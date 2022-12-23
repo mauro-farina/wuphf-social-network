@@ -9,6 +9,6 @@ module.exports = {
     getDB: () => _db,
     connect: async () => {
         await client.connect;
-        _db = client.db("quacker");
+        _db = client.db("wuphf");
     }
 }
