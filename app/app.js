@@ -13,7 +13,7 @@ app.use("/api/auth", authAPIRouter);
 app.use("/api/social", socialAPIRouter);
 app.use(express.json());
 
-app.use(express.static(__dirname +"/public"));
+app.use(express.static(__dirname +"/public/"));;
 
 app.listen(process.env.PORT, async () => {
     console.log(`listening on port {process.env.PORT}`);
