@@ -16,6 +16,6 @@ app.use(express.json());
 app.use(express.static(__dirname +"/public/"));;
 
 app.listen(process.env.PORT, async () => {
-    console.log(`listening on port {process.env.PORT}`);
+    console.log(`listening on port ${process.env.PORT}`);
     await mongoManager.connect().then(console.log("Connected to MongoDB"));
 });
