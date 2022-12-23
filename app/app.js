@@ -4,10 +4,14 @@ const authAPIRouter = require("./auth-router.js");
 const socialAPIRouter = require("./social-router.js");
 const mongoManager = require("./mongodb-manager.js");
 const cookieParser = require('cookie-parser');
+const { config } = require("dotenv");
+require("dotenv").config({ path: './private/settings.env' });
+// https://www.geeksforgeeks.org/where-should-secret-keys-should-be-stored-for-a-node-js-app/
 
 app.use(cookieParser());
 app.use("/api/auth", authAPIRouter);
 app.use("/api/social", socialAPIRouter);
+app.use(express.json());
 
 app.use(express.static(__dirname +"/public"));
 

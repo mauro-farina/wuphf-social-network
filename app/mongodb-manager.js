@@ -1,5 +1,7 @@
 const {MongoClient} = require("mongodb");
-const uri = "mongodb://mongosrv:27017";
+require("dotenv").config({ path: './private/settings.env' });
+
+const uri = process.env.MONGODB_URI; // process.env.MONGODB_URI
 
 const client = new MongoClient(uri);
 
