@@ -1,1 +1,1 @@
-# wuphf-social-network
+# WUPHF.com - The place to _bark_ your thoughts
