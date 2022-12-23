@@ -1,0 +1,19 @@
+version: "3"
+services:
+  app:
+    container_name: app
+    build: .
+    command: nodemon -L app.js
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./app:/usr/src/app
+    links:
+      - "mongo:mongosrv"
+  mongo:
+    container_name: mongo
+    image: mongo
+    volumes:
+      - ./data:/data/db
+    ports:
+      - '27017:27017'
