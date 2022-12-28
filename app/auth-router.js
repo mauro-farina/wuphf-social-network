@@ -50,7 +50,7 @@ router.post("/signup", async (req, res) => { // https://vegibit.com/node-js-mong
     */
 });
 
-router.post("/signin", (req, res) => { //TMP GET
+router.post("/signin", (req, res) => {
     res.send("we are checking.");
     //res.send(jwt.verify(req.cookies.access_token, "SECRET_KEY"));
 });
