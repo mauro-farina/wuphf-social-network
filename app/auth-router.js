@@ -5,6 +5,7 @@ const bcrypt = require("bcryptjs"); // https://www.npmjs.com/package/bcryptjs
 // written in pure JS => no compilation problems using docker (but it is 30% slower)
 require("dotenv").config({ path: './private/settings.env' });
 const mongoManager = require("./mongodb-manager.js");
+const { body, validationResult } = require('express-validator');
 
 // Joi to validate inputs
 // SANITIZER express-validator
@@ -14,7 +15,29 @@ POST    /api/auth/signup    Registrazione di un nuovo utente
 POST    /api/auth/signin    Login di un utente
 */
 
-router.post("/signup", async (req, res) => { // https://vegibit.com/node-js-mongodb-user-registration/
+const sanitizeInput = [
+  body('username')
+    .notEmpty().withMessage("Username must be at least 1 character")
+    .not().matches(' ').withMessage("Username cannot contain spaces")
+    .escape(),
+  body('password', "Password must be at least 8 characters").isLength({ min: 8 })
+];
+
+router.post("/signup", sanitizeInput, async (req, res) => { // https://vegibit.com/node-js-mongodb-user-registration/
+    const sanitizeInputErrors = validationResult(req);
+	if (!sanitizeInputErrors.isEmpty()) {
+        return res.status(400).json({ errors: sanitizeInputErrors.array() });
+        /*
+        "errors": [
+            {
+                "value": "panda84",
+                "msg": "Password must be at least 8 characters",
+                "param": "password",
+                "location": "body"
+            }
+        ]
+        */
+	}
     const mongo = mongoManager.getDB();
     //express.json() should parse req.body from String to JSON if content-type = app/json
     //app.use(express-json()) HAS TO BE BEFORE app.use(this-file);
@@ -50,7 +73,11 @@ router.post("/signup", async (req, res) => { // https://vegibit.com/node-js-mong
     */
 });
 
-router.post("/signin", async (req, res) => {
+router.post("/signin", sanitizeInput, async (req, res) => {
+    const sanitizeInputErrors = validationResult(req);
+	if (!sanitizeInputErrors.isEmpty()) {
+        return res.status(400).json({ errors: sanitizeInputErrors.array() });
+    }
     const mongo = mongoManager.getDB();
     if(req.body == undefined) {
         return res.status(400).send("Make sure Content-Type is application/json in the HTTP POST Request");
