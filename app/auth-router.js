@@ -50,8 +50,24 @@ router.post("/signup", async (req, res) => { // https://vegibit.com/node-js-mong
     */
 });
 
-router.post("/signin", (req, res) => {
-    res.send("we are checking.");
+router.post("/signin", async (req, res) => {
+    const mongo = mongoManager.getDB();
+    if(req.body == undefined) {
+        return res.status(400).send("Make sure Content-Type is application/json in the HTTP POST Request");
+    }
+    if(req.body.username == undefined || req.body.password == undefined) {
+        return res.status(400).send("Missing information");
+    }
+    let alreadyExistingUserQuery = await mongo.collection("users").findOne({username: req.body.username});
+    if(!alreadyExistingUserQuery) {
+        return res.status(400).send(`Invalid password or username`);
+    }
+    const compareResult = await bcrypt.compare(req.body.password, alreadyExistingUserQuery.password);
+    if(compareResult) {
+        res.send("Welcome in buddy");
+    } else {
+        return res.status(400).send(`Invalid password or username`);
+    }
     //res.send(jwt.verify(req.cookies.access_token, "SECRET_KEY"));
 });
 
