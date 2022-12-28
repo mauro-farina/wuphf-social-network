@@ -1,5 +1,10 @@
 const express = require("express");
 const router = express.Router();
+const bcrypt = require("bcryptjs"); // https://www.npmjs.com/package/bcryptjs
+// written in pure JS => no compilation problems using docker (but it is 30% slower)
+require("dotenv").config({ path: './private/settings.env' });
+const mongoManager = require("./mongodb-manager.js");
+const { body, validationResult } = require('express-validator');
 
 /*
 GET     /api/social/users/:id                   Visualizzazione informazione dell’utente con ID id
@@ -16,8 +21,14 @@ GET     /api/social/search?q=query              Cerca l’utente che matcha la s
 GET     /api/social/whoami                      Se autenticato, restituisce le informazioni sull’utente 
 */
 
-router.get("/users/:id", (req, res) => { // Visualizzazione informazione dell’utente con ID id
-    res.send("");
+router.get("/users/:id", async (req, res) => { // Visualizzazione informazione dell’utente con ID id
+    const mongo = mongoManager.getDB();
+    let userByID = await mongo.collection("users").findOne({userID : parseInt(req.params.id)});
+    if(userByID) {
+        res.json(userByID);
+    } else {
+        res.send("user does not exist");
+    }
 });
 
 router.get("/messages/:userId", (req, res) => { // Elenco dei messaggi dell’utente con ID userID
