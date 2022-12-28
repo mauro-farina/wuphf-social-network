@@ -9,9 +9,9 @@ require("dotenv").config({ path: './private/settings.env' });
 // https://www.geeksforgeeks.org/where-should-secret-keys-should-be-stored-for-a-node-js-app/
 
 app.use(cookieParser());
+app.use(express.json());
 app.use("/api/auth", authAPIRouter);
 app.use("/api/social", socialAPIRouter);
-app.use(express.json());
 
 app.use(express.static(__dirname +"/public/"));;
 
