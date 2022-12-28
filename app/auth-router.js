@@ -23,7 +23,7 @@ const sanitizeInput = [
   body('password', "Password must be at least 8 characters").isLength({ min: 8 })
 ];
 
-router.post("/signup", sanitizeInput, async (req, res) => { // https://vegibit.com/node-js-mongodb-user-registration/
+router.post("/signup", sanitizeInput, async (req, res) => {
     const sanitizeInputErrors = validationResult(req);
 	if (!sanitizeInputErrors.isEmpty()) {
         return res.status(400).json({ errors: sanitizeInputErrors.array() });
@@ -47,12 +47,15 @@ router.post("/signup", sanitizeInput, async (req, res) => { // https://vegibit.c
     if(req.body.username == undefined || req.body.password == undefined) {
         return res.status(400).send("Missing information");
     }
+    // TRY-CATCHES FOR MONGO AND BCRYPT OPERATIONS ?
     let alreadyExistingUserQuery = await mongo.collection("users").findOne({username: req.body.username});
     if(alreadyExistingUserQuery) {
         return res.status(400).send(`Username ${req.body.username} is already taken!`);
     }
-    
-    let newUser = { 
+    let lastUserQuery = await mongo.collection("users").findOne({},{ sort: {"userID": -1}});
+
+    let newUser = {
+        userID : 0,
         username : req.body.username,
         password : req.body.password,
         firstName : req.body.firstName,
@@ -60,11 +63,15 @@ router.post("/signup", sanitizeInput, async (req, res) => { // https://vegibit.c
         bio : req.body.bio,
     };
     
+    if(lastUserQuery !== null) {
+        newUser.userID = lastUserQuery.userID+1;
+    }
+    
     // salt rounds: value for quick testing 2, value for good security 10+
     const salt = await bcrypt.genSalt(parseInt(process.env.BCRYPT_ROUNDS_FOR_SALT));
     newUser.password = await bcrypt.hash(newUser.password, salt);
     
-    //await mongo.collection("users").insertOne(newUser);
+    await mongo.collection("users").insertOne(newUser);
     res.json(newUser);
     /*
     const token = jwt.sign({ id: 7, name: "test-jwt-cookie" }, process.env.JWT_SECRET_KEY, (err,token) => {
