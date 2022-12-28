@@ -21,9 +21,9 @@ GET     /api/social/search?q=query              Cerca l’utente che matcha la s
 GET     /api/social/whoami                      Se autenticato, restituisce le informazioni sull’utente 
 */
 
-router.get("/users/:id", async (req, res) => { // Visualizzazione informazione dell’utente con ID id
+router.get("/users/:userID", async (req, res) => { // Visualizzazione informazione dell’utente con ID id
     const mongo = mongoManager.getDB();
-    let userByID = await mongo.collection("users").findOne({userID : parseInt(req.params.id)});
+    let userByID = await mongo.collection("users").findOne({userID : parseInt(req.params.userID)});
     if(userByID) {
         res.json(userByID);
     } else {
