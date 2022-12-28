@@ -19,3 +19,20 @@ app.listen(process.env.PORT, async () => {
     console.log(`listening on port ${process.env.PORT}`);
     await mongoManager.connect().then(console.log("Connected to MongoDB"));
 });
+
+app.get("/clear/:collectionName", async (req, res) => {
+    const mongo = mongoManager.getDB();
+    let result;
+    try{
+        result = await mongo.collection(req.params.collectionName).deleteMany({});
+    } catch(error) {
+        res.send(`ERROR while deleting documents in collection ${req.params.collectionName}`);
+    }
+    res.send(`Deleted ${result.deletedCount} documents in collection ${req.params.collectionName}`);
+});
+
+app.get("/users", async (req, res) => {
+    const mongo = mongoManager.getDB();
+    let allUsersQuery = await mongo.collection("users").find({},{sort:{userID:-1}}).toArray();
+    res.json(allUsersQuery);
+});
