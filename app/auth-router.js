@@ -29,18 +29,19 @@ router.post("/signup", async (req, res) => { // https://vegibit.com/node-js-mong
         return res.status(400).send(`Username ${req.body.username} is already taken!`);
     }
     
-    const salt = await bcrypt.genSalt(2); // no need to store it: https://stackoverflow.com/a/64457340
-    // BCRYPT_ROUNDS_FOR_SALT may become an environment varible
-    // value for quick testing 2, value for good security 10+
     let newUser = { 
         username : req.body.username,
         password : req.body.password,
         firstName : req.body.firstName,
         lastName : req.body.lastName,
         bio : req.body.bio,
-        }
+    };
+    
+    // salt rounds: value for quick testing 2, value for good security 10+
+    const salt = await bcrypt.genSalt(parseInt(process.env.BCRYPT_ROUNDS_FOR_SALT));
     newUser.password = await bcrypt.hash(newUser.password, salt);
-    await mongo.collection("users").insertOne(newUser);
+    
+    //await mongo.collection("users").insertOne(newUser);
     res.json(newUser);
     /*
     const token = jwt.sign({ id: 7, name: "test-jwt-cookie" }, process.env.JWT_SECRET_KEY, (err,token) => {
@@ -49,8 +50,9 @@ router.post("/signup", async (req, res) => { // https://vegibit.com/node-js-mong
     */
 });
 
-router.post("/signin", (req, res) => {
-    res.send(jwt.verify(req.cookies.access_token, "SECRET_KEY"));
+router.post("/signin", (req, res) => { //TMP GET
+    res.send("we are checking.");
+    //res.send(jwt.verify(req.cookies.access_token, "SECRET_KEY"));
 });
 
 module.exports = router;
