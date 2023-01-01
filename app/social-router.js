@@ -21,26 +21,53 @@ GET     /api/social/search?q=query              Cerca l’utente che matcha la s
 GET     /api/social/whoami                      Se autenticato, restituisce le informazioni sull’utente 
 */
 
-router.get("/users/:userID", async (req, res) => { // Visualizzazione informazione dell’utente con ID id
+router.get("/users/:username", async (req, res) => { // Visualizzazione informazione dell’utente `username`
     const mongo = mongoManager.getDB();
-    let userByID = await mongo.collection("users").findOne({userID : parseInt(req.params.userID)});
-    if(userByID) {
-        res.json(userByID);
+    let getUserByUsername = await mongo.collection("users").findOne({username : parseInt(req.params.username)});
+    if(getUserByUsername) {
+        res.json(getUserByUsername);
     } else {
         res.send("user does not exist");
     }
 });
 
-router.get("/messages/:userId", (req, res) => { // Elenco dei messaggi dell’utente con ID userID
-    res.send("");
+router.get("/messages/:username", async (req, res) => { // Elenco dei messaggi dell’utente `username`
+    const mongo = mongoManager.getDB();
+    let messagesOfUser = await mongo.collection("messages").find({postedBy : parseInt(req.params.username)},{sort: {messageID:-1}}).toArray();
+    if(messagesOfUser){
+        res.json(messagesOfUser);
+    } else {
+        res.send("no messages");
+    }
 });
 
 router.get("/messages/:userId/:idMsg", (req, res) => { // Singolo messaggio dell’utente userID con ID idMsg
     res.send("");
 });
 
-router.post("/messages", (req, res) => { // Creazione di un nuovo messaggio
-    res.send("");
+router.post("/messages", async (req, res) => { // Creazione di un nuovo messaggio
+    // verify user is authenticated
+    let auth_cookie_data;
+    try {
+        auth_cookie_data = jwt.verify(req.cookies.access_token, process.env.JWT_SECRET_KEY);
+    } catch {
+        res.status(400).send("Not authenticated!");
+    }
+    const mongo = mongoManager.getDB();
+    let lastMessageOfUser = await mongo.collection("messages").findOne({postedBy : cookies_data.username},{ sort: {messageID: -1}});
+    //let lastMessageOfUser = await mongo.collection("messages").findOne({postedBy : req.body.postedBy},{ sort: {messageID: -1}});
+    let newMessage = {
+        messageID : 0,
+        message : req.body.message,
+        postedBy : req.body.postedBy,
+        date : new Date(),
+        likedBy : []
+    }
+    if(lastMessageOfUser !== null) {
+        newMessage.messageID = lastMessageOfUser.messageID+1;
+    }
+    await mongo.collection("messages").insertOne(newMessage);
+    res.json(newMessage);
 });
 
 router.get("/followers/:id", (req, res) => { // Lista dei followers dell’utente con ID id
