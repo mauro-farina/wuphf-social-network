@@ -52,10 +52,10 @@ router.post("/signup", sanitizeInput, async (req, res) => {
     if(alreadyExistingUserQuery) {
         return res.status(400).send(`Username ${req.body.username} is already taken!`);
     }
-    let lastUserQuery = await mongo.collection("users").findOne({},{ sort: {"userID": -1}});
+    //let lastUserQuery = await mongo.collection("users").findOne({},{ sort: {"userID": -1}});
 
     let newUser = {
-        userID : 0,
+        //userID : 0,
         username : req.body.username,
         password : req.body.password,
         firstName : req.body.firstName,
@@ -63,9 +63,11 @@ router.post("/signup", sanitizeInput, async (req, res) => {
         bio : req.body.bio,
     };
     
+    /*
     if(lastUserQuery !== null) {
         newUser.userID = lastUserQuery.userID+1;
     }
+    */
     
     // salt rounds: value for quick testing 2, value for good security 10+
     const salt = await bcrypt.genSalt(parseInt(process.env.BCRYPT_ROUNDS_FOR_SALT));
