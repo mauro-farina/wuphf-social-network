@@ -75,6 +75,9 @@ router.post("/signup", sanitizeInput, async (req, res) => {
     newUser.password = await bcrypt.hash(newUser.password, salt);
     
     await mongo.collection("users").insertOne(newUser);
+    await mongo.collection("followers").insertOne({ username : req.params.username, followers : [] });
+    await mongo.collection("feed").insertOne({ username : req.params.username, followedUsers : [] });
+
     res.json(newUser);
     /*
     const token = jwt.sign({ id: 7, name: "test-jwt-cookie" }, process.env.JWT_SECRET_KEY, (err,token) => {
