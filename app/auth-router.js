@@ -61,6 +61,7 @@ router.post("/signup", sanitizeInput, async (req, res) => {
         firstName : req.body.firstName,
         lastName : req.body.lastName,
         bio : req.body.bio,
+        signUpDate : new Date()
     };
     
     /*
