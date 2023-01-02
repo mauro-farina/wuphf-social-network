@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs"); // https://www.npmjs.com/package/bcryptjs
 // written in pure JS => no compilation problems using docker (but it is 30% slower)
 require("dotenv").config({ path: './private/settings.env' });
@@ -21,9 +22,9 @@ GET     /api/social/search?q=query              Cerca l’utente che matcha la s
 GET     /api/social/whoami                      Se autenticato, restituisce le informazioni sull’utente 
 */
 
-router.get("/users/:username", async (req, res) => { // Visualizzazione informazione dell’utente `username`
+router.get("/users/:username", async (req, res) => { // Visualizzazione informazioni dell’utente `username`
     const mongo = mongoManager.getDB();
-    let getUserByUsername = await mongo.collection("users").findOne({username : parseInt(req.params.username)});
+    let getUserByUsername = await mongo.collection("users").findOne({username : req.params.username});
     if(getUserByUsername) {
         res.json(getUserByUsername);
     } else {
@@ -33,7 +34,7 @@ router.get("/users/:username", async (req, res) => { // Visualizzazione informaz
 
 router.get("/messages/:username", async (req, res) => { // Elenco dei messaggi dell’utente `username`
     const mongo = mongoManager.getDB();
-    let messagesOfUser = await mongo.collection("messages").find({postedBy : parseInt(req.params.username)},{sort: {messageID:-1}}).toArray();
+    let messagesOfUser = await mongo.collection("messages").find({username : req.params.username},{sort: {messageID:-1}}).toArray();
     if(messagesOfUser){
         res.json(messagesOfUser);
     } else {
@@ -41,11 +42,59 @@ router.get("/messages/:username", async (req, res) => { // Elenco dei messaggi d
     }
 });
 
-router.get("/messages/:userId/:idMsg", (req, res) => { // Singolo messaggio dell’utente userID con ID idMsg
-    res.send("");
+router.get("/messages/:username/:messageID", async (req, res) => { // Singolo messaggio dell’utente `username` con ID messageID
+    const mongo = mongoManager.getDB();
+    const query = {
+        username : req.params.username, 
+        messageID : parseInt(req.params.messageID)
+    }
+    let messagesOfUser = await mongo.collection("messages").findOne(query);
+    if(messagesOfUser) {
+        res.json(messagesOfUser);
+    } else {
+        res.send("no messages");
+    }
 });
 
-router.post("/messages", async (req, res) => { // Creazione di un nuovo messaggio
+router.post("/messages", async (req, res) => { // Creazione di un nuovo messaggio da parte di cookie auth.username
+    const auth_cookie = req.cookies.auth;
+    if(!auth_cookie) {
+        res.status(400).send("Not authenticated!");
+    }
+    let cookieUsername;
+    jwt.verify(req.cookies.auth, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
+        if(err) {
+            res.status(400).send("Cookie cannot be verified");
+        }
+        cookieUsername = decodedCookie.username;
+    });
+
+    const mongo = mongoManager.getDB();
+    let lastMessageOfUser = await mongo.collection("messages").findOne({username : cookieUsername},{ sort: {messageID: -1}});
+    let newMessage = {
+        messageID : 0,
+        message : req.body.message,
+        username : cookieUsername,
+        date : new Date(),
+        likedBy : []
+    }
+
+    if(lastMessageOfUser !== null) {
+        newMessage.messageID = lastMessageOfUser.messageID+1;
+    }
+    await mongo.collection("messages").insertOne(newMessage);
+    res.json(newMessage);
+});
+
+// so far _^_ it's all working
+
+router.get("/followers/:username", async (req, res) => { // Lista dei followers dell’utente `username`
+    const mongo = mongoManager.getDB();
+    let followersOfUser = await mongo.collection("followers").findOne({username : req.params.username});
+    res.json(followersOfUser);
+});
+
+router.post("/followers/:username", async (req, res) => { // Aggiunta di un nuovo follow per l’utente `username`
     // verify user is authenticated
     let auth_cookie_data;
     try {
@@ -54,31 +103,29 @@ router.post("/messages", async (req, res) => { // Creazione di un nuovo messaggi
         res.status(400).send("Not authenticated!");
     }
     const mongo = mongoManager.getDB();
-    let lastMessageOfUser = await mongo.collection("messages").findOne({postedBy : cookies_data.username},{ sort: {messageID: -1}});
-    //let lastMessageOfUser = await mongo.collection("messages").findOne({postedBy : req.body.postedBy},{ sort: {messageID: -1}});
-    let newMessage = {
-        messageID : 0,
-        message : req.body.message,
-        postedBy : req.body.postedBy,
-        date : new Date(),
-        likedBy : []
+    // collection followers -> track new follow for :username
+    let getFollowersOfUser = await mongo.collection("followers").findOne({username : req.params.username});
+    if(getFollowersOfUser !== null) {
+        let addNewFollower = await mongo.collection("followers")
+            .updateOne( {username : req.params.username}, { $push: {followers: auth_cookie_data.username} } );
+    } else {
+        // error i guess
+        res.status(500).send("error");
     }
-    if(lastMessageOfUser !== null) {
-        newMessage.messageID = lastMessageOfUser.messageID+1;
+
+    // collection feed -> track that cookie.username is now following :username (for the feed)
+    let getFeedOfUser = await mongo.collection("feed").findOne({username : auth_cookie_data.username});
+    if(getFeedOfUser !== null) {
+        let addNewFollowToFeed = await mongo.collection("feed")
+            .updateOne( {username : auth_cookie_data.username}, { $push: {followedUsers: req.params.username} } );
+    } else {
+        // error i guess
+        res.status(500).send("error");
     }
-    await mongo.collection("messages").insertOne(newMessage);
-    res.json(newMessage);
+    res.send("done");
 });
 
-router.get("/followers/:id", (req, res) => { // Lista dei followers dell’utente con ID id
-    res.send("");
-});
-
-router.post("/followers/:id", (req, res) => { // Aggiunta di un nuovo follow per l’utente id
-    res.send("");
-});
-
-router.delete("/followers/:id", (req, res) => { // Rimozione del follow all’utente id
+router.delete("/followers/:username", (req, res) => { // Rimozione del follow all’utente `username`
     res.send("");
 });
 
