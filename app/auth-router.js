@@ -81,14 +81,11 @@ router.post("/signup", sanitizeInput, async (req, res) => {
                 followers : [], 
                 followedUsers : []
             } );
-    console.log("time to prepare a tokens and cookies!");
-    //const token = await jwt.sign( {username : req.body.username}, process.env.JWT_SECRET_KEY);
 
-    jwt.sign({ username: req.body.username }, process.env.JWT_SECRET_KEY, { expiresIn: "48h"}, (err,token) => {
-        res.cookie("auth", token, {httpOnly: true}).status(200);
-        console.log("token signed and ready!");
-        console.log("sending response...!");
-        res.json( {newUser, token } );
+    //const token = await jwt.sign( {username : req.body.username}, process.env.JWT_SECRET_KEY);
+    jwt.sign({ username: req.body.username }, process.env.JWT_SECRET_KEY, { expiresIn: "30d"}, (err,token) => {
+        res.cookie("auth", token, {httpOnly: true}); //expires in 30d
+        res.status(200).json( {newUser, token } );
     });
     /*
     const token = jwt.sign({ id: 7, name: "test-jwt-cookie" }, process.env.JWT_SECRET_KEY, (err,token) => {
