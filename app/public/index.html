@@ -8,12 +8,23 @@
             Homepage di WUPHF.com
         </h1>
         <ul>
-            <li><a href="/collection/users">List users</a></li>
-            <li><a href="/collection/follows">List follows</a></li>
-            <li><a href="/collection/users">List messages</a></li>
-            <li><a href="/clear/users">CLEAR users</a></li>
-            <li><a href="/clear/follows">CLEAR follows</a></li>
-            <li><a href="/clear/messages">CLEAR msgs</a></li>
+            <li><a href="/collection/users" target="_blank">List users</a></li>
+            <li><a href="/collection/follows" target="_blank">List follows</a></li>
+            <li><a href="/collection/messages" target="_blank">List messages</a></li>
+            <li><a href="/collection/likes" target="_blank">List likes</a></li>
+            <li>Clear the database <button id="clearCollectionsButton">Clear DB</button></li>
         </ul>
+        <script>
+            const buttonClearCollections = document.getElementById("clearCollectionsButton");
+            buttonClearCollections.addEventListener('click', e => {
+                const requestOptions = {
+                    method: 'GET',
+                }
+                fetch("/clear/users", requestOptions);
+                fetch("/clear/follows", requestOptions);
+                fetch("/clear/messages", requestOptions);
+                fetch("/clear/likes", requestOptions);
+            });
+        </script>
     </body>
 </html>
