@@ -76,13 +76,20 @@ router.post("/signup", sanitizeInput, async (req, res) => {
 
     await mongo.collection("users").insertOne(newUser);
     await mongo.collection("follows")
-        .insertOne( { 
-            username : req.body.username, 
-            followers : [], 
-            followedUsers : []
-        } );
+            .insertOne( { 
+                username : req.body.username, 
+                followers : [], 
+                followedUsers : []
+            } );
+    console.log("time to prepare a tokens and cookies!");
+    //const token = await jwt.sign( {username : req.body.username}, process.env.JWT_SECRET_KEY);
 
-    res.json(newUser);
+    jwt.sign({ username: req.body.username }, process.env.JWT_SECRET_KEY, { expiresIn: "48h"}, (err,token) => {
+        res.cookie("auth", token, {httpOnly: true}).status(200);
+        console.log("token signed and ready!");
+        console.log("sending response...!");
+        res.json( {newUser, token } );
+    });
     /*
     const token = jwt.sign({ id: 7, name: "test-jwt-cookie" }, process.env.JWT_SECRET_KEY, (err,token) => {
         res.cookie("logged_in", token, {httpOnly: true,}).status(200).json({token,});
