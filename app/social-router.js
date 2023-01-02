@@ -48,7 +48,17 @@ router.get("/messages/:username/:messageID", async (req, res) => { // Singolo me
         username : req.params.username, 
         messageID : parseInt(req.params.messageID)
     }
-    let messagesOfUser = await mongo.collection("messages").findOne(query);
+    const queryOptions = {
+        projection : {
+            _id : 0,
+            messageID : 1,
+            message : 1,
+            username : 1,
+            date : 1,
+            likedBy : 1
+        }
+    }
+    let messagesOfUser = await mongo.collection("messages").findOne(query, queryOptions);
     if(messagesOfUser) {
         res.json(messagesOfUser);
     } else {
@@ -86,43 +96,68 @@ router.post("/messages", async (req, res) => { // Creazione di un nuovo messaggi
     res.json(newMessage);
 });
 
-// so far _^_ it's all working
-
 router.get("/followers/:username", async (req, res) => { // Lista dei followers dell’utente `username`
     const mongo = mongoManager.getDB();
-    let followersOfUser = await mongo.collection("followers").findOne({username : req.params.username});
-    res.json(followersOfUser);
+    const queryOptions = {
+        projection : {
+            _id : 0,
+            username : 1,
+            followers : 1,
+        }
+    }
+    let followersOfUser = await mongo.collection("follows").findOne({username : req.params.username}, queryOptions);
+    if(followersOfUser){
+        res.json(followersOfUser);
+    } else {
+        res.send("no followers");
+    }
 });
 
+// -=-=-=-=-=-=-=-=-=-=-=-=-= so far _^_ it's all working -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+
+// not tested, should work
 router.post("/followers/:username", async (req, res) => { // Aggiunta di un nuovo follow per l’utente `username`
-    // verify user is authenticated
-    let auth_cookie_data;
-    try {
-        auth_cookie_data = jwt.verify(req.cookies.access_token, process.env.JWT_SECRET_KEY);
-    } catch {
+    const auth_cookie = req.cookies.auth;
+    if(!auth_cookie) {
         res.status(400).send("Not authenticated!");
+        //res.redirect();
     }
+    let cookieUsername;
+    jwt.verify(req.cookies.auth, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
+        if(err) {
+            res.status(400).send("Cookie cannot be verified"); // how to handle this case?
+            //res.redirect(); // ?
+        }
+        cookieUsername = decodedCookie.username;
+    });
+
     const mongo = mongoManager.getDB();
-    // collection followers -> track new follow for :username
-    let getFollowersOfUser = await mongo.collection("followers").findOne({username : req.params.username});
-    if(getFollowersOfUser !== null) {
-        let addNewFollower = await mongo.collection("followers")
-            .updateOne( {username : req.params.username}, { $push: {followers: auth_cookie_data.username} } );
+    
+    let getFollowersOfParamsUser = await mongo.collection("follows").findOne({username : req.params.username});
+    if(getFollowersOfParamsUser !== null) {
+        await mongo.collection("follows") // :username has a new follower: cookieUsername
+            .updateOne( {username : req.params.username}, { $push: {followers: cookieUsername} } );
+        
     } else {
-        // error i guess
+        // weird error i guess, should not happen but you never know
+        // maybe should be handled like: .insertOne(...)
         res.status(500).send("error");
     }
 
-    // collection feed -> track that cookie.username is now following :username (for the feed)
-    let getFeedOfUser = await mongo.collection("feed").findOne({username : auth_cookie_data.username});
-    if(getFeedOfUser !== null) {
-        let addNewFollowToFeed = await mongo.collection("feed")
-            .updateOne( {username : auth_cookie_data.username}, { $push: {followedUsers: req.params.username} } );
+    let getFollowedUsersOfCookieUser = await mongo.collection("follows").findOne({username : cookieUsername});
+    if(getFollowedUsersOfCookieUser !== null) {
+        await mongo.collection("follows") // cookieUsername now follows :username
+            .updateOne( {username : cookieUsername}, { $push: {followedUsers: req.params.username} } );
     } else {
-        // error i guess
+        // weird error i guess, should not happen but you never know
+        // maybe should be handled like: .insertOne(...)
         res.status(500).send("error");
     }
-    res.send("done");
+    res.status(200).json({
+        username : req.params.username,
+        newFollower : cookieUsername
+    });
 });
 
 router.delete("/followers/:username", (req, res) => { // Rimozione del follow all’utente `username`
@@ -148,6 +183,5 @@ router.get("/search?q=query", (req, res) => { // Cerca l’utente che matcha la 
 router.get("/whoami", (req, res) => { // Se autenticato, restituisce le informazioni sull’utente
     res.send("");
 });
-
 
 module.exports = router;
