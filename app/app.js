@@ -31,8 +31,8 @@ app.get("/clear/:collectionName", async (req, res) => {
     res.send(`Deleted ${result.deletedCount} documents in collection ${req.params.collectionName}`);
 });
 
-app.get("/users", async (req, res) => {
+app.get("/collection/:name", async (req, res) => {
     const mongo = mongoManager.getDB();
-    let allUsersQuery = await mongo.collection("users").find({},{sort:{userID:-1}}).toArray();
+    let allUsersQuery = await mongo.collection(req.params.name).find({}).toArray();
     res.json(allUsersQuery);
 });
