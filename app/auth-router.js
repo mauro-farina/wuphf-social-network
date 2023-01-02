@@ -73,10 +73,10 @@ router.post("/signup", sanitizeInput, async (req, res) => {
     // salt rounds: value for quick testing 2, value for good security 10+
     const salt = await bcrypt.genSalt(parseInt(process.env.BCRYPT_ROUNDS_FOR_SALT));
     newUser.password = await bcrypt.hash(newUser.password, salt);
-    
+
     await mongo.collection("users").insertOne(newUser);
-    await mongo.collection("followers").insertOne({ username : req.params.username, followers : [] });
-    await mongo.collection("feed").insertOne({ username : req.params.username, followedUsers : [] });
+    await mongo.collection("followers").insertOne({ username : req.body.username, followers : [] });
+    await mongo.collection("feed").insertOne({ username : req.body.username, followedUsers : [] });
 
     res.json(newUser);
     /*
