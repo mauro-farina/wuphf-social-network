@@ -28,7 +28,9 @@ app.get("/clear/:collectionName", async (req, res) => {
     } catch(error) {
         res.send(`ERROR while deleting documents in collection ${req.params.collectionName}`);
     }
-    res.send(`Deleted ${result.deletedCount} documents in collection ${req.params.collectionName}`);
+    res.json({
+        deleted : result.deletedCount
+    })
 });
 
 app.get("/collection/:name", async (req, res) => {
