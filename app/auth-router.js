@@ -75,8 +75,12 @@ router.post("/signup", sanitizeInput, async (req, res) => {
     newUser.password = await bcrypt.hash(newUser.password, salt);
 
     await mongo.collection("users").insertOne(newUser);
-    await mongo.collection("followers").insertOne({ username : req.body.username, followers : [] });
-    await mongo.collection("feed").insertOne({ username : req.body.username, followedUsers : [] });
+    await mongo.collection("follows")
+        .insertOne( { 
+            username : req.body.username, 
+            followers : [], 
+            followedUsers : []
+        } );
 
     res.json(newUser);
     /*
