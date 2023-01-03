@@ -83,12 +83,12 @@ router.get("/messages/:username/:messageID", async (req, res) => { // Singolo me
 router.post("/messages", async (req, res) => { // Creazione di un nuovo messaggio da parte di cookie auth.username
     const auth_cookie = req.cookies.auth;
     if(!auth_cookie) {
-        res.status(400).send("Not authenticated!");
+        return res.status(400).send("Not authenticated!");
     }
     let cookieUsername;
     jwt.verify(req.cookies.auth, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
         if(err) {
-            res.status(400).send("Cookie cannot be verified");
+            return res.status(400).send("Cookie cannot be verified");
         }
         cookieUsername = decodedCookie.username;
     });
@@ -104,7 +104,7 @@ router.post("/messages", async (req, res) => { // Creazione di un nuovo messaggi
         date : new Date(),
         likedBy : []
     }
-    
+
     await mongo.collection("messages").insertOne(newMessage);
     res.json(newMessage); // _id is sent as well ._.
 });
@@ -115,7 +115,7 @@ router.get("/followers/:username", async (req, res) => { // Lista dei followers 
         projection : {
             _id : 0,
             username : 1,
-            followers : 1,
+            followers : 1
         }
     }
     let followersOfUser = await mongo.collection("follows").findOne({username : req.params.username}, queryOptions);
@@ -126,26 +126,29 @@ router.get("/followers/:username", async (req, res) => { // Lista dei followers 
     }
 });
 
-// -=-=-=-=-=-=-=-=-=-=-=-=-= so far _^_ it's all working -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-
-// not tested, should work
 router.post("/followers/:username", async (req, res) => {   // Aggiunta di un nuovo follow per l’utente `:username`
     const auth_cookie = req.cookies.auth;                   // interpreted as: "req.cookies.auth starts following `:username`"
     if(!auth_cookie) {
-        res.status(400).send("Not authenticated!");
+        return res.status(400).send("Not authenticated!");
         //res.redirect();
     }
     let cookieUsername;
     jwt.verify(req.cookies.auth, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
         if(err) {
-            res.status(400).send("Cookie cannot be verified"); // how should i handle this case?
+            return res.status(400).send("Cookie cannot be verified"); // how should i handle this case?
             //res.redirect(); // ?
         }
         cookieUsername = decodedCookie.username;
     });
 
+    if(cookieUsername === req.params.username) { // is === the best here?
+        return res.status(400).send("One cannot follow themselves");
+    }
+
     const mongo = mongoManager.getDB();
+
+    // check if "is already following"
     
     let getFollowersOfParamsUser = await mongo.collection("follows").findOne({username : req.params.username});
     if(getFollowersOfParamsUser !== null) {
@@ -155,7 +158,7 @@ router.post("/followers/:username", async (req, res) => {   // Aggiunta di un nu
     } else {
         // weird error i guess, should not happen but you never know
         // maybe should be handled like: .insertOne(...)
-        res.status(500).send("error");
+        return res.status(500).send("error");
     }
 
     let getFollowedUsersOfCookieUser = await mongo.collection("follows").findOne({username : cookieUsername});
@@ -165,7 +168,7 @@ router.post("/followers/:username", async (req, res) => {   // Aggiunta di un nu
     } else {
         // weird error i guess, should not happen but you never know
         // maybe should be handled like: .insertOne(...)
-        res.status(500).send("error");
+        return res.status(500).send("error");
     }
     res.status(200).json({
         username : req.params.username,
@@ -173,27 +176,64 @@ router.post("/followers/:username", async (req, res) => {   // Aggiunta di un nu
     });
 });
 
-router.delete("/followers/:username", (req, res) => { // Rimozione del follow all’utente `username`
-    res.send("");
+router.delete("/followers/:username", async (req, res) => { // Rimozione del follow all’utente `username`
+    const auth_cookie = req.cookies.auth;                   // interpreted as: "req.cookies.auth stops following `:username`"
+    if(!auth_cookie) {
+        return res.status(400).send("Not authenticated!");
+        //res.redirect();
+    }
+    let cookieUsername;
+    jwt.verify(req.cookies.auth, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
+        if(err) {
+            return res.status(400).send("Cookie cannot be verified"); // how should i handle this case?
+            //res.redirect(); // ?
+        }
+        cookieUsername = decodedCookie.username;
+    });
+
+    if(cookieUsername === req.params.username) { // is === the best here?
+        return res.status(400).send("One cannot follow themselves");
+    }
+
+    const mongo = mongoManager.getDB();
+
+    // check if "is not even following"
+    
+    let getFollowersOfParamsUser = await mongo.collection("follows").findOne({username : req.params.username});
+    if(getFollowersOfParamsUser !== null) {
+        await mongo.collection("follows") // `:username` loses a follower: cookieUsername
+            .updateOne( {username : req.params.username}, { $pull: {followers: cookieUsername} } );
+    } 
+    let getFollowedUsersOfCookieUser = await mongo.collection("follows").findOne({username : cookieUsername});
+    if(getFollowedUsersOfCookieUser !== null) {
+        await mongo.collection("follows") // cookieUsername stops following :username
+            .updateOne( {username : cookieUsername}, { $pull: {followedUsers: req.params.username} } );
+    }
+    
+    res.send("probably done");
 });
 
-router.get("/feed", (req, res) => { // Elenco dei messaggi degli utenti seguiti
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-= so far _^_ it's all working -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+
+router.get("/feed", async (req, res) => { // Elenco dei messaggi degli utenti seguiti
     res.send("feed");
 });
 
-router.post("/like/:idMessage", (req, res) => { // Like ad un messaggio con ID idMessage
+router.post("/like/:idMessage", async (req, res) => { // Like ad un messaggio con ID idMessage
     res.send("");
 });
 
-router.delete("/like/:idMessage", (req, res) => { // Rimozione like al messaggio con ID idMessage
+router.delete("/like/:idMessage", async (req, res) => { // Rimozione like al messaggio con ID idMessage
     res.send("");
 });
 
-router.get("/search?q=query", (req, res) => { // Cerca l’utente che matcha la stringa query
+router.get("/search?q=query", async (req, res) => { // Cerca l’utente che matcha la stringa query
     res.send("");
 });
 
-router.get("/whoami", (req, res) => { // Se autenticato, restituisce le informazioni sull’utente
+router.get("/whoami", async (req, res) => { // Se autenticato, restituisce le informazioni sull’utente
     res.send("");
 });
 
