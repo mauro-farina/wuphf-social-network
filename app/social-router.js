@@ -219,7 +219,56 @@ router.delete("/followers/:username", async (req, res) => { // Rimozione del fol
 
 
 router.get("/feed", async (req, res) => { // Elenco dei messaggi degli utenti seguiti
-    res.send("feed");
+    const auth_cookie = req.cookies.auth;                   // interpreted as: "req.cookies.auth stops following `:username`"
+    if(!auth_cookie) {
+        return res.status(400).send("Not authenticated!");
+        //res.redirect();
+    }
+    let cookieUsername;
+    jwt.verify(req.cookies.auth, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
+        if(err) {
+            return res.status(400).send("Cookie cannot be verified"); // how should i handle this case?
+            //res.redirect(); // ?
+        }
+        cookieUsername = decodedCookie.username;
+    });
+    
+    const mongo = mongoManager.getDB();
+
+    const queryFollowedUsers = {
+        username : cookieUsername
+    }
+    const queryFollowedUsersOptions = {
+        projection : {
+            _id : 0,
+            followedUsers : 1
+        }
+    }
+    
+    let followedUsers = await mongo.collection("follows").findOne(queryFollowedUsers, queryFollowedUsersOptions);
+    console.log(followedUsers.followedUsers);
+    let feed = [];
+    for(let user of followedUsers.followedUsers) {
+        console.log(`messages written by ${user}`);
+        const queryMessages = {
+            username : user
+        }
+        const queryMessagesOptions = {
+            projection : {
+                _id : 0,
+                messageID : 1,
+                username : 1,
+                date : 1,
+                likedBy : 1
+            }
+        }
+        let messagesOfUser = await mongo.collection("messages").find(queryMessages, queryMessagesOptions).toArray();
+        for(let messageObject of messagesOfUser) {
+            console.log(messageObject);
+            feed.push(messageObject);
+        }
+    }
+    res.json(feed);
 });
 
 router.post("/like/:idMessage", async (req, res) => { // Like ad un messaggio con ID idMessage
