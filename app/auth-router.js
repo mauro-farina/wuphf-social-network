@@ -106,13 +106,18 @@ router.post("/signin", sanitizeInput, async (req, res) => {
     if(req.body.username == undefined || req.body.password == undefined) {
         return res.status(400).send("Missing information");
     }
+    
     let alreadyExistingUserQuery = await mongo.collection("users").findOne({username: req.body.username});
     if(!alreadyExistingUserQuery) {
         return res.status(400).send(`Invalid password or username`);
     }
+
     const compareResult = await bcrypt.compare(req.body.password, alreadyExistingUserQuery.password);
     if(compareResult) {
-        res.send("Welcome in buddy");
+        jwt.sign({ username: req.body.username }, process.env.JWT_SECRET_KEY, { expiresIn: "30d"}, (err,token) => {
+            res.cookie("auth", token, {httpOnly: true}); //expires in 30d
+            res.status(200).json( { token } );
+        });
     } else {
         return res.status(400).send(`Invalid password or username`);
     }
