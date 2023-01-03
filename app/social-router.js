@@ -198,6 +198,7 @@ router.delete("/followers/:username", async (req, res) => { // Rimozione del fol
     const mongo = mongoManager.getDB();
 
     // check if "is not even following"
+        // as of now: if not following, no errors in mongo or node-app (which is nice)
     
     let getFollowersOfParamsUser = await mongo.collection("follows").findOne({username : req.params.username});
     if(getFollowersOfParamsUser !== null) {
