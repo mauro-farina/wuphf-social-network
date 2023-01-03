@@ -48,7 +48,7 @@ router.post("/signup", sanitizeInput, async (req, res) => {
         return res.status(400).send("Missing information");
     }
     // TRY-CATCHES FOR MONGO AND BCRYPT OPERATIONS ?
-    let alreadyExistingUserQuery = await mongo.collection("users").findOne({username: req.body.username});
+    let alreadyExistingUserQuery = await mongo.collection("users").findOne({username: req.body.username}); // to lower case? idk
     if(alreadyExistingUserQuery) {
         return res.status(400).send(`Username ${req.body.username} is already taken!`);
     }
