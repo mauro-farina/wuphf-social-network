@@ -24,6 +24,7 @@ GET     /api/social/whoami                      Se autenticato, restituisce le i
 
 router.get("/users/:username", async (req, res) => { // Visualizzazione informazioni dell’utente `username`
     const mongo = mongoManager.getDB();
+    // projection
     let getUserByUsername = await mongo.collection("users").findOne({username : req.params.username});
     if(getUserByUsername) {
         res.json(getUserByUsername);
@@ -34,7 +35,20 @@ router.get("/users/:username", async (req, res) => { // Visualizzazione informaz
 
 router.get("/messages/:username", async (req, res) => { // Elenco dei messaggi dell’utente `username`
     const mongo = mongoManager.getDB();
-    let messagesOfUser = await mongo.collection("messages").find({username : req.params.username},{sort: {messageID:-1}}).toArray();
+    const queryOptions = {
+        sort : {
+            messageID : -1
+        },
+        projection : {
+            _id : 0,
+            messageID : 1,
+            message : 1,
+            username : 1,
+            date : 1,
+            likedBy : 1
+        }
+    }
+    let messagesOfUser = await mongo.collection("messages").find({username : req.params.username}, queryOptions).toArray();
     if(messagesOfUser){
         res.json(messagesOfUser);
     } else {
@@ -79,21 +93,20 @@ router.post("/messages", async (req, res) => { // Creazione di un nuovo messaggi
         cookieUsername = decodedCookie.username;
     });
 
+    console.log(cookieUsername);
     const mongo = mongoManager.getDB();
     let lastMessageOfUser = await mongo.collection("messages").findOne({username : cookieUsername},{ sort: {messageID: -1}});
+    let msgID = lastMessageOfUser !== null ? lastMessageOfUser.messageID+1 : 0;
     let newMessage = {
-        messageID : 0,
+        messageID : msgID,
         message : req.body.message,
         username : cookieUsername,
         date : new Date(),
         likedBy : []
     }
-
-    if(lastMessageOfUser !== null) {
-        newMessage.messageID = lastMessageOfUser.messageID+1;
-    }
+    
     await mongo.collection("messages").insertOne(newMessage);
-    res.json(newMessage);
+    res.json(newMessage); // _id is sent as well ._.
 });
 
 router.get("/followers/:username", async (req, res) => { // Lista dei followers dell’utente `username`
@@ -117,8 +130,8 @@ router.get("/followers/:username", async (req, res) => { // Lista dei followers 
 
 
 // not tested, should work
-router.post("/followers/:username", async (req, res) => { // Aggiunta di un nuovo follow per l’utente `username`
-    const auth_cookie = req.cookies.auth;
+router.post("/followers/:username", async (req, res) => {   // Aggiunta di un nuovo follow per l’utente `:username`
+    const auth_cookie = req.cookies.auth;                   // interpreted as: "req.cookies.auth starts following `:username`"
     if(!auth_cookie) {
         res.status(400).send("Not authenticated!");
         //res.redirect();
@@ -126,7 +139,7 @@ router.post("/followers/:username", async (req, res) => { // Aggiunta di un nuov
     let cookieUsername;
     jwt.verify(req.cookies.auth, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
         if(err) {
-            res.status(400).send("Cookie cannot be verified"); // how to handle this case?
+            res.status(400).send("Cookie cannot be verified"); // how should i handle this case?
             //res.redirect(); // ?
         }
         cookieUsername = decodedCookie.username;
@@ -136,7 +149,7 @@ router.post("/followers/:username", async (req, res) => { // Aggiunta di un nuov
     
     let getFollowersOfParamsUser = await mongo.collection("follows").findOne({username : req.params.username});
     if(getFollowersOfParamsUser !== null) {
-        await mongo.collection("follows") // :username has a new follower: cookieUsername
+        await mongo.collection("follows") // `:username` has a new follower: cookieUsername
             .updateOne( {username : req.params.username}, { $push: {followers: cookieUsername} } );
         
     } else {
