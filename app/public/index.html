@@ -8,11 +8,12 @@
             Homepage di WUPHF.com
         </h1>
         <ul>
-            <li><a href="/collection/users" target="_blank">List users</a></li>
-            <li><a href="/collection/follows" target="_blank">List follows</a></li>
-            <li><a href="/collection/messages" target="_blank">List messages</a></li>
-            <li><a href="/collection/likes" target="_blank">List likes</a></li>
+            <li><a href="/api/utils/collection/users" target="_blank">List users</a></li>
+            <li><a href="/api/utils/collection/follows" target="_blank">List follows</a></li>
+            <li><a href="/api/utils/collection/messages" target="_blank">List messages</a></li>
+            <li><a href="/api/utils/collection/likes" target="_blank">List likes</a></li>
             <li>Clear the database <button id="clearCollectionsButton">Clear DB</button></li>
+            <li>Load Mongo with data <button id="loadMongoButton">Load data</button></li>
         </ul>
         <script>
             const buttonClearCollections = document.getElementById("clearCollectionsButton");
@@ -24,6 +25,16 @@
                 fetch("/api/utils//clear/follows", requestOptions);
                 fetch("/api/utils//clear/messages", requestOptions);
                 fetch("/api/utils//clear/likes", requestOptions);
+            });
+        </script>
+
+        <script>
+            const buttonCLoadMongo = document.getElementById("loadMongoButton");
+            buttonCLoadMongo.addEventListener('click', e => {
+                const requestOptions = {
+                    method: 'GET',
+                }
+                fetch("/api/utils/mongo-loader", requestOptions);
             });
         </script>
     </body>
