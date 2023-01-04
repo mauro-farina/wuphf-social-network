@@ -39,9 +39,8 @@
 
     </head>
     
-    <body>
-
-    	<main data-bs-theme="dark" id="app">
+    <body data-bs-theme="dark">
+    	<main id="app">
 				<div class="container-fluid text-bg-dark">
 					<div class="container">
 						<div class="row align-items-center" style="height: 100vh;">
@@ -61,7 +60,7 @@
 									</div>
 									<div class="form-floating input-group mb-3 mt-3 ms-2 me-2">
 										<input :type="inputPasswordType" class="form-control" id="passwordInput" placeholder="Password" required>
-										<button class="btn btn-light btn-md local-primary-text" type="button" @click.prevent="toggleShowPwd">
+										<button class="btn btn-light btn-md rounded-end local-primary-text" type="button" @click.prevent="toggleShowPwd">
 											<!-- button makes the input field *slightly* longer => annoying -->
 											<i :class="togglePwdIconClasses"></i>
 										</button>
@@ -96,7 +95,7 @@
 			const data = {
 				name: "Mauro",
 				inputPasswordType : 'password',
-                togglePwdIconClasses : 'bi bi-eye'
+                togglePwdIconClasses : 'bi bi-eye-fill'
 			};
 
 			const app = createApp({
@@ -107,10 +106,10 @@
 					toggleShowPwd: function() {
                         if(this.inputPasswordType === 'text') {
                             this.inputPasswordType = 'password';
-                            this.togglePwdIconClasses = 'bi bi-eye'
+                            this.togglePwdIconClasses = 'bi bi-eye-fill'
                         } else {
                             this.inputPasswordType = 'text';
-                            this.togglePwdIconClasses = 'bi bi-eye-slash'
+                            this.togglePwdIconClasses = 'bi bi-eye-slash-fill'
                         }
 					}
 				},
