@@ -32,6 +32,10 @@
 			input {
 				color : darkslategray !important;
 			}
+			#toggleShowPasswordButton:hover {
+				/*background-color: snow; /*approximation*/
+				background-color: var(--bs-light);
+			}
 		</style>
 
     </head>
@@ -55,14 +59,18 @@
 										<input type="text" class="form-control" id="usernameInput" placeholder="Username" required>
 										<label for="usernameInput">Username</label>
 									</div>
-									<div class="form-floating input-group mb-3 mt-3 ms-2 me-2">
-										<input :type="inputPasswordType" class="form-control" id="passwordInput" placeholder="Password" required>
-										<button class="btn btn-light btn-md rounded-end local-primary-text" type="button" @click.prevent="toggleShowPwd">
+
+									<div class="input-group mb-3 mt-3 ms-2 me-2">
+										<div class="form-floating">
+											<input :type="inputPasswordType" class="form-control" id="passwordInput" placeholder="Password" required>
+											<label for="passwordInput">Password</label>
+										</div>
+										<button id="toggleShowPasswordButton" class="btn btn-light btn-outline-dark rounded-end local-primary-text" type="button" @click.prevent="toggleShowPwd">
 											<!-- button makes the input field *slightly* longer => annoying -->
 											<i :class="togglePwdIconClasses"></i>
 										</button>
-										<label for="passwordInput">Password</label> <!-- disappears when input field is selected :c -->
 									</div>
+									
 									<div class="form-floating mb-3 mt-3 ms-2 me-2">
 										<input type="text" class="form-control" id="firstNameInput" placeholder="First Name">
 										<label for="firstNameInput">First Name</label>
