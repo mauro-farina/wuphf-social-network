@@ -26,7 +26,8 @@ const sanitizeInput = [
 router.post("/signup", sanitizeInput, async (req, res) => {
     const sanitizeInputErrors = validationResult(req);
 	if (!sanitizeInputErrors.isEmpty()) {
-        return res.status(400).json({ errors: sanitizeInputErrors.array() });
+        //return res.status(400).json({ inputValidationErrors : sanitizeInputErrors.array() });
+        return res.status(400).json({ error : sanitizeInputErrors.array()[0].msg });
         /*
         "errors": [
             {
@@ -39,18 +40,24 @@ router.post("/signup", sanitizeInput, async (req, res) => {
         */
 	}
     const mongo = mongoManager.getDB();
-    //express.json() should parse req.body from String to JSON if content-type = app/json
+
     //app.use(express-json()) HAS TO BE BEFORE app.use(this-file);
     if(req.body == undefined) {
-        return res.status(400).send("Make sure Content-Type is application/json in the HTTP POST Request");
+        return res.status(400).send("Make sure Content-Type is application/json in the HTTP POST Request"); //json?
     }
-    if(req.body.username == undefined || req.body.password == undefined) {
-        return res.status(400).send("Missing information");
+    /*
+    // express-validator takes care of this bit
+    if(req.body.username == undefined) {
+        return res.status(400).json({ "error" : "username field cannot be left empty" });
     }
+    if(req.body.password == undefined) {
+        return res.status(400).json({ "error" : "password field cannot be left empty" });
+    }
+    */
     // TRY-CATCHES FOR MONGO AND BCRYPT OPERATIONS ?
     let alreadyExistingUserQuery = await mongo.collection("users").findOne({username: req.body.username}); // to lower case? idk
     if(alreadyExistingUserQuery) {
-        return res.status(400).send(`Username ${req.body.username} is already taken!`);
+        return res.status(400).json( { error : `Username ${req.body.username} is already taken` } );
     }
     //let lastUserQuery = await mongo.collection("users").findOne({},{ sort: {"userID": -1}});
 

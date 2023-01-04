@@ -36,6 +36,12 @@
 				/*background-color: snow; /*approximation*/
 				background-color: var(--bs-light);
 			}
+			.hidden {
+				display: none;
+			}
+			#signupFailedMessage {
+				color: var(--bs-danger);
+			}
 		</style>
 
     </head>
@@ -45,16 +51,20 @@
 				<div class="container-fluid text-bg-dark">
 					<div class="container">
 						<div class="row align-items-center" style="height: 100vh;">
-							<div class="col-lg-7">
+							<div class="col-lg-7 mb-3 mt-3 ms-2 me-2">
 								<h1>WUPHF.com</h1>
 								<h2>The place to <em>bark</em> your thoughts</h2>
 								<p>
-									Born as a University project between December 2022 and December 2023, it didn't take long after public launch
+									Born as a University project between December 2022 and January 2023, it didn't take long after public launch
 									for WUPHF.com to become viral - also thanks to Elon Musk incredible mismanagement of WUPHF.com main rival: Twitter
 								</p>
 							</div>
 							<div class="col-lg">
+
+								<div id="signupFailedMessage" class="hidden"></div>
+
 								<form class="rounded-3 local-primary-text">
+
 									<div class="form-floating mb-3 mt-3 ms-2 me-2">
 										<input type="text" class="form-control" id="usernameInput" placeholder="Username" required>
 										<label for="usernameInput">Username</label>
@@ -75,19 +85,22 @@
 										<input type="text" class="form-control" id="firstNameInput" placeholder="First Name">
 										<label for="firstNameInput">First Name</label>
 									</div>
+
 									<div class="form-floating mb-3 mt-3 ms-2 me-2">
 										<input type="text" class="form-control" id="lastNameInput" placeholder="Last Name">
 										<label for="lastNameInput">Last Name</label>
 									</div>
+
 									<div class="form-floating mb-3 mt-3 ms-2 me-2">
 										<input type="text" class="form-control" id="bioInput" placeholder="Bio">
 										<label for="bioInput">Bio</label>
 									</div>
+
 									<button class="w-100 btn local-primary-text" type="submit" id="signUpButton">Sign up</button>
+									
 									<hr class="my-4">
-									<!--<small class="text-muted">By clicking Sign up, you agree to the terms of use.</small> -->
 								</form>
-								<p>Already a user? <a href="#">Log in</a>!</p>
+								<p>Already a user? <a href="/login">Log in</a>!</p>
 							</div>
 						</div>
 					</div>
@@ -131,28 +144,40 @@
 
 		<script>
 			const signUpButton = document.getElementById("signUpButton");
-			signUpButton.addEventListener('click', e => {
+			signUpButton.addEventListener('click', async e => {
 				e.preventDefault();
+
+				document.getElementById("signupFailedMessage").classList.add("hidden");
+
 				const username = document.getElementById("usernameInput").value;
 				const password = document.getElementById("passwordInput").value;
 				const firstName = document.getElementById("firstNameInput").value;
 				const lastName = document.getElementById("lastNameInput").value;
 				const bio = document.getElementById("bioInput").value;
 
-				fetch("/api/auth/signup", {
+				let signupRequest = await fetch("/api/auth/signup", {
 					method: 'POST',
 					headers: {
 						'Content-Type' : 'application/json'
 					},
-					body: {
+					body: JSON.stringify({
 						"username" : username,
 						"password" : password,
 						"firstName" : firstName,
 						"lastName" : lastName,
 						"bio" : bio
-					}
+					})
 				});
-				
+				if(!signupRequest.ok) {
+					document.getElementById("signupFailedMessage").classList.remove("hidden");
+					let parseErrors = await signupRequest.json();
+					// console.log(parseErrors.errors); // Array [ {...}, {...} ]
+					if(parseErrors.error !== 'undefined') {
+						document.getElementById("signupFailedMessage").innerHTML = parseErrors.error;
+					} else {
+						document.getElementById("signupFailedMessage").innerHTML = "Error - refresh the page and try again";
+					}
+				}
 			})
 		</script>
 
