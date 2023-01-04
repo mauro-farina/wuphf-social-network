@@ -15,7 +15,12 @@ app.use("/api/auth", authAPIRouter);
 app.use("/api/social", socialAPIRouter);
 app.use("/api/utils", utilsAPIRouter);
 
-app.use(express.static(__dirname +"/public/"));;
+app.use(express.static(__dirname +"/public/", { extensions: ['html'] }));
+/*
+    { extensions: ['html'] }
+    allows to 'GET' static files that end with .html without specifying the file extensions
+    therefore browser URL bar can display /home instead of /home.html, if wanted
+*/
 
 app.listen(process.env.PORT, async () => {
     console.log(`listening on port ${process.env.PORT}`);
