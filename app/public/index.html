@@ -162,6 +162,7 @@
 					headers: {
 						'Content-Type' : 'application/json'
 					},
+					redirect: 'follow',
 					body: JSON.stringify({
 						"username" : username,
 						"password" : password,
@@ -183,7 +184,10 @@
 					}
 					errorMessageElement.innerHTML = errorMessageText;
 					signupFailedContainer.appendChild(errorMessageElement);
-				}
+				} else {
+                    window.location.href = signupRequest.url; // technically works
+                    // https://stackoverflow.com/q/53945402
+                }
 			})
 		</script>
 
