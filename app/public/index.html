@@ -147,7 +147,8 @@
 			signUpButton.addEventListener('click', async e => {
 				e.preventDefault();
 
-				document.getElementById("signupFailedMessage").classList.add("hidden");
+				const signupFailedElement = document.getElementById("signupFailedMessage")
+				signupFailedElement.classList.add("hidden");
 
 				const username = document.getElementById("usernameInput").value;
 				const password = document.getElementById("passwordInput").value;
@@ -168,8 +169,9 @@
 						"bio" : bio
 					})
 				});
+
 				if(!signupRequest.ok) {
-					document.getElementById("signupFailedMessage").classList.remove("hidden");
+					signupFailedElement.classList.remove("hidden");
 					let parseErrors = await signupRequest.json();
 					const errorMessageElement = document.createElement("p");
 					let errorMessageText;
@@ -179,7 +181,7 @@
 						errorMessageText = "Error - refresh the page and try again";
 					}
 					errorMessageElement.innerHTML = errorMessageText;
-					document.getElementById("signupFailedMessage").appendChild(errorMessageElement);
+					signupFailedElement.appendChild(errorMessageElement);
 				}
 			})
 		</script>
