@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>WUPHF.com</title>
+        <meta charset="UTF-8">
+        <meta name="description" content="WUPHF.com - The place to bark your thoughts">
+        <meta name="keywords" content="wuphf, woof">
+        <meta name="author" content="Mauro Farina">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<!-- Vue.js -->
+		<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+		<!-- Bootstrap 5-->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+        <!-- Bootstrap icons-->
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+				<!-- You can also include Popper and our JS separately. 
+                If you don’t plan to use dropdowns, popovers, or tooltips, 
+                save some kilobytes by not including Popper. -->
+			
+		<style>
+			:root {
+				--primary: #9D4EDD;
+			}
+			.local-primary-text {
+				color: var(--primary) !important;
+			}
+			.local-primary-border {
+				border-color: var(--primary) !important;
+			}
+			input {
+				color : darkslategray !important;
+			}
+			#toggleShowPasswordButton:hover {
+				/*background-color: snow; /*approximation*/
+				background-color: var(--bs-light);
+			}
+			.hidden {
+				display: none;
+			}
+            #login-form {
+                max-width: 400px;
+            }
+            /*
+            * {
+                box-sizing: border-box;
+                outline: 3px solid red !important;
+            }
+            */
+		</style>
+
+    </head>
+    
+    <body data-bs-theme="dark">
+    	<main id="app">
+            <div class="container-fluid">
+                <div class="container mt-3 text-center">
+                    <form class="rounded-3 mx-auto row row-cols-1 align-items-center" id="login-form">
+
+                        <img class="mb-4 img-fluid col" src="./favicon.ico" alt="WUPHF.com">
+
+                        <div id="loginFailedMessageContainer" class="hidden text-danger col mb-3 mt-3 ms-2 me-2"></div>
+
+                        <div class="form-floating col mb-3 mt-3 ms-2 me-2">
+                            <input type="text" class="form-control" id="usernameInput" placeholder="Username" required>
+                            <label for="usernameInput">Username</label>
+                        </div>
+
+                        <div class="input-group col mb-3 mt-3 ms-2 me-2">
+                            <div class="form-floating">
+                                <input :type="inputPasswordType" class="form-control" id="passwordInput" placeholder="Password" required>
+                                <label for="passwordInput">Password</label>
+                            </div>
+                            <button id="toggleShowPasswordButton" class="btn btn-light btn-outline-dark rounded-end local-primary-text" type="button" @click.prevent="toggleShowPwd">
+                                <!-- button makes the input field *slightly* longer => annoying -->
+                                <i :class="togglePwdIconClasses"></i>
+                            </button>
+                        </div>
+
+                        <button class="w-100 btn col local-primary-text" type="submit" id="loginButton">Login</button>
+
+                    </form>
+                </div>
+            </div>
+    	</main>
+
+		<script>
+			const { createApp } = Vue
+
+			const data = {
+				name: "Mauro",
+				inputPasswordType : 'password',
+                togglePwdIconClasses : 'bi bi-eye-fill'
+			};
+
+			const app = createApp({
+				data: function() { // === data() { ... }
+					return data
+				},
+				methods: {
+					toggleShowPwd: function() {
+                        if(this.inputPasswordType === 'text') {
+                            this.inputPasswordType = 'password';
+                            this.togglePwdIconClasses = 'bi bi-eye-fill'
+                        } else {
+                            this.inputPasswordType = 'text';
+                            this.togglePwdIconClasses = 'bi bi-eye-slash-fill'
+                        }
+					}
+				},
+				computed: {
+					testComputed: function() {
+						return this.name + " is the best";
+					}
+				}
+			});
+
+			app.mount("#app");
+
+		</script>
+
+		<script>
+			const loginButton = document.getElementById("loginButton");
+			loginButton.addEventListener('click', async e => {
+
+				e.preventDefault();
+
+                const loginFailedMsgContainer = document.getElementById("loginFailedMessageContainer");
+				if(loginFailedMsgContainer.hasChildNodes()) {
+					loginFailedMsgContainer.removeChild(loginFailedMsgContainer.firstChild);
+				}
+				loginFailedMsgContainer.classList.add("hidden");
+
+				const username = document.getElementById("usernameInput").value;
+				const password = document.getElementById("passwordInput").value;
+
+                console.log("fetch something");
+				let loginRequest = await fetch("/api/auth/signin", {
+					method: 'POST',
+					headers: {
+						'Content-Type' : 'application/json'
+					},
+                    redirect: 'follow',
+					body: JSON.stringify({
+						"username" : username,
+						"password" : password
+					})
+				});
+				if(!loginRequest.ok) {
+					loginFailedMsgContainer.classList.remove("hidden");
+					let parseErrors = await loginRequest.json();
+					const errorMessageElement = document.createElement("p");
+					let errorMessageText;
+					if(parseErrors.error !== 'undefined') {
+						errorMessageText = parseErrors.error;
+					} else {
+						errorMessageText = "Error - refresh the page and try again";
+					}
+					errorMessageElement.innerHTML = errorMessageText;
+					loginFailedMsgContainer.appendChild(errorMessageElement);
+				} else {
+                    window.location.href = loginRequest.url; // technically works
+                    // https://stackoverflow.com/q/53945402
+                }
+			})
+		</script>
+
+    </body>
+</html>
