@@ -142,9 +142,13 @@
 		<script>
 			const signUpButton = document.getElementById("signUpButton");
 			signUpButton.addEventListener('click', async e => {
+
 				e.preventDefault();
 
-				const signupFailedElement = document.getElementById("signupFailedMessage")
+				const signupFailedElement = document.getElementById("signupFailedMessage");
+				if(signupFailedElement.hasChildNodes()) {
+					signupFailedElement.removeChild(signupFailedElement.firstChild);
+				}
 				signupFailedElement.classList.add("hidden");
 
 				const username = document.getElementById("usernameInput").value;
