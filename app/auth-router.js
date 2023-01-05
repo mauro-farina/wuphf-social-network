@@ -15,15 +15,23 @@ POST    /api/auth/signup    Registrazione di un nuovo utente
 POST    /api/auth/signin    Login di un utente
 */
 
-const sanitizeInput = [
+const sanitizeInputSignup = [
   body('username')
-    .notEmpty().withMessage("Username must be at least 1 character")
+    .notEmpty().withMessage("Username field is empty")
     .not().matches(' ').withMessage("Username cannot contain spaces")
     .escape(),
-  body('password', "Password must be at least 8 characters").isLength({ min: 8 })
+  body('password', "Password must be at least 8 characters").isLength({ min: 8 }).escape(),
+  body('firstName').escape(),
+  body('lastName').escape(),
+  body('bio').escape()
 ];
 
-router.post("/signup", sanitizeInput, async (req, res) => {
+const sanitizeInputSignin = [
+    body('username').not().isEmpty().withMessage("Username field is empty").trim().escape(),
+    body('password').not().isEmpty().withMessage("Password field is empty").escape()
+  ];
+
+router.post("/signup", sanitizeInputSignup, async (req, res) => {
     const sanitizeInputErrors = validationResult(req);
 	if (!sanitizeInputErrors.isEmpty()) {
         //return res.status(400).json({ inputValidationErrors : sanitizeInputErrors.array() });
@@ -81,7 +89,7 @@ router.post("/signup", sanitizeInput, async (req, res) => {
 
 });
 
-router.post("/signin", sanitizeInput, async (req, res) => {
+router.post("/signin", sanitizeInputSignin, async (req, res) => {
     const sanitizeInputErrors = validationResult(req);
 	if (!sanitizeInputErrors.isEmpty()) {
         return res.status(400).json({ error : sanitizeInputErrors.array()[0].msg });
