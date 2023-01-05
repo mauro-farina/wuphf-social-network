@@ -28,38 +28,25 @@ router.post("/signup", sanitizeInput, async (req, res) => {
 	if (!sanitizeInputErrors.isEmpty()) {
         //return res.status(400).json({ inputValidationErrors : sanitizeInputErrors.array() });
         return res.status(400).json({ error : sanitizeInputErrors.array()[0].msg });
-        /*
-        "errors": [
-            {
-                "value": "panda84",
-                "msg": "Password must be at least 8 characters",
-                "param": "password",
-                "location": "body"
-            }
-        ]
-        */
+        /* "errors": [ {
+                        "value": "panda84",
+                        "msg": "Password must be at least 8 characters",
+                        "param": "password",
+                        "location": "body"
+                       } ] */
 	}
-    const mongo = mongoManager.getDB();
-
-    //app.use(express-json()) HAS TO BE BEFORE app.use(this-file);
+    
     if(req.body == undefined) {
         return res.status(400).send("Make sure Content-Type is application/json in the HTTP POST Request"); //json?
     }
-    /*
-    // express-validator takes care of this bit
-    if(req.body.username == undefined) {
-        return res.status(400).json({ "error" : "username field cannot be left empty" });
-    }
-    if(req.body.password == undefined) {
-        return res.status(400).json({ "error" : "password field cannot be left empty" });
-    }
-    */
+    
+    const mongo = mongoManager.getDB();
+
     // TRY-CATCHES FOR MONGO AND BCRYPT OPERATIONS ?
     let alreadyExistingUserQuery = await mongo.collection("users").findOne({username: req.body.username}); // to lower case? idk
     if(alreadyExistingUserQuery) {
         return res.status(400).json( { error : `Username ${req.body.username} is already taken` } );
     }
-    //let lastUserQuery = await mongo.collection("users").findOne({},{ sort: {"userID": -1}});
 
     let newUser = {
         //userID : 0,
@@ -71,14 +58,13 @@ router.post("/signup", sanitizeInput, async (req, res) => {
         signUpDate : new Date()
     };
     
-    /*
-    if(lastUserQuery !== null) {
-        newUser.userID = lastUserQuery.userID+1;
-    }
-    */
+    //let lastUserQuery = await mongo.collection("users").findOne({},{ sort: {"userID": -1}});
+    //if(lastUserQuery !== null) {
+    //    newUser.userID = lastUserQuery.userID+1;
+    //}
     
-    // salt rounds: value for quick testing 2, value for good security 10+
-    const salt = await bcrypt.genSalt(parseInt(process.env.BCRYPT_ROUNDS_FOR_SALT));
+    // salt rounds: 2 for quick testing, 10+ for good security 
+    const salt = await bcrypt.genSalt(parseInt(process.env.BCRYPT_ROUNDS_FOR_SALT)); // BCRYPT_ROUNDS_FOR_SALT ignored for some reason
     newUser.password = await bcrypt.hash(newUser.password, salt);
 
     await mongo.collection("users").insertOne(newUser);
@@ -89,46 +75,37 @@ router.post("/signup", sanitizeInput, async (req, res) => {
                 followedUsers : []
             } );
 
-    //const token = await jwt.sign( {username : req.body.username}, process.env.JWT_SECRET_KEY);
     jwt.sign({ username: req.body.username }, process.env.JWT_SECRET_KEY, { expiresIn: "30d"}, (err,token) => {
-        res.cookie("auth", token, {httpOnly: true}); //expires in 30d
-        res.status(200).json( {newUser, token } );
+        return res.cookie("auth", token, {httpOnly: true}).redirect("/home");
     });
-    /*
-    const token = jwt.sign({ id: 7, name: "test-jwt-cookie" }, process.env.JWT_SECRET_KEY, (err,token) => {
-        res.cookie("logged_in", token, {httpOnly: true,}).status(200).json({token,});
-    });
-    */
+
 });
 
 router.post("/signin", sanitizeInput, async (req, res) => {
     const sanitizeInputErrors = validationResult(req);
 	if (!sanitizeInputErrors.isEmpty()) {
-        return res.status(400).json({ errors: sanitizeInputErrors.array() });
-    }
-    const mongo = mongoManager.getDB();
+        return res.status(400).json({ error : sanitizeInputErrors.array()[0].msg });
+	}
+
     if(req.body == undefined) {
-        return res.status(400).send("Make sure Content-Type is application/json in the HTTP POST Request");
+        return res.status(400).send("Make sure Content-Type is application/json in the HTTP POST Request"); //json?
     }
-    if(req.body.username == undefined || req.body.password == undefined) {
-        return res.status(400).send("Missing information");
-    }
+    
+    const mongo = mongoManager.getDB();
     
     let alreadyExistingUserQuery = await mongo.collection("users").findOne({username: req.body.username});
     if(!alreadyExistingUserQuery) {
-        return res.status(400).send(`Invalid password or username`);
+        return res.status(400).json( { error : `Invalid username or password` } );
     }
 
     const compareResult = await bcrypt.compare(req.body.password, alreadyExistingUserQuery.password);
     if(compareResult) {
         jwt.sign({ username: req.body.username }, process.env.JWT_SECRET_KEY, { expiresIn: "30d"}, (err,token) => {
-            res.cookie("auth", token, {httpOnly: true}); //expires in 30d
-            res.status(200).json( { token } );
+            return res.cookie("auth", token, {httpOnly: true}).redirect("/home");
         });
     } else {
-        return res.status(400).send(`Invalid password or username`);
+        return res.status(400).json( { error : `Invalid username or password` } );
     }
-    //res.send(jwt.verify(req.cookies.access_token, "SECRET_KEY"));
 });
 
 module.exports = router;
