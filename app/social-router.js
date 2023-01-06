@@ -209,10 +209,6 @@ router.delete("/followers/:username", async (req, res) => { // Rimozione del fol
     res.send("probably done");
 });
 
-
-// -=-=-=-=-=-=-=-=-=-=-=-=-= so far _^_ it's all working -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-
 router.get("/feed", async (req, res) => { // Elenco dei messaggi degli utenti seguiti
     const auth_cookie = req.cookies.auth;                   // interpreted as: "req.cookies.auth stops following `:username`"
     if(!auth_cookie) {
@@ -225,8 +221,6 @@ router.get("/feed", async (req, res) => { // Elenco dei messaggi degli utenti se
         }
         cookieUsername = decodedCookie.username;
     });
-
-    console.log(`${cookieUsername} requested their feed`);
     
     const mongo = mongoManager.getDB();
 
@@ -264,6 +258,9 @@ router.get("/feed", async (req, res) => { // Elenco dei messaggi degli utenti se
     res.json(feed);
 });
 
+// -=-=-=-=-=-=-=-=-=-=-=-=-= so far _^_ it's all working -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+
 router.post("/like/:idMessage", async (req, res) => { // Like ad un messaggio con ID idMessage
     res.send("");
 });
@@ -282,7 +279,6 @@ router.get("/whoami", async (req, res) => { // Se autenticato, restituisce le in
         return res.status(400).redirect('/');
     }
     let cookieUsername;
-    console.log("!");
     jwt.verify(req.cookies.auth, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
         if(err) {
             return res.status(400).redirect('/'); // cookie cannot be verified
