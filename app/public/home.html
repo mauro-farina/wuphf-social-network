@@ -60,11 +60,34 @@
             @media screen and (max-width: 991.5px) {
                 .home-main {
                     grid-template-columns: 1fr;
-                    grid-template-rows: 1fr 1fr 1fr;
+                    grid-template-rows: 60px 1fr;
                     grid-template-areas:
                         "nav"
                         "section";
                 }
+
+                .home-nav {
+                    height: 60px;
+                    background-color: var(--bs-dark);
+                }
+
+                .home-section {
+                    top: 60px;
+                }
+/*
+                #newMessage {
+                    margin-top: 60px;
+                } */
+
+                #navbarSupportedContent {
+                    background-color: var(--bs-dark);
+                }
+
+                #buttonTogglerContainer {
+                    background-color: var(--bs-dark);
+                }
+
+                /* text appears above navbar and sucks */
 
                 /*
                 #navbarSupportedContent {
@@ -81,6 +104,12 @@
                     left: -10px;
                     max-width: fit-content;
                 }
+
+                .home-section {
+                    border-width: 0px 0px 0px 1px;
+                    border-style: solid;
+                    border-color: var(--bs-light);
+                }
             }
 
             @media screen and (min-width: 1200px) {
@@ -95,24 +124,28 @@
             /*
             * {
                 box-sizing: border-box;
-                outline: 3px solid red !important;
+                outline: px solid red !important;
             }
             */
-
+            
 
         </style>
     </head>
     
     <body data-bs-theme="dark"> <!-- DARK -->
         
+
           <main id="app" class="home-main text-bg-dark">
 
-            <nav class="home-nav navbar navbar-expand-lg font-xl collapse-md">
+            <nav class="home-nav navbar navbar-expand-lg font-xl collapse-lg fixed-top">
                 <div class="container-fluid">
 
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
+                    <div class="container-fluid" id="buttonTogglerContainer">
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
 
                     <!-- navbar-brand -->
     
@@ -137,18 +170,16 @@
             </nav>
 
             <section class="home-section">
-                <article>
-                    <!-- textarea to write a new message -->
+                <article class="col" id="newMessage">
+                    lol
                 </article>
 
                 <article>
                     <!-- one article for each message sent by followed users -->
                 </article>
-                
             </section>
 
         </main>
-
         
 <!--
         <main id="app">
