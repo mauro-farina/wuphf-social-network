@@ -83,17 +83,16 @@ router.get("/messages/:username/:messageID", async (req, res) => { // Singolo me
 router.post("/messages", async (req, res) => { // Creazione di un nuovo messaggio da parte di cookie auth.username
     const auth_cookie = req.cookies.auth;
     if(!auth_cookie) {
-        return res.status(400).send("Not authenticated!");
+        return res.status(400).redirect('/');
     }
     let cookieUsername;
     jwt.verify(req.cookies.auth, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
         if(err) {
-            return res.status(400).send("Cookie cannot be verified");
+            return res.status(400).redirect('/');
         }
         cookieUsername = decodedCookie.username;
     });
 
-    console.log(cookieUsername);
     const mongo = mongoManager.getDB();
     let lastMessageOfUser = await mongo.collection("messages").findOne({username : cookieUsername},{ sort: {messageID: -1}});
     let msgID = lastMessageOfUser !== null ? lastMessageOfUser.messageID+1 : 0;
@@ -130,19 +129,17 @@ router.get("/followers/:username", async (req, res) => { // Lista dei followers 
 router.post("/followers/:username", async (req, res) => {   // Aggiunta di un nuovo follow per l’utente `:username`
     const auth_cookie = req.cookies.auth;                   // interpreted as: "req.cookies.auth starts following `:username`"
     if(!auth_cookie) {
-        return res.status(400).send("Not authenticated!");
-        //res.redirect();
+        return res.status(400).redirect('/');
     }
     let cookieUsername;
     jwt.verify(req.cookies.auth, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
         if(err) {
-            return res.status(400).send("Cookie cannot be verified"); // how should i handle this case?
-            //res.redirect(); // ?
+            return res.status(400).redirect('/');
         }
         cookieUsername = decodedCookie.username;
     });
 
-    if(cookieUsername === req.params.username) { // is === the best here?
+    if(cookieUsername === req.params.username) { // is === the best here? maybe tolowercases?
         return res.status(400).send("One cannot follow themselves");
     }
 
@@ -179,14 +176,12 @@ router.post("/followers/:username", async (req, res) => {   // Aggiunta di un nu
 router.delete("/followers/:username", async (req, res) => { // Rimozione del follow all’utente `username`
     const auth_cookie = req.cookies.auth;                   // interpreted as: "req.cookies.auth stops following `:username`"
     if(!auth_cookie) {
-        return res.status(400).send("Not authenticated!");
-        //res.redirect();
+        return res.status(400).redirect('/');
     }
     let cookieUsername;
     jwt.verify(req.cookies.auth, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
         if(err) {
-            return res.status(400).send("Cookie cannot be verified"); // how should i handle this case?
-            //res.redirect(); // ?
+            return res.status(400).redirect('/');
         }
         cookieUsername = decodedCookie.username;
     });
@@ -221,17 +216,17 @@ router.delete("/followers/:username", async (req, res) => { // Rimozione del fol
 router.get("/feed", async (req, res) => { // Elenco dei messaggi degli utenti seguiti
     const auth_cookie = req.cookies.auth;                   // interpreted as: "req.cookies.auth stops following `:username`"
     if(!auth_cookie) {
-        return res.status(400).send("Not authenticated!");
-        //res.redirect();
+        return res.status(400).redirect('/');
     }
     let cookieUsername;
     jwt.verify(req.cookies.auth, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
         if(err) {
-            return res.status(400).send("Cookie cannot be verified"); // how should i handle this case?
-            //res.redirect(); // ?
+            return res.status(400).redirect('/');
         }
         cookieUsername = decodedCookie.username;
     });
+
+    console.log(`${cookieUsername} requested their feed`);
     
     const mongo = mongoManager.getDB();
 
@@ -246,10 +241,8 @@ router.get("/feed", async (req, res) => { // Elenco dei messaggi degli utenti se
     }
     
     let followedUsers = await mongo.collection("follows").findOne(queryFollowedUsers, queryFollowedUsersOptions);
-    console.log(followedUsers.followedUsers);
     let feed = [];
     for(let user of followedUsers.followedUsers) {
-        console.log(`messages written by ${user}`);
         const queryMessages = {
             username : user
         }
@@ -257,6 +250,7 @@ router.get("/feed", async (req, res) => { // Elenco dei messaggi degli utenti se
             projection : {
                 _id : 0,
                 messageID : 1,
+                message : 1,
                 username : 1,
                 date : 1,
                 likedBy : 1
@@ -264,7 +258,6 @@ router.get("/feed", async (req, res) => { // Elenco dei messaggi degli utenti se
         }
         let messagesOfUser = await mongo.collection("messages").find(queryMessages, queryMessagesOptions).toArray();
         for(let messageObject of messagesOfUser) {
-            console.log(messageObject);
             feed.push(messageObject);
         }
     }
@@ -284,7 +277,32 @@ router.get("/search?q=query", async (req, res) => { // Cerca l’utente che matc
 });
 
 router.get("/whoami", async (req, res) => { // Se autenticato, restituisce le informazioni sull’utente
-    res.send("");
+    const auth_cookie = req.cookies.auth;                   // interpreted as: "req.cookies.auth stops following `:username`"
+    if(!auth_cookie) {
+        return res.status(400).redirect('/');
+    }
+    let cookieUsername;
+    console.log("!");
+    jwt.verify(req.cookies.auth, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
+        if(err) {
+            return res.status(400).redirect('/'); // cookie cannot be verified
+        }
+        cookieUsername = decodedCookie.username;
+    });
+    
+    const mongo = mongoManager.getDB();
+    const queryOptions = {
+        projection : {
+            _id : 0,
+            username : 1,
+            firstName : 1,
+            lastName : 1,
+            bio : 1,
+            signUpDate : 1
+        }
+    }
+    let userInfo = await mongo.collection("users").findOne({username : cookieUsername}, queryOptions);
+    return res.json(userInfo);
 });
 
 module.exports = router;
