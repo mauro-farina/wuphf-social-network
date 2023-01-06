@@ -31,13 +31,21 @@
             .home-nav {
                 grid-area: nav;
             }
+            
             .home-section {
                 grid-area: section;
-                padding-left: 6%;
+                padding-left: 12%;
+                padding-right: 12%;
+                padding-bottom: 50px;
+                padding-top: 50px;
             }
 
             .font-m {
                 font-size: medium;
+            }
+
+            .font-l {
+                font-size: large;
             }
 
             .font-xl {
@@ -54,30 +62,62 @@
 
             .nav-list:nth-child(1) {
                 padding-top: 10px;
-             }
+            }
 
+            .btn {
+                color: #9D4EDD;
+            }
+
+            .message {
+                border-width: 1px 0px 0px 0px;
+                border-color: var( --bs-border-color);
+                border-style: solid;
+                padding-top: 15px;
+                padding-right: 15px;
+                padding-left: 15px;
+                padding-bottom: 0px;
+            }
+
+            #newMessageTextArea {
+                resize: none;
+                background-color: aliceblue;
+                color : var(--bs-dark) !important;
+            }
+
+            input {
+				color : var(--bs-dark) !important;
+			}
+
+            /* TMP BORDERS 
+            article {
+                box-sizing: border-box;
+                outline: 2px solid pink !important; 
+            }
+
+            section {
+                box-sizing: border-box;
+                outline: 1px solid red !important; 
+            }
+
+            */
 
             @media screen and (max-width: 991.5px) {
                 .home-main {
                     grid-template-columns: 1fr;
-                    grid-template-rows: 60px 1fr;
+                    grid-template-rows: 70px 1fr;
                     grid-template-areas:
                         "nav"
                         "section";
                 }
 
                 .home-nav {
-                    height: 60px;
+                    height: 70px;
                     background-color: var(--bs-dark);
                 }
 
                 .home-section {
-                    top: 60px;
+                    padding-top: 10px;
                 }
-/*
-                #newMessage {
-                    margin-top: 60px;
-                } */
 
                 #navbarSupportedContent {
                     background-color: var(--bs-dark);
@@ -86,8 +126,6 @@
                 #buttonTogglerContainer {
                     background-color: var(--bs-dark);
                 }
-
-                /* text appears above navbar and sucks */
 
                 /*
                 #navbarSupportedContent {
@@ -121,20 +159,11 @@
                 }
             }
 
-            /*
-            * {
-                box-sizing: border-box;
-                outline: px solid red !important;
-            }
-            */
-            
-
         </style>
     </head>
     
     <body data-bs-theme="dark"> <!-- DARK -->
         
-
           <main id="app" class="home-main text-bg-dark">
 
             <nav class="home-nav navbar navbar-expand-lg font-xl collapse-lg fixed-top">
@@ -153,7 +182,10 @@
                         <ul class="nav-list me-auto mt-2">
 
                             <li class="nav-item">
-                                <a href="" class="nav-link">Profile</a>
+                                <a class="nav-link">Hi, {{user.username}}</a>
+                            </li>
+                            <li class="nav-item">
+                                <a :href="'/api/social/users/'.concat(user.username)" class="nav-link">Profile</a>
                             </li>
                             <li class="nav-item">
                                 <a href="#newMessage" class="nav-link">New message</a>
@@ -169,53 +201,72 @@
                 </div>
             </nav>
 
-            <section class="home-section">
+            <section class="home-section row row-cols-1 text-start font-l">
                 <article class="col" id="newMessage">
-                    lol
+                    <form>
+                        <div class="mb-3">
+                            <!--<label for="newMessageTextArea" class="form-label">What's barking through your mind?</label>-->
+                            <textarea class="form-control" id="newMessageTextArea" rows="3" placeholder="What's barking through your mind?"></textarea>
+                          </div>
+                        <button type="submit" class="btn btn-dark">Woof it!</button>
+                    </form>
                 </article>
+                <div v-for="msg in messages" class="container-fluid">
+                    <!--<article class="col message" :id="(msg.messageID).concat('-').concat(msg.username)">-->
+                    <article class="col message" :id="(msg.username).concat('#').concat(msg.messageID)">
+                        <div class="container-fluid">
+                            <span><a :href="'/api/social/users/'.concat(msg.username)">@{{msg.username}}</a> at {{msg.date}}</span> <!-- unfollow button -->
+                            <p>
+                                {{msg.message}}
+                            </p>
+                        </div>
+                    </article>
+                </div>
 
-                <article>
-                    <!-- one article for each message sent by followed users -->
-                </article>
             </section>
 
         </main>
-        
-<!--
-        <main id="app">
-            
-            <nav class="navbar navbar-expand-md flex-column">
 
-                    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    
-                    <a class="navbar-brand" href="#">WUPHF.com</a>
+        <script defer>
+            async function getUserData() {
+                try {
+                    const fetchOptions = {
+                        redirect: 'follow'
+                    };
 
-                    <div class="offcanvas offcanvas-start flex-column" tabindex="-1" id="offcanvasDarkNavbar" aria-labelledby="offcanvasDarkNavbarLabel">
+                    let whoamiResponse = await fetch("/api/social/whoami", fetchOptions);
+                    if (!whoamiResponse.ok) {
+                        throw new Error(`HTTP error: ${whoamiResponse.status}`);
+                    }
+                    if(whoamiResponse.redirected) {
+                        window.location.href = whoamiResponse.url;
+                    }
+                    const userData = await whoamiResponse.json();
+
+                    let feedResponse = await fetch('/api/social/feed', fetchOptions);
+                    if (!feedResponse.ok) {
+                        throw new Error(`HTTP error: ${feedResponse.status}`);
+                    }
+                    if(feedResponse.redirected) {
+                        window.location.href = feedResponse.url;
+                    }
+                    const feedData = await feedResponse.json();
                     
-                        <div class="offcanvas-header">
-                            <h5 class="offcanvas-title" id="offcanvasDarkNavbarLabel">Hi, {{username}}</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-                        </div>
-                    
-                        <div class="offcanvas-body justify-content-start">
-                            <ul class="navbar-nav flex-column pe-3">
-                                <li class="nav-item">
-                                    <a class="nav-link active" aria-current="page" href="#">Home</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="#">Linkie</a>
-                                </li>
-                                <form class="d-flex mt-3" role="search">
-                                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                                    <button class="btn btn-success" type="submit">Search</button>
-                                </form>
-                            </ul>
-                        </div>
-                    </div>
-              </nav>
-        </main> -->
+                    const { createApp } = Vue;
+                    const data = { messages : feedData, user : userData };
+
+                    const app = createApp({
+                        data() {
+                            return data;
+                        }
+                    });
+                    app.mount("#app");
+                } catch(error) {
+                    console.error(`Could not get data: ${error}`);
+                }
+            }
+            getUserData();
+        </script>
 
     </body>
 
