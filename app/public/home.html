@@ -224,14 +224,16 @@
                             <!--<label for="newMessageTextArea" class="form-label">What's barking through your mind?</label>-->
                             <textarea class="form-control" id="newMessageTextArea" rows="3" placeholder="What's barking through your mind?"></textarea>
                           </div>
-                        <button type="submit" class="btn btn-dark">Woof it!</button>
+                        <button id="woofNewMessageButton" class="btn btn-dark" type="submit">Woof it!</button>
                     </form>
                 </article>
                 <div v-for="msg in messages" class="container-fluid">
                     <!--<article class="col message" :id="(msg.messageID).concat('-').concat(msg.username)">-->
                     <article class="col message" :id="(msg.username).concat('#').concat(msg.messageID)">
                         <div class="container-fluid">
-                            <span><a :href="'/api/social/users/'.concat(msg.username)">@{{msg.username}}</a> at {{msg.date}}</span> <!-- unfollow button -->
+                            <button class="btn" :data-username-toggle-follow="msg.username" :data-username-logged="user.username" onclick="toggleFollow(this)" type="submit">
+                                <i id="followIcon" class="bi bi-person-check-fill"></i>
+                            </button>                            
                             <p>
                                 {{msg.message}}
                             </p>
@@ -243,7 +245,7 @@
 
         </main>
 
-        <script defer>
+        <script>
             async function getUserData() {
                 try {
                     const fetchOptions = {
@@ -269,7 +271,10 @@
                     const feedData = await feedResponse.json();
                     
                     const { createApp } = Vue;
-                    const data = { messages : feedData, user : userData };
+                    const data = { 
+                        messages : feedData, 
+                        user : userData
+                    };
 
                     const app = createApp({
                         data() {
@@ -282,6 +287,46 @@
                 }
             }
             getUserData();
+        </script>
+
+        <script defer>
+
+            async function toggleFollow(buttonElement) {
+
+                const usernameToggleFollow = buttonElement.getAttribute('data-username-toggle-follow');
+                const usernameLogged = buttonElement.getAttribute('data-username-logged');
+
+                let getFollowers = await fetch(`/api/social/followers/${usernameToggleFollow}`);
+
+                if(getFollowers.ok) {
+                    followersJson = await getFollowers.json();
+                    if(followersJson.followers.includes(usernameLogged)) {
+                        // logged user is following => STOPS following
+                        let stopFollowing = await fetch(`/api/social/followers/${usernameToggleFollow}`, {
+                            method: 'DELETE'
+                        });
+                        if(stopFollowing.ok) {
+                            // switch icon TO ALL BUTTONS WHERE data-username-toggle-follow = usernameToggleFollow
+                            for(e of document.querySelectorAll(`[data-username-toggle-follow="${usernameToggleFollow}"]`)) {
+                                e.firstElementChild.classList.remove('bi-person-check-fill');
+                                e.firstElementChild.classList.add('bi-person-fill-add');
+                            }
+                        }
+                    } else {
+                        let stopFollowing = await fetch(`/api/social/followers/${usernameToggleFollow}`, {
+                            method: 'POST'
+                        });
+                        if(stopFollowing.ok) {
+                            // switch icon TO ALL BUTTONS WHERE data-username-toggle-follow = usernameToggleFollow
+                            for(e of document.querySelectorAll(`[data-username-toggle-follow="${usernameToggleFollow}"]`)) {
+                                e.firstElementChild.classList.remove('bi-person-fill-add');
+                                e.firstElementChild.classList.add('bi-person-check-fill');
+                            }
+                        }
+                    }
+                }
+            }
+
         </script>
 
     </body>
