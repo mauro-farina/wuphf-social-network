@@ -233,7 +233,8 @@
                         <div class="container-fluid">
                             <button class="btn" :data-username-toggle-follow="msg.username" :data-username-logged="user.username" onclick="toggleFollow(this)" type="submit">
                                 <i id="followIcon" class="bi bi-person-check-fill"></i>
-                            </button>                            
+                            </button>
+                            <span><a :href="'/api/social/users/'.concat(msg.username)">@{{msg.username}}</a> at {{msg.date}}</span> 
                             <p>
                                 {{msg.message}}
                             </p>
