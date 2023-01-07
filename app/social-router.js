@@ -6,6 +6,7 @@ const bcrypt = require("bcryptjs"); // https://www.npmjs.com/package/bcryptjs
 require("dotenv").config({ path: './private/settings.env' });
 const mongoManager = require("./mongodb-manager.js");
 const { body, validationResult } = require('express-validator');
+const e = require("express");
 
 /*
 GET     /api/social/users/:id                   Visualizzazione informazione dell’utente con ID id
@@ -252,9 +253,28 @@ router.get("/feed", async (req, res) => { // Elenco dei messaggi degli utenti se
         }
         let messagesOfUser = await mongo.collection("messages").find(queryMessages, queryMessagesOptions).toArray();
         for(let messageObject of messagesOfUser) {
+            // reformat date from '2023-01-07T12:24:44.368Z' to '12:24:44 GMT January 7, 2023.'
+            /*
+            const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+            const dateYear = messageObject.date.getFullYear();
+            const dateMonth = months[messageObject.date.getMonth()];
+            const dateDay = messageObject.date.getDate();
+            const dateTimeH = messageObject.date.getUTCHours();
+            const dateTimeM = messageObject.date.getUTCMinutes();
+            messageObject.date = ''.concat(dateTimeH).concat(':').concat(dateTimeM).concat(' GMT ').concat(dateMonth).concat(' ').concat(dateDay).concat(', ').concat(dateYear);
+            */
             feed.push(messageObject);
         }
     }
+    feed.sort( (msg1, msg2) => { // cookie preferences : sorting order
+        if(msg1.date > msg2.date) {
+            return -1;
+        } else if(msg1.date < msg2.date) {
+            return 1;
+        } else {
+            return 0;
+        }
+    });
     res.json(feed);
 });
 
