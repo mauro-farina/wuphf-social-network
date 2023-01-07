@@ -230,7 +230,7 @@
                             <!--<label for="newMessageTextArea" class="form-label">What's barking through your mind?</label>-->
                             <textarea class="form-control" id="newMessageTextArea" rows="3" placeholder="What's barking through your mind?"></textarea>
                         </div>
-                        <button id="woofNewMessageButton" class="btn btn-dark" type="submit">Woof it!</button>
+                        <button id="woofNewMessageButton" class="btn btn-dark" type="submit" @click.prevent="postNewMessage">Woof it!</button>
                     </form>
                 </article>
 
@@ -299,6 +299,19 @@
                                                         + ", " + dateYYYYMMDD[0];
                                 const dateTime = dateSplit[1].split('.')[0].substring(0,5);
                                 return dateTime + " GMT " + datemmDDYYYY;
+                            },
+                            async postNewMessage() {
+                                const newWoof = document.getElementById('newMessageTextArea').value;
+                                let postNewWoof = await fetch('/api/social/messages', {
+                                    method: 'POST',
+                                    redirect: 'follow',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        "message" : newWoof
+                                    })
+                                }).then(res => alert('posted ' + newWoof)).catch(err => alert(err));
                             }
                         }
                     });
@@ -348,31 +361,6 @@
                 }
             }
 
-        </script>
-
-        <script defer>
-            setTimeout(postNewWoofScript, 250); // not the preattiest workaround, but it works   \_O_/
-
-            function postNewWoofScript() {
-                const woofNewMessageButton = document.getElementById('woofNewMessageButton');
-                woofNewMessageButton.addEventListener('click', async e => {
-                    e.preventDefault();
-                    const newWoof = document.getElementById('newMessageTextArea');
-                    let postNewWoof = await fetch('/api/social/messages', {
-                        method: 'POST',
-                        redirect: 'follow',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            "message" : newWoof.value
-                        })
-                    });
-                    if(!postNewWoof.ok) {
-                        // something went wrong!
-                    }
-                });
-            }
         </script>
 
     </body>
