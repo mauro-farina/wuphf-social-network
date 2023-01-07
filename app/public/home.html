@@ -362,6 +362,31 @@
 
         </script>
 
+        <script defer>
+            setTimeout(postNewWoofScript, 250); // not the preattiest workaround, but it works   \_O_/
+
+            function postNewWoofScript() {
+                const woofNewMessageButton = document.getElementById('woofNewMessageButton');
+                woofNewMessageButton.addEventListener('click', async e => {
+                    e.preventDefault();
+                    const newWoof = document.getElementById('newMessageTextArea');
+                    let postNewWoof = await fetch('/api/social/messages', {
+                        method: 'POST',
+                        redirect: 'follow',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            "message" : newWoof.value
+                        })
+                    });
+                    if(!postNewWoof.ok) {
+                        // something went wrong!
+                    }
+                });
+            }
+        </script>
+
     </body>
 
 </html>
