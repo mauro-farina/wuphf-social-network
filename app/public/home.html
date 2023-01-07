@@ -238,8 +238,9 @@
                     <!--<article class="col message" :id="(msg.messageID).concat('-').concat(msg.username)">-->
                     <article class="col message" :id="(msg.username).concat('#').concat(msg.messageID)">
                         <div class="container-fluid">
-                            <button class="btn" :data-username-toggle-follow="msg.username" :data-username-logged="user.username" onclick="toggleFollow(this)" type="submit">
-                                <i id="followIcon" class="bi bi-person-check-fill"></i>
+                            <!--<button class="btn" :data-username-toggle-follow="msg.username" :data-username-logged="user.username" onclick="toggleFollow(this)" type="submit">-->
+                            <button class="btn" @click.prevent="toggleFollow(msg.username)" type="submit">
+                                <i class="bi bi-person-check-fill" :data-follow-icon-for="msg.username"></i>
                             </button>
                             <span><a :href="'/api/social/users/'.concat(msg.username)">@{{msg.username}}</a> {{convertDate(msg.date)}}</span> 
                             <p>
@@ -312,6 +313,30 @@
                                         "message" : newWoof
                                     })
                                 }).then(res => alert('posted ' + newWoof)).catch(err => alert(err));
+                            },
+                            async toggleFollow(usernameToggleFollow) {
+                                const usernameLogged = this.user.username;
+    
+                                let getFollowers = await fetch(`/api/social/followers/${usernameToggleFollow}`);
+
+                                if(!getFollowers.ok) {
+                                    console.err("ooooh upsie");
+                                    return;
+                                }
+                                let followersJson = await getFollowers.json();
+                                const httpMethod = followersJson.followers.includes(usernameLogged) ? 'DELETE' : 'POST';
+                                let toggleFollowFetch = await fetch(`/api/social/followers/${usernameToggleFollow}`, {
+                                    method: httpMethod
+                                });
+                                if(!toggleFollowFetch.ok) {
+                                    console.err("well thats unexpected");
+                                    return; //error D:
+                                }
+                                document.querySelectorAll(`[data-follow-icon-for="${usernameToggleFollow}"]`)
+                                    .forEach(el => {
+                                        el.classList.toggle('bi-person-check-fill');
+                                        el.classList.toggle('bi-person-fill-add');
+                                    });
                             }
                         }
                     });
@@ -324,7 +349,7 @@
         </script>
 
         <script defer>
-
+/*
             async function toggleFollow(buttonElement) {
 
                 const usernameToggleFollow = buttonElement.getAttribute('data-username-toggle-follow');
@@ -360,7 +385,7 @@
                     }
                 }
             }
-
+*/
         </script>
 
     </body>
