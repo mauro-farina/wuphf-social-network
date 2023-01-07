@@ -218,15 +218,17 @@
             </nav>
 
             <section class="home-section row row-cols-1 text-start font-l">
+
                 <article class="col" id="newMessage">
                     <form>
                         <div class="mb-3">
                             <!--<label for="newMessageTextArea" class="form-label">What's barking through your mind?</label>-->
                             <textarea class="form-control" id="newMessageTextArea" rows="3" placeholder="What's barking through your mind?"></textarea>
-                          </div>
+                        </div>
                         <button id="woofNewMessageButton" class="btn btn-dark" type="submit">Woof it!</button>
                     </form>
                 </article>
+
                 <div v-for="msg in messages" class="container-fluid">
                     <!--<article class="col message" :id="(msg.messageID).concat('-').concat(msg.username)">-->
                     <article class="col message" :id="(msg.username).concat('#').concat(msg.messageID)">
