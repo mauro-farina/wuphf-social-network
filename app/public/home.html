@@ -234,7 +234,7 @@
                             <button class="btn" :data-username-toggle-follow="msg.username" :data-username-logged="user.username" onclick="toggleFollow(this)" type="submit">
                                 <i id="followIcon" class="bi bi-person-check-fill"></i>
                             </button>
-                            <span><a :href="'/api/social/users/'.concat(msg.username)">@{{msg.username}}</a> at {{msg.date}}</span> 
+                            <span><a :href="'/api/social/users/'.concat(msg.username)">@{{msg.username}}</a> {{convertDate(msg.date)}}</span> 
                             <p>
                                 {{msg.message}}
                             </p>
@@ -280,6 +280,19 @@
                     const app = createApp({
                         data() {
                             return data;
+                        },
+                        methods: {
+                            convertDate(date) {
+                                const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+                                const dateSplit = date.split('T');
+                                const dateYYYYMMDD = dateSplit[0].split('-'); 
+                                // 2023-01-07 -> January 7, 2023
+                                const datemmDDYYYY = months[parseInt(dateYYYYMMDD[1])-1] 
+                                                        + " " + dateYYYYMMDD[2]
+                                                        + ", " + dateYYYYMMDD[0];
+                                const dateTime = dateSplit[1].split('.')[0].substring(0,5);
+                                return dateTime + " GMT " + datemmDDYYYY;
+                            }
                         }
                     });
                     app.mount("#app");
@@ -288,6 +301,18 @@
                 }
             }
             getUserData();
+        </script>
+        
+        <script>
+            function convertDate(messageObject) {
+                const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+                const dateYear = messageObject.date.getFullYear();
+                const dateMonth = months[messageObject.date.getMonth()];
+                const dateDay = messageObject.date.getDate();
+                const dateTimeH = messageObject.date.getUTCHours();
+                const dateTimeM = messageObject.date.getUTCMinutes();
+                return ''.concat(dateTimeH).concat(':').concat(dateTimeM).concat(' GMT ').concat(dateMonth).concat(' ').concat(dateDay).concat(', ').concat(dateYear);
+            }
         </script>
 
         <script defer>
