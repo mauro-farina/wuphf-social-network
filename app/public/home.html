@@ -309,18 +309,6 @@
             }
             getUserData();
         </script>
-        
-        <script>
-            function convertDate(messageObject) {
-                const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-                const dateYear = messageObject.date.getFullYear();
-                const dateMonth = months[messageObject.date.getMonth()];
-                const dateDay = messageObject.date.getDate();
-                const dateTimeH = messageObject.date.getUTCHours();
-                const dateTimeM = messageObject.date.getUTCMinutes();
-                return ''.concat(dateTimeH).concat(':').concat(dateTimeM).concat(' GMT ').concat(dateMonth).concat(' ').concat(dateDay).concat(', ').concat(dateYear);
-            }
-        </script>
 
         <script defer>
 
