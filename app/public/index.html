@@ -105,16 +105,16 @@
     	</main>
 
 		<script>
+
 			const { createApp } = Vue
 
 			const data = {
-				name: "Mauro",
 				inputPasswordType : 'password',
                 togglePwdIconClasses : 'bi bi-eye-fill'
 			};
 
 			const app = createApp({
-				data: function() { // === data() { ... }
+				data: function() {
 					return data
 				},
 				methods: {
@@ -126,11 +126,6 @@
                             this.inputPasswordType = 'text';
                             this.togglePwdIconClasses = 'bi bi-eye-slash-fill'
                         }
-					}
-				},
-				computed: {
-					testComputed: function() {
-						return this.name + " is the best";
 					}
 				}
 			});
