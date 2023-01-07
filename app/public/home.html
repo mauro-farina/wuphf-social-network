@@ -88,6 +88,10 @@
 				color : var(--bs-dark) !important;
 			}
 
+            .nav-icon {
+                width: 100px;
+            }
+
             /* TMP BORDERS 
             article {
                 box-sizing: border-box;
@@ -171,19 +175,28 @@
 
             <nav class="home-nav navbar navbar-expand-lg font-xl collapse-lg fixed-top">
                 <div class="container-fluid">
+                <!--<div class="container-fluid row flex-lg-column flex-md-row">-->
 
                     <div class="container-fluid" id="buttonTogglerContainer">
+                    <!--<div class="container-fluid col" id="buttonTogglerContainer">-->
                         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                             <span class="navbar-toggler-icon"></span>
                         </button>
                     </div>
-                    
 
                     <!-- navbar-brand -->
-    
+                    <!--
+                    <div class="container col" id="nav-icon-container"> 
+                        <a class="navbar-brand" href="/home">
+                            <img src="./favicon.ico" class="nav-icon">
+                        </a>
+                    </div>
+                    -->
+                    
+                    <!--<div class="container-fluid collapse navbar-collapse col" id="navbarSupportedContent">-->
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                        <ul class="nav-list me-auto mt-2">
-
+                        <!--<ul class="nav-list navbar-nav me-auto mt-2" style="flex-direction:column">-->
+                            <ul class="nav-list me-auto mt-2" style="flex-direction:column">
                             <li class="nav-item">
                                 <a class="nav-link">Hi, {{user.username}}</a>
                             </li>
