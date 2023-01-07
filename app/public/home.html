@@ -166,6 +166,11 @@
                 }
             }
 
+            /* https://stackoverflow.com/a/42262375 */
+            [v-cloak] {
+                display: none;
+            }
+
         </style>
     </head>
     
@@ -198,7 +203,7 @@
                         <!--<ul class="nav-list navbar-nav me-auto mt-2" style="flex-direction:column">-->
                             <ul class="nav-list me-auto mt-2" style="flex-direction:column">
                             <li class="nav-item">
-                                <a class="nav-link">Hi, {{user.username}}</a>
+                                <a class="nav-link" v-cloak>Hi, {{user.username}}</a>
                             </li>
                             <li class="nav-item">
                                 <a :href="'/api/social/users/'.concat(user.username)" class="nav-link">Profile</a>
@@ -229,7 +234,7 @@
                     </form>
                 </article>
 
-                <div v-for="msg in messages" class="container-fluid">
+                <div v-for="msg in messages" v-cloak class="container-fluid">
                     <!--<article class="col message" :id="(msg.messageID).concat('-').concat(msg.username)">-->
                     <article class="col message" :id="(msg.username).concat('#').concat(msg.messageID)">
                         <div class="container-fluid">
