@@ -269,9 +269,6 @@ router.get("/feed", async (req, res) => { // Elenco dei messaggi degli utenti se
     res.json(feed);
 });
 
-// -=-=-=-=-=-=-=-=-=-=-=-=-= so far _^_ it's all working -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-
 router.post("/like/:idMessage", async (req, res) => { // Like ad un messaggio con ID idMessage
     res.send("");
 });
@@ -288,7 +285,6 @@ router.get("/search", async (req, res) => { // Cerca l’utente che matcha la st
         return res.json({});
     }
     const mongo = mongoManager.getDB();
-    //await mongo.collection("users").createIndex({ username: "text" });
     const queryOptions = {
         projection : {
             _id : 0,
@@ -299,11 +295,9 @@ router.get("/search", async (req, res) => { // Cerca l’utente che matcha la st
             signUpDate : 1
         }
     }
-    //let correspondingUsers = await mongo.collection("users").find({$text: { $search: req.query.q }}, queryOptions).toArray();
-    // maybe with a regex it would work /\
     let correspondingUsers = [];
     await mongo.collection("users").find({}, queryOptions).forEach(u => {
-        if(u.username.includes(req.query.q)) {
+        if(u.username.includes(req.query.q.toLowerCase())) {
             correspondingUsers.push(u);
         }
     });
