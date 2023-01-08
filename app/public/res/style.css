@@ -12,7 +12,6 @@ body {
 }
 
 #toggleShowPasswordButton:hover {
-    /*background-color: snow; /*approximation*/
     background-color: var(--bs-light);
 }
 
