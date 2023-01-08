@@ -101,6 +101,10 @@ body {
     opacity: 1; /* Firefox */
 }
 
+#newMessageTextArea::placeholder, #searchUserInput::-ms-input-placeholder { /* Microsoft Edge */
+    color: red;
+}
+
 input {
     color : var(--bs-dark) !important;
 }
