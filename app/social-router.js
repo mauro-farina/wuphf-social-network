@@ -308,18 +308,11 @@ router.get("/search", async (req, res) => { // Cerca l’utente che matcha la st
 
 router.get("/whoami", async (req, res) => { // Se autenticato, restituisce le informazioni sull’utente
     const auth_cookie = req.cookies.auth;
-    if(!auth_cookie) {
-        return res.json( {authenticated : false} );
+    let cookieUsername = await validateCookie(auth_cookie).catch(err => res.json({ authenticated : false, reason : err }));
+    if(typeof cookieUsername !== 'string') {
+        return;
     }
-    let cookieUsername;
-    jwt.verify(req.cookies.auth, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
-        if(err) {
-            // cookie cannot be verified
-            return res.json({ authenticated : false });              
-        }
-        cookieUsername = decodedCookie.username;
-    });
-    
+
     const mongo = mongoManager.getDB();
     const queryOptionsUser = {
         projection : {
@@ -346,5 +339,21 @@ router.get("/whoami", async (req, res) => { // Se autenticato, restituisce le in
     userInfo.followers = userFollows.followers;
     return res.json(userInfo);
 });
+
+function validateCookie(auth_cookie) {
+    return new Promise((resolve, reject) => {
+        if(!auth_cookie) {
+            return reject("No cookie");
+        }
+        let cookieUsername;
+        jwt.verify(auth_cookie, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
+            if(err) {
+                return reject("Cookie is invalid");
+            }
+            resolve(decodedCookie.username);
+        });
+    });
+}
+
 
 module.exports = router;
