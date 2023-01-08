@@ -214,9 +214,9 @@
                             <li class="nav-item">
                                 <a href="#top" class="nav-link">New message</a>
                             </li>
-                            <div class="input-group nav-item">
-                                <input class="form-control" type="search" placeholder="Search user" aria-label="Search">
-                                <button class="btn btn-success" type="submit" id="searchUserButton"><i class="bi bi-search"></i></button>
+                            <div class="input-group nav-item" v-cloak>
+                                <input class="form-control" v-model="usernameToLookup" @input.prevent="searchUser" placeholder="Search user" type="search" aria-label="Search">
+                                <!--<button class="btn btn-success" @click.prevent="searchUser" type="submit" id="searchUserButton"><i class="bi bi-search"></i></button>-->
                             </div>
 
                         </ul>
@@ -229,7 +229,7 @@
 
             <section class="home-section row row-cols-1 text-start font-l">
 
-                <article class="col" id="newMessage" v-if="user.authenticated" v-cloak>
+                <article class="col" id="newMessage" v-if="user.authenticated && showFeed" v-cloak>
                     <form>
                         <div class="mb-3">
                             <!--<label for="newMessageTextArea" class="form-label">What's barking through your mind?</label>-->
@@ -239,9 +239,9 @@
                     </form>
                 </article>
 
-                <div v-for="msg in messages" v-cloak class="container-fluid" v-if="user.authenticated">
+                <div v-for="msg in messages" v-cloak class="container-fluid col" v-if="user.authenticated && showFeed" v-if="showFeed">
                     <!--<article class="col message" :id="(msg.messageID).concat('-').concat(msg.username)">-->
-                    <article class="col message" :id="(msg.username).concat('#').concat(msg.messageID)">
+                    <article class="message" :id="(msg.username).concat('#').concat(msg.messageID)">
                         <div class="container-fluid">
                             <!--<button class="btn" :data-username-toggle-follow="msg.username" :data-username-logged="user.username" onclick="toggleFollow(this)" type="submit">-->
                             <button class="btn" @click.prevent="toggleFollow(msg.username)" type="submit">
@@ -258,6 +258,22 @@
                 <article v-if="!user.authenticated" v-cloak>
                     Create an account to start following users and personalize your feed!
                 </article>
+
+                <div v-cloak v-if="showSearch" v-for="foundUser in searchUserResults" class="container-fluid col">
+                    <article class="message">
+                        <div class="container-fluid">
+                            <span v-if="foundUser.username === user.username" class="text-muted pe-2">(you)</span>
+                            <button class="btn" @click.prevent="toggleFollow(foundUser.username)" type="submit" v-if="user.authenticated && foundUser.username !== user.username">
+                                <i v-if="user.followedUsers.includes(foundUser.username)" class="bi bi-person-check-fill" :data-follow-icon-for="foundUser.username"></i>
+                                <i v-if="!user.followedUsers.includes(foundUser.username)" class="bi bi-person-fill-add" :data-follow-icon-for="foundUser.username"></i>
+                            </button>
+                            <span><a :href="'/api/social/users/'.concat(foundUser.username)">@{{foundUser.username}}</a> - {{foundUser.firstName}} {{foundUser.lastName}}</span> 
+                            <p>
+                                {{foundUser.bio}}
+                            </p>
+                        </div>
+                    </article>
+                </div>
 
             </section>
 
@@ -291,10 +307,10 @@
 
                 const data = { 
                     messages : userData.feed, 
-                    user : userData.user
+                    user : userData.user,
+                    usernameToLookup : "",
+                    searchUserResults : []
                 };
-
-                console.log(data);
 
                 const app = createApp({
                     data() {
@@ -313,7 +329,13 @@
                             return dateTime + " GMT " + datemmDDYYYY;
                         },
                         async postNewMessage() {
+
+                            // on send new woof -> woof textbox reset to emptu && show new feed ===> feed contains loggedUser woofs as well!
+
                             const newWoof = document.getElementById('newMessageTextArea').value;
+
+                            // check length != 0
+
                             let postNewWoof = await fetch('/api/social/messages', {
                                 method: 'POST',
                                 redirect: 'follow',
@@ -346,6 +368,20 @@
                                     el.classList.toggle('bi-person-check-fill');
                                     el.classList.toggle('bi-person-fill-add');
                                 });
+                        },
+                        async searchUser() {
+                            let queryResults = await fetch(`/api/social/search?q=${this.usernameToLookup}`).then(res => res.json()).catch(err => console.err(err));
+                            if(queryResults.length === undefined) { return; }
+                            this.searchUserResults = queryResults;
+                            //queryResults.forEach(e => console.log(e.username));
+                        }
+                    },
+                    computed: {
+                        showFeed() {
+                            return this.usernameToLookup.trim().length > 0 ? false : true;
+                        },
+                        showSearch() {
+                            return this.usernameToLookup.trim().length > 0 ? true : false;
                         }
                     }
                 });
