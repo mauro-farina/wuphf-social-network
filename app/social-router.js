@@ -281,6 +281,12 @@ router.delete("/like/:idMessage", async (req, res) => { // Rimozione like al mes
 });
 
 router.get("/search", async (req, res) => { // Cerca l’utente che matcha la stringa query /search?q=[partial_username]
+    if(req.query.q === undefined) {
+        return res.json({});
+    }
+    if(req.query.q.length === 0) {
+        return res.json({});
+    }
     const mongo = mongoManager.getDB();
     //await mongo.collection("users").createIndex({ username: "text" });
     const queryOptions = {
@@ -293,12 +299,6 @@ router.get("/search", async (req, res) => { // Cerca l’utente che matcha la st
             signUpDate : 1
         }
     }
-    if(req.query.q === undefined) {
-        return res.json({});
-    }
-    if(req.query.q.length === 0) {
-        return res.json({});
-    }
     //let correspondingUsers = await mongo.collection("users").find({$text: { $search: req.query.q }}, queryOptions).toArray();
     // maybe with a regex it would work /\
     let correspondingUsers = [];
@@ -307,11 +307,12 @@ router.get("/search", async (req, res) => { // Cerca l’utente che matcha la st
             correspondingUsers.push(u);
         }
     });
+    // for each of them, find number of followers and number of following?
     return res.json(correspondingUsers);
 });
 
 router.get("/whoami", async (req, res) => { // Se autenticato, restituisce le informazioni sull’utente
-    const auth_cookie = req.cookies.auth;                   // interpreted as: "req.cookies.auth stops following `:username`"
+    const auth_cookie = req.cookies.auth;
     if(!auth_cookie) {
         return res.json( {authenticated : false} );
     }
@@ -325,18 +326,29 @@ router.get("/whoami", async (req, res) => { // Se autenticato, restituisce le in
     });
     
     const mongo = mongoManager.getDB();
-    const queryOptions = {
+    const queryOptionsUser = {
         projection : {
             _id : 0,
             username : 1,
             firstName : 1,
             lastName : 1,
             bio : 1,
-            signUpDate : 1
+            signUpDate: 1
         }
     }
-    let userInfo = await mongo.collection("users").findOne({username : cookieUsername}, queryOptions);
+    const queryOptionsFollows = {
+        projection : {
+            _id : 0,
+            username : 1,
+            followedUsers : 1,
+            followers : 1
+        }
+    }
+    let userInfo = await mongo.collection("users").findOne({username : cookieUsername}, queryOptionsUser);
+    let userFollows = await mongo.collection("follows").findOne({username : cookieUsername}, queryOptionsFollows);
     userInfo.authenticated = true;
+    userInfo.followedUsers = userFollows.followedUsers;
+    userInfo.followers = userFollows.followers;
     return res.json(userInfo);
 });
 
