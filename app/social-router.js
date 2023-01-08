@@ -280,8 +280,30 @@ router.delete("/like/:idMessage", async (req, res) => { // Rimozione like al mes
     res.send("");
 });
 
-router.get("/search?q=query", async (req, res) => { // Cerca l’utente che matcha la stringa query
-    res.send("");
+router.get("/search", async (req, res) => { // Cerca l’utente che matcha la stringa query /search?q=[partial_username]
+    const mongo = mongoManager.getDB();
+    //await mongo.collection("users").createIndex({ username: "text" });
+    const queryOptions = {
+        projection : {
+            _id : 0,
+            username : 1
+        }
+    }
+    if(req.query.q === undefined) {
+        return res.json({});
+    }
+    if(req.query.q.length === 0) {
+        return res.json({});
+    }
+    //let correspondingUsers = await mongo.collection("users").find({$text: { $search: req.query.q }}, queryOptions).toArray();
+    // maybe with a regex it would work /\
+    let correspondingUsers = [];
+    await mongo.collection("users").find({}, queryOptions).forEach(u => {
+        if(u.username.includes(req.query.q)) {
+            correspondingUsers.push(u);
+        }
+    });
+    return res.json(correspondingUsers);
 });
 
 router.get("/whoami", async (req, res) => { // Se autenticato, restituisce le informazioni sull’utente
