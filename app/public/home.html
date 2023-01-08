@@ -19,6 +19,12 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
 
         <style>
+            :root {
+				--primary: #9D4EDD;
+			}
+			.local-primary-text {
+				color: var(--primary) !important;
+			}
             .home-main {
                 /* https://mor10.com/wceu2017/ */
                 display: grid;
@@ -40,6 +46,10 @@
                 padding-top: 50px;
             }
 
+            .link-no-underine {
+                text-decoration: none;
+            }
+
             .font-m {
                 font-size: medium;
             }
@@ -50,6 +60,10 @@
 
             .font-xl {
                 font-size: x-large;
+            }
+
+            .font-xxl {
+                font-size: xx-large;
             }
 
             .nav-list {
@@ -178,7 +192,7 @@
         
           <main id="app" class="home-main text-bg-dark">
 
-            <nav class="home-nav navbar navbar-expand-lg font-xl collapse-lg fixed-top">
+            <nav class="home-nav navbar navbar-expand-lg collapse-lg fixed-top">
                 <div class="container-fluid">
                 <!--<div class="container-fluid row flex-lg-column flex-md-row">-->
 
@@ -201,15 +215,15 @@
                     <!--<div class="container-fluid collapse navbar-collapse col" id="navbarSupportedContent">-->
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
                         <!--<ul class="nav-list navbar-nav me-auto mt-2" style="flex-direction:column">-->
-                            <ul class="nav-list me-auto mt-2" style="flex-direction:column">
+                        <ul class="nav-list me-auto mt-2 font-xl" style="flex-direction:column">
                             <li class="nav-item" v-cloak>
-                                <span class="nav-link" v-if="user.authenticated">Hi, {{user.username}}</span>
+                                <span class="nav-link font-xxl" v-if="user.authenticated">Hi, <a :href="'/api/social/users/'.concat(user.username)" class="local-primary-text link-no-underine">{{user.username}}</a></span>
                                 <span class="nav-link" v-if="!user.authenticated">
-                                    <a href="/">Signup</a> or <a href="/login">Login</a>
+                                    <a href="/" class="link-no-underine">Signup</a> or <a href="/login" class="link-no-underine">Login</a>
                                 </span>
                             </li>
                             <li class="nav-item">
-                                <a :href="'/api/social/users/'.concat(user.username)" class="nav-link">Profile</a>
+                                <a href="/home" class="nav-link">Feed</a>
                             </li>
                             <li class="nav-item">
                                 <a href="#top" class="nav-link">New message</a>
@@ -255,11 +269,11 @@
                     </article>
                 </div>
 
-                <article v-if="!user.authenticated" v-cloak>
+                <article v-if="!user.authenticated" class="col" v-cloak>
                     Create an account to start following users and personalize your feed!
                 </article>
 
-                <div v-cloak v-if="showSearch" v-for="foundUser in searchUserResults" class="container-fluid col">
+                <div v-for="foundUser in searchUserResults" class="container-fluid col" v-cloak v-if="showSearch">
                     <article class="message">
                         <div class="container-fluid">
                             <span v-if="foundUser.username === user.username" class="text-muted pe-2">(you)</span>
@@ -373,6 +387,10 @@
                             let queryResults = await fetch(`/api/social/search?q=${this.usernameToLookup}`).then(res => res.json()).catch(err => console.err(err));
                             if(queryResults.length === undefined) { return; }
                             this.searchUserResults = queryResults;
+                            if(window.visualViewport.width < 991.5) {
+                                console.log(`${window.visualViewport.width} < 972`);
+                                document.getElementById('buttonTogglerContainer').firstElementChild.click();
+                            }
                             //queryResults.forEach(e => console.log(e.username));
                         }
                     },
