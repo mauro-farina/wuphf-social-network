@@ -362,6 +362,9 @@
                                 })
                             }).catch(err => console.err(err));
                             
+                            // erase textarea
+                            newMessageTextarea.value = "";
+                            
                             // add new message to the feed without reloading!
                             await fetch(`/api/social/messages/${this.user.username}`)
                                 .then(res => res.json()).then(msgs => this.messages.splice(0,0,msgs[0])).catch(err => console.error(err));
