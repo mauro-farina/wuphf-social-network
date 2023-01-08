@@ -237,8 +237,6 @@ router.get("/feed", async (req, res) => { // Elenco dei messaggi degli utenti se
     
     let followedUsers = await mongo.collection("follows").findOne(queryFollowedUsers, queryFollowedUsersOptions);
     followedUsers.followedUsers.push(cookieUsername);
-    console.log(followedUsers);
-    console.log(typeof followedUsers);
     let feed = [];
     for(let user of followedUsers.followedUsers) {
         const queryMessages = {
