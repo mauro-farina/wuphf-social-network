@@ -253,12 +253,12 @@
                     </form>
                 </article>
 
-                <div v-for="msg in messages" v-cloak class="container-fluid col" v-if="user.authenticated && showFeed" v-if="showFeed">
+                <div v-for="msg in messages" v-cloak class="container-fluid col message-container" v-if="user.authenticated && showFeed">
                     <!--<article class="col message" :id="(msg.messageID).concat('-').concat(msg.username)">-->
                     <article class="message" :id="(msg.username).concat('#').concat(msg.messageID)">
                         <div class="container-fluid">
                             <!--<button class="btn" :data-username-toggle-follow="msg.username" :data-username-logged="user.username" onclick="toggleFollow(this)" type="submit">-->
-                            <button class="btn" @click.prevent="toggleFollow(msg.username)" type="submit">
+                            <button class="btn" @click.prevent="toggleFollow(msg.username)" v-if="msg.username !== user.username" type="submit">
                                 <i class="bi bi-person-check-fill" :data-follow-icon-for="msg.username"></i>
                             </button>
                             <span><a :href="'/api/social/users/'.concat(msg.username)">@{{msg.username}}</a> {{convertDate(msg.date)}}</span> 
@@ -344,9 +344,10 @@
                         },
                         async postNewMessage() {
 
-                            // on send new woof -> woof textbox reset to emptu && show new feed ===> feed contains loggedUser woofs as well!
+                            // on send new woof -> show new feed (or just push new msg on top...)
 
-                            const newWoof = document.getElementById('newMessageTextArea').value;
+                            const newMessageTextarea = document.getElementById('newMessageTextArea');
+                            const newWoof = newMessageTextarea.value;
 
                             // check length != 0
 
@@ -359,7 +360,37 @@
                                 body: JSON.stringify({
                                     "message" : newWoof
                                 })
-                            }).then(res => alert('posted ' + newWoof)).catch(err => alert(err));
+                            }).catch(err => console.err(err));
+                            /*
+                            await fetch(`/api/social/messages/${this.user.username}`)
+                                .then(res => res.json()).then(msgs => this.messages.push(msgs[0])).catch(err => console.error(err));
+                            newMessageTextarea.value = "";
+                            // append child home-section maybeeee (can i pick the position though?)
+                            const newLatestMessageContainer = document.createElement("div");
+                            newLatestMessageContainer.classList.add("container-fluid", "col", "message-container");
+                            newLatestMessageContainer.setAttribute("v-if", "user.authenticated && showFeed");
+                            const newLatestMessageArticle = document.createElement("article");
+                            newLatestMessageArticle.classList.add("article");
+                            newLatestMessageArticle.setAttribute("id", `${this.user.username}#latestID`);
+
+
+                            newMessageTextarea.insertBefore(
+                                null, // new node
+                                document.querySelector(['class="message-container"']) // reference node
+                                );
+                            */
+                                /*
+                                        div class="container-fluid"
+                                            <button class="btn" @click.prevent="toggleFollow(msg.username)" type="submit">
+                                                <i class="bi bi-person-check-fill" :data-follow-icon-for="msg.username"></i>
+                                            </button>
+                                            <span><a :href="'/api/social/users/'.concat(msg.username)">@{{msg.username}}</a> {{convertDate(msg.date)}}</span> 
+                                            <p>
+                                                message
+                                            </p>
+                                        div
+                                */
+
                         },
                         async toggleFollow(usernameToggleFollow) {
                             const usernameLogged = this.user.username;
