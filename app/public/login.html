@@ -78,7 +78,7 @@
                             </button>
                         </div>
 
-                        <button class="w-100 btn col local-primary-text" type="submit" id="loginButton">Login</button>
+                        <button class="w-100 btn col local-primary-text" type="submit" id="loginButton" @click.prevent="login">Login</button>
 
                     </form>
                 </div>
@@ -89,13 +89,12 @@
 			const { createApp } = Vue
 
 			const data = {
-				name: "Mauro",
 				inputPasswordType : 'password',
                 togglePwdIconClasses : 'bi bi-eye-fill'
 			};
 
 			const app = createApp({
-				data: function() { // === data() { ... }
+				data: function() {
 					return data
 				},
 				methods: {
@@ -107,63 +106,49 @@
                             this.inputPasswordType = 'text';
                             this.togglePwdIconClasses = 'bi bi-eye-slash-fill'
                         }
-					}
-				},
-				computed: {
-					testComputed: function() {
-						return this.name + " is the best";
+					},
+					async login() {
+						const loginFailedMsgContainer = document.getElementById("loginFailedMessageContainer");
+						if(loginFailedMsgContainer.hasChildNodes()) {
+							loginFailedMsgContainer.removeChild(loginFailedMsgContainer.firstChild);
+						}
+						loginFailedMsgContainer.classList.add("hidden");
+
+						const username = document.getElementById("usernameInput").value;
+						const password = document.getElementById("passwordInput").value;
+
+						let loginRequest = await fetch("/api/auth/signin", {
+							method: 'POST',
+							headers: {
+								'Content-Type' : 'application/json'
+							},
+							redirect: 'follow',
+							body: JSON.stringify({
+								"username" : username,
+								"password" : password
+							})
+						});
+						if(!loginRequest.ok) {
+							loginFailedMsgContainer.classList.remove("hidden");
+							let parseErrors = await loginRequest.json();
+							const errorMessageElement = document.createElement("p");
+							let errorMessageText;
+							if(parseErrors.error !== 'undefined') {
+								errorMessageText = parseErrors.error;
+							} else {
+								errorMessageText = "Error - refresh the page and try again";
+							}
+							errorMessageElement.innerHTML = errorMessageText;
+							loginFailedMsgContainer.appendChild(errorMessageElement);
+						} else { // assuming loginRequest.redirect is true
+							window.location.href = loginRequest.url; // technically works
+							// https://stackoverflow.com/q/53945402
+						}
 					}
 				}
 			});
 
 			app.mount("#app");
-
-		</script>
-
-		<script>
-			const loginButton = document.getElementById("loginButton");
-			loginButton.addEventListener('click', async e => {
-
-				e.preventDefault();
-
-                const loginFailedMsgContainer = document.getElementById("loginFailedMessageContainer");
-				if(loginFailedMsgContainer.hasChildNodes()) {
-					loginFailedMsgContainer.removeChild(loginFailedMsgContainer.firstChild);
-				}
-				loginFailedMsgContainer.classList.add("hidden");
-
-				const username = document.getElementById("usernameInput").value;
-				const password = document.getElementById("passwordInput").value;
-
-                console.log("fetch something");
-				let loginRequest = await fetch("/api/auth/signin", {
-					method: 'POST',
-					headers: {
-						'Content-Type' : 'application/json'
-					},
-                    redirect: 'follow',
-					body: JSON.stringify({
-						"username" : username,
-						"password" : password
-					})
-				});
-				if(!loginRequest.ok) {
-					loginFailedMsgContainer.classList.remove("hidden");
-					let parseErrors = await loginRequest.json();
-					const errorMessageElement = document.createElement("p");
-					let errorMessageText;
-					if(parseErrors.error !== 'undefined') {
-						errorMessageText = parseErrors.error;
-					} else {
-						errorMessageText = "Error - refresh the page and try again";
-					}
-					errorMessageElement.innerHTML = errorMessageText;
-					loginFailedMsgContainer.appendChild(errorMessageElement);
-				} else {
-                    window.location.href = loginRequest.url; // technically works
-                    // https://stackoverflow.com/q/53945402
-                }
-			})
 		</script>
 
     </body>
