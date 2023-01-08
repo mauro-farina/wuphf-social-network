@@ -202,8 +202,11 @@
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
                         <!--<ul class="nav-list navbar-nav me-auto mt-2" style="flex-direction:column">-->
                             <ul class="nav-list me-auto mt-2" style="flex-direction:column">
-                            <li class="nav-item">
-                                <a class="nav-link" v-cloak>Hi, {{user.username}}</a>
+                            <li class="nav-item" v-cloak>
+                                <span class="nav-link" v-if="user.authenticated">Hi, {{user.username}}</span>
+                                <span class="nav-link" v-if="!user.authenticated">
+                                    <a href="/">Signup</a> or <a href="/login">Login</a>
+                                </span>
                             </li>
                             <li class="nav-item">
                                 <a :href="'/api/social/users/'.concat(user.username)" class="nav-link">Profile</a>
@@ -226,7 +229,7 @@
 
             <section class="home-section row row-cols-1 text-start font-l">
 
-                <article class="col" id="newMessage">
+                <article class="col" id="newMessage" v-if="user.authenticated" v-cloak>
                     <form>
                         <div class="mb-3">
                             <!--<label for="newMessageTextArea" class="form-label">What's barking through your mind?</label>-->
@@ -236,7 +239,7 @@
                     </form>
                 </article>
 
-                <div v-for="msg in messages" v-cloak class="container-fluid">
+                <div v-for="msg in messages" v-cloak class="container-fluid" v-if="user.authenticated">
                     <!--<article class="col message" :id="(msg.messageID).concat('-').concat(msg.username)">-->
                     <article class="col message" :id="(msg.username).concat('#').concat(msg.messageID)">
                         <div class="container-fluid">
@@ -252,6 +255,10 @@
                     </article>
                 </div>
 
+                <article v-if="!user.authenticated" v-cloak>
+                    Create an account to start following users and personalize your feed!
+                </article>
+
             </section>
 
         </main>
@@ -265,17 +272,11 @@
                 if (!whoamiResponse.ok) {
                     throw new Error(`HTTP error: ${whoamiResponse.status}`);
                 }
-                if(whoamiResponse.redirected) {
-                    window.location.href = whoamiResponse.url;
-                }
                 const user = await whoamiResponse.json();
 
                 let feedResponse = await fetch('/api/social/feed', fetchOptions);
                 if (!feedResponse.ok) {
                     throw new Error(`HTTP error: ${feedResponse.status}`);
-                }
-                if(feedResponse.redirected) {
-                    window.location.href = feedResponse.url;
                 }
                 const feed = await feedResponse.json();
                 return {
@@ -292,6 +293,8 @@
                     messages : userData.feed, 
                     user : userData.user
                 };
+
+                console.log(data);
 
                 const app = createApp({
                     data() {

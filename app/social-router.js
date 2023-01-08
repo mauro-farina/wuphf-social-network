@@ -213,12 +213,12 @@ router.delete("/followers/:username", async (req, res) => { // Rimozione del fol
 router.get("/feed", async (req, res) => { // Elenco dei messaggi degli utenti seguiti
     const auth_cookie = req.cookies.auth;                   // interpreted as: "req.cookies.auth stops following `:username`"
     if(!auth_cookie) {
-        return res.status(400).redirect('/');
+        return res.json( {authenticated : false} );
     }
     let cookieUsername;
     jwt.verify(req.cookies.auth, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
         if(err) {
-            return res.status(400).redirect('/');
+            return res.json( {authenticated : false} );
         }
         cookieUsername = decodedCookie.username;
     });
@@ -252,17 +252,8 @@ router.get("/feed", async (req, res) => { // Elenco dei messaggi degli utenti se
             }
         }
         let messagesOfUser = await mongo.collection("messages").find(queryMessages, queryMessagesOptions).toArray();
+
         for(let messageObject of messagesOfUser) {
-            // reformat date from '2023-01-07T12:24:44.368Z' to '12:24:44 GMT January 7, 2023.'
-            /*
-            const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-            const dateYear = messageObject.date.getFullYear();
-            const dateMonth = months[messageObject.date.getMonth()];
-            const dateDay = messageObject.date.getDate();
-            const dateTimeH = messageObject.date.getUTCHours();
-            const dateTimeM = messageObject.date.getUTCMinutes();
-            messageObject.date = ''.concat(dateTimeH).concat(':').concat(dateTimeM).concat(' GMT ').concat(dateMonth).concat(' ').concat(dateDay).concat(', ').concat(dateYear);
-            */
             feed.push(messageObject);
         }
     }
@@ -296,12 +287,13 @@ router.get("/search?q=query", async (req, res) => { // Cerca l’utente che matc
 router.get("/whoami", async (req, res) => { // Se autenticato, restituisce le informazioni sull’utente
     const auth_cookie = req.cookies.auth;                   // interpreted as: "req.cookies.auth stops following `:username`"
     if(!auth_cookie) {
-        return res.status(400).redirect('/');
+        return res.json( {authenticated : false} );
     }
     let cookieUsername;
     jwt.verify(req.cookies.auth, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
         if(err) {
-            return res.status(400).redirect('/'); // cookie cannot be verified
+            // cookie cannot be verified
+            return res.json({ authenticated : false });              
         }
         cookieUsername = decodedCookie.username;
     });
@@ -318,6 +310,7 @@ router.get("/whoami", async (req, res) => { // Se autenticato, restituisce le in
         }
     }
     let userInfo = await mongo.collection("users").findOne({username : cookieUsername}, queryOptions);
+    userInfo.authenticated = true;
     return res.json(userInfo);
 });
 
