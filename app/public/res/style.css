@@ -96,6 +96,11 @@ body {
     color : var(--bs-dark) !important;
 }
 
+#newMessageTextArea::placeholder, #searchUserInput::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: var(--primary);
+    opacity: 1; /* Firefox */
+}
+
 input {
     color : var(--bs-dark) !important;
 }

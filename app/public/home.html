@@ -62,7 +62,7 @@
                                 <a href="#top" class="nav-link">New message</a>
                             </li>
                             <div class="input-group nav-item" v-cloak>
-                                <input class="form-control" v-model="usernameToLookup" @input.prevent="searchUser" placeholder="Search user" type="search" aria-label="Search">
+                                <input id="searchUserInput" class="form-control" v-model="usernameToLookup" @input.prevent="searchUser" placeholder="Search user" type="search" aria-label="Search">
                                 <!--<button class="btn btn-success" @click.prevent="searchUser" type="submit" id="searchUserButton"><i class="bi bi-search"></i></button>-->
                             </div>
 
