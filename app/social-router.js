@@ -286,7 +286,11 @@ router.get("/search", async (req, res) => { // Cerca l’utente che matcha la st
     const queryOptions = {
         projection : {
             _id : 0,
-            username : 1
+            username : 1,
+            firstName : 1,
+            lastName : 1,
+            bio : 1,
+            signUpDate : 1
         }
     }
     if(req.query.q === undefined) {
