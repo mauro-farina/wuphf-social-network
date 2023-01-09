@@ -295,11 +295,20 @@ router.get("/whoami", validateAuthCookie, async (req, res) => { // If authentica
             followers : 1
         }
     }
+    const queryOptionsLikes = {
+        projection : {
+            _id : 0,
+            messageID : 1
+        }
+    }
+
     let userInfo = await mongo.collection("users").findOne({username : cookieUsername}, queryOptionsUser);
     let userFollows = await mongo.collection("follows").findOne({username : cookieUsername}, queryOptionsFollows);
+    let userLikes = await mongo.collection("messages").find({likedBy : cookieUsername}, queryOptionsLikes).toArray();
     userInfo.authenticated = true;
     userInfo.followedUsers = userFollows.followedUsers;
     userInfo.followers = userFollows.followers;
+    userInfo.likedMessages = userLikes;
     return res.json(userInfo);
 });
 /*
