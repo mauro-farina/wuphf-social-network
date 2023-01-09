@@ -308,7 +308,10 @@ router.get("/whoami", validateAuthCookie, async (req, res) => { // If authentica
     userInfo.authenticated = true;
     userInfo.followedUsers = userFollows.followedUsers;
     userInfo.followers = userFollows.followers;
-    userInfo.likedMessages = userLikes;
+    userInfo.likedMessages = [];
+    for(let msg of userLikes.values()) {
+        userInfo.likedMessages.push(msg.messageID);
+    }
     return res.json(userInfo);
 });
 /*
