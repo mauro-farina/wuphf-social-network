@@ -227,13 +227,19 @@ router.get("/feed", validateAuthCookie, async (req, res) => { // List of message
 });
 
 
-router.post("/like/:idMessage", async (req, res) => { // req.username likes message `:idMessage`
-    res.send("");
+router.post("/like/:idMessage", validateAuthCookie, async (req, res) => { // req.username likes message `:idMessage`
+    const cookieUsername = req.username;
+    const mongo = mongoManager.getDB();
+    let newLike = await mongo.collection("messages").updateOne( {messageID : parseInt(req.params.idMessage)}, {$push: {likedBy: cookieUsername}} );
+    res.json({"messageID" : req.params.idMessage, "newLikeBy" : cookieUsername, "returnObject" : newLike});
 });
 
 
-router.delete("/like/:idMessage", async (req, res) => { // req.username removed likes to message `:idMessage`
-    res.send("");
+router.delete("/like/:idMessage", validateAuthCookie, async (req, res) => { // req.username remove like to message `:idMessage`
+    const cookieUsername = req.username;
+    const mongo = mongoManager.getDB();
+    await mongo.collection("messages").updateOne( {messageID : parseInt(req.params.idMessage)}, {$pull: {likedBy: cookieUsername}} );
+    res.json({"messageID" : req.params.idMessage, "notLikedAnymoreBy" : cookieUsername});
 });
 
 
