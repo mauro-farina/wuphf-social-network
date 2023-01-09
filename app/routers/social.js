@@ -304,14 +304,13 @@ router.get("/whoami", validateAuthCookie, async (req, res) => { // If authentica
 
     let userInfo = await mongo.collection("users").findOne({username : cookieUsername}, queryOptionsUser);
     let userFollows = await mongo.collection("follows").findOne({username : cookieUsername}, queryOptionsFollows);
-    let userLikes = await mongo.collection("messages").find({likedBy : cookieUsername}, queryOptionsLikes).toArray();
-    userInfo.authenticated = true;
     userInfo.followedUsers = userFollows.followedUsers;
     userInfo.followers = userFollows.followers;
     userInfo.likedMessages = [];
-    for(let msg of userLikes.values()) {
+    let userLikes = await mongo.collection("messages").find({likedBy : cookieUsername}, queryOptionsLikes).forEach(msg => {
         userInfo.likedMessages.push(msg.messageID);
-    }
+    });
+    userInfo.authenticated = true;
     return res.json(userInfo);
 });
 /*
