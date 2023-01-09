@@ -50,7 +50,7 @@ router.get("/messages/:username", async (req, res) => { // Elenco dei messaggi d
         }
     }
     let messagesOfUser = await mongo.collection("messages").find({username : req.params.username}, queryOptions).toArray();
-    if(messagesOfUser){
+    if(messagesOfUser) {
         res.json(messagesOfUser);
     } else {
         res.send("no messages");
@@ -82,18 +82,7 @@ router.get("/messages/:username/:messageID", async (req, res) => { // Singolo me
 });
 
 router.post("/messages", async (req, res) => { // Creazione di un nuovo messaggio da parte di cookie auth.username
-    const auth_cookie = req.cookies.auth;
-    if(!auth_cookie) {
-        return res.status(400).redirect('/');
-    }
-    let cookieUsername;
-    jwt.verify(req.cookies.auth, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
-        if(err) {
-            return res.status(400).redirect('/');
-        }
-        cookieUsername = decodedCookie.username;
-    });
-
+    const cookieUsername = req.username;
     const mongo = mongoManager.getDB();
     let lastMessageOfUser = await mongo.collection("messages").findOne({username : cookieUsername},{ sort: {messageID: -1}});
     let msgID = lastMessageOfUser !== null ? lastMessageOfUser.messageID+1 : 0;
@@ -127,19 +116,10 @@ router.get("/followers/:username", async (req, res) => { // Lista dei followers 
 });
 
 
-router.post("/followers/:username", async (req, res) => {   // Aggiunta di un nuovo follow per l’utente `:username`
-    const auth_cookie = req.cookies.auth;                   // interpreted as: "req.cookies.auth starts following `:username`"
-    if(!auth_cookie) {
-        return res.status(400).redirect('/');
-    }
-    let cookieUsername;
-    jwt.verify(req.cookies.auth, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
-        if(err) {
-            return res.status(400).redirect('/');
-        }
-        cookieUsername = decodedCookie.username;
-    });
-
+router.post("/followers/:username", validateAuthCookie, async (req, res) => {   // Aggiunta di un nuovo follow per l’utente `:username`
+                                                                                // interpreted as: "req.username starts following `:username`"
+    
+    const cookieUsername = req.username;
     if(cookieUsername === req.params.username) { // is === the best here? maybe tolowercases?
         return res.status(400).send("One cannot follow themselves");
     }
@@ -174,23 +154,9 @@ router.post("/followers/:username", async (req, res) => {   // Aggiunta di un nu
     });
 });
 
-router.delete("/followers/:username", async (req, res) => { // Rimozione del follow all’utente `username`
-    const auth_cookie = req.cookies.auth;                   // interpreted as: "req.cookies.auth stops following `:username`"
-    if(!auth_cookie) {
-        return res.status(400).redirect('/');
-    }
-    let cookieUsername;
-    jwt.verify(req.cookies.auth, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
-        if(err) {
-            return res.status(400).redirect('/');
-        }
-        cookieUsername = decodedCookie.username;
-    });
-
-    if(cookieUsername === req.params.username) { // is === the best here?
-        return res.status(400).send("One cannot follow themselves");
-    }
-
+router.delete("/followers/:username", validateAuthCookie, async (req, res) => { // Rimozione del follow all’utente `username`
+                                                                               // interpreted as: "req.username stops following `:username`"
+    const cookieUsername = req.username;
     const mongo = mongoManager.getDB();
 
     // check if "is not even following"
@@ -210,21 +176,10 @@ router.delete("/followers/:username", async (req, res) => { // Rimozione del fol
     res.send("probably done");
 });
 
-router.get("/feed", async (req, res) => { // Elenco dei messaggi degli utenti seguiti
-    const auth_cookie = req.cookies.auth;                   // interpreted as: "req.cookies.auth stops following `:username`"
-    if(!auth_cookie) {
-        return res.json( {authenticated : false} );
-    }
-    let cookieUsername;
-    jwt.verify(req.cookies.auth, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
-        if(err) {
-            return res.json( {authenticated : false} );
-        }
-        cookieUsername = decodedCookie.username;
-    });
-    
+router.get("/feed", validateAuthCookie, async (req, res) => { // Elenco dei messaggi degli utenti seguiti
+                                                               // interpreted as: "req.cookies.auth stops following `:username`"
+    const cookieUsername = req.username;
     const mongo = mongoManager.getDB();
-
     const queryFollowedUsers = {
         username : cookieUsername
     }
