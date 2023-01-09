@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs"); // https://www.npmjs.com/package/bcryptjs
 // written in pure JS => no compilation problems using docker (but it is 30% slower)
 require("dotenv").config({ path: './private/settings.env' });
-const mongoManager = require("./mongodb-manager.js");
+const mongoManager = require("../mongodb-manager.js");
 const { body, validationResult } = require('express-validator');
 const e = require("express");
 

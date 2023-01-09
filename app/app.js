@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
-const authAPIRouter = require("./auth-router.js");
-const socialAPIRouter = require("./social-router.js");
+const authRouter = require("./routers/auth.js");
+const socialRouter = require("./routers/social.js");
 const utilsAPIRouter = require("./private/utils.js");
 const mongoManager = require("./mongodb-manager.js");
 const cookieParser = require('cookie-parser');
@@ -11,8 +11,8 @@ require("dotenv").config({ path: './private/settings.env' });
 
 app.use(cookieParser());
 app.use(express.json());
-app.use("/api/auth", authAPIRouter);
-app.use("/api/social", socialAPIRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/social", socialRouter);
 app.use("/api/utils", utilsAPIRouter);
 
 app.use(express.static(__dirname +"/public/", { extensions: ['html'] }));
