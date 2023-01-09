@@ -257,9 +257,9 @@ router.get("/search", async (req, res) => { // Search a user based on a partial 
     }
     let correspondingUsers = [];
     await mongo.collection("users").find({}, queryOptions).forEach(u => {
-        if(u.username.includes(req.query.q.toLowerCase())
-                || u.firstName.includes(req.query.q.toLowerCase()) 
-                || u.lastName.includes(req.query.q.toLowerCase())) {
+        if(u.username.toLowerCase().includes(req.query.q.toLowerCase())
+                || u.firstName.toLowerCase().includes(req.query.q.toLowerCase()) 
+                || u.lastName.toLowerCase().includes(req.query.q.toLowerCase())) {
             correspondingUsers.push(u);
         }
     });
