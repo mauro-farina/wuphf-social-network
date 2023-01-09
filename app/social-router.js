@@ -23,7 +23,7 @@ GET     /api/social/search?q=query              Cerca l’utente che matcha la s
 GET     /api/social/whoami                      Se autenticato, restituisce le informazioni sull’utente 
 */
 
-router.get("/users/:username", async (req, res) => { // Visualizzazione informazioni dell’utente `username`
+router.get("/users/:username", async (req, res) => { // Show informationsa about `:username`
     const mongo = mongoManager.getDB();
     // projection
     let getUserByUsername = await mongo.collection("users").findOne({username : req.params.username});
@@ -34,7 +34,8 @@ router.get("/users/:username", async (req, res) => { // Visualizzazione informaz
     }
 });
 
-router.get("/messages/:username", async (req, res) => { // Elenco dei messaggi dell’utente `username`
+
+router.get("/messages/:username", async (req, res) => { // List messages wrote by `:username`
     const mongo = mongoManager.getDB();
     const queryOptions = {
         sort : {
@@ -57,7 +58,8 @@ router.get("/messages/:username", async (req, res) => { // Elenco dei messaggi d
     }
 });
 
-router.get("/messages/:username/:messageID", async (req, res) => { // Singolo messaggio dell’utente `username` con ID messageID
+
+router.get("/messages/:username/:messageID", async (req, res) => { // Single message `:messageID` wrote by `:username`
     const mongo = mongoManager.getDB();
     const query = {
         username : req.params.username, 
@@ -81,7 +83,8 @@ router.get("/messages/:username/:messageID", async (req, res) => { // Singolo me
     }
 });
 
-router.post("/messages", async (req, res) => { // Creazione di un nuovo messaggio da parte di cookie auth.username
+
+router.post("/messages", validateAuthCookie, async (req, res) => { // New message wrote by req.username
     const cookieUsername = req.username;
     const mongo = mongoManager.getDB();
     let lastMessageOfUser = await mongo.collection("messages").findOne({username : cookieUsername},{ sort: {messageID: -1}});
@@ -98,7 +101,8 @@ router.post("/messages", async (req, res) => { // Creazione di un nuovo messaggi
     res.json(newMessage); // _id is sent as well ._.
 });
 
-router.get("/followers/:username", async (req, res) => { // Lista dei followers dell’utente `username`
+
+router.get("/followers/:username", async (req, res) => { // Followers of `:username`
     const mongo = mongoManager.getDB();
     const queryOptions = {
         projection : {
@@ -116,9 +120,7 @@ router.get("/followers/:username", async (req, res) => { // Lista dei followers 
 });
 
 
-router.post("/followers/:username", validateAuthCookie, async (req, res) => {   // Aggiunta di un nuovo follow per l’utente `:username`
-                                                                                // interpreted as: "req.username starts following `:username`"
-    
+router.post("/followers/:username", validateAuthCookie, async (req, res) => {   // req.username starts following `:username`
     const cookieUsername = req.username;
     if(cookieUsername === req.params.username) { // is === the best here? maybe tolowercases?
         return res.status(400).send("One cannot follow themselves");
@@ -132,7 +134,6 @@ router.post("/followers/:username", validateAuthCookie, async (req, res) => {   
     if(getFollowersOfParamsUser !== null) {
         await mongo.collection("follows") // `:username` has a new follower: cookieUsername
             .updateOne( {username : req.params.username}, { $push: {followers: cookieUsername} } );
-        
     } else {
         // weird error i guess, should not happen but you never know
         // maybe should be handled like: .insertOne(...)
@@ -154,8 +155,8 @@ router.post("/followers/:username", validateAuthCookie, async (req, res) => {   
     });
 });
 
-router.delete("/followers/:username", validateAuthCookie, async (req, res) => { // Rimozione del follow all’utente `username`
-                                                                               // interpreted as: "req.username stops following `:username`"
+
+router.delete("/followers/:username", validateAuthCookie, async (req, res) => { // req.username stops following `:username`
     const cookieUsername = req.username;
     const mongo = mongoManager.getDB();
 
@@ -176,8 +177,8 @@ router.delete("/followers/:username", validateAuthCookie, async (req, res) => { 
     res.send("probably done");
 });
 
-router.get("/feed", validateAuthCookie, async (req, res) => { // Elenco dei messaggi degli utenti seguiti
-                                                               // interpreted as: "req.cookies.auth stops following `:username`"
+
+router.get("/feed", validateAuthCookie, async (req, res) => { // List of messages (newst-to-oldest) sent users followed by req.username
     const cookieUsername = req.username;
     const mongo = mongoManager.getDB();
     const queryFollowedUsers = {
@@ -225,15 +226,18 @@ router.get("/feed", validateAuthCookie, async (req, res) => { // Elenco dei mess
     res.json(feed);
 });
 
-router.post("/like/:idMessage", async (req, res) => { // Like ad un messaggio con ID idMessage
+
+router.post("/like/:idMessage", async (req, res) => { // req.username likes message `:idMessage`
     res.send("");
 });
 
-router.delete("/like/:idMessage", async (req, res) => { // Rimozione like al messaggio con ID idMessage
+
+router.delete("/like/:idMessage", async (req, res) => { // req.username removed likes to message `:idMessage`
     res.send("");
 });
 
-router.get("/search", async (req, res) => { // Cerca l’utente che matcha la stringa query /search?q=[partial_username]
+
+router.get("/search", async (req, res) => { // Search a user based on a partial username => /search?q=[partial_username]
     if(req.query.q === undefined) {
         return res.json({});
     }
@@ -261,14 +265,8 @@ router.get("/search", async (req, res) => { // Cerca l’utente che matcha la st
     return res.json(correspondingUsers);
 });
 
-router.get("/whoami", validateAuthCookie, async (req, res) => { // Se autenticato, restituisce le informazioni sull’utente
-    /*
-    const auth_cookie = req.cookies.auth;
-    let cookieUsername = await validateAuthCookie(auth_cookie).catch(err => res.json({ authenticated : false, reason : err }));
-    if(typeof cookieUsername !== 'string') {
-        return;
-    }
-    */
+
+router.get("/whoami", validateAuthCookie, async (req, res) => { // If authenticated, returns information about req.username
     const cookieUsername = req.username;
     const mongo = mongoManager.getDB();
     const queryOptionsUser = {
