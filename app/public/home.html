@@ -208,20 +208,9 @@
                         },
                         async toggleFollow(usernameToggleFollow) {
                             const usernameLogged = this.user.username;
-                            let getFollowers = await fetch(`/api/social/followers/${usernameToggleFollow}`);
-                            if(!getFollowers.ok) {
-                                console.err("ooooh upsie");
-                                return;
-                            }
-                            let followersJson = await getFollowers.json();
-                            const httpMethod = followersJson.followers.includes(usernameLogged) ? 'DELETE' : 'POST';
-                            let toggleFollowFetch = await fetch(`/api/social/followers/${usernameToggleFollow}`, {
-                                method: httpMethod
-                            });
-                            if(!toggleFollowFetch.ok) {
-                                console.err("well thats unexpected");
-                                return; //error D:
-                            }
+                            const followIconElement = document.querySelector(`[data-follow-icon-for="${usernameToggleFollow}"]`);
+                            const httpMethod = followIconElement.classList.contains("bi-person-fill-add") ? 'POST' : 'DELETE';
+                            let toggleFollowFetch = await fetch(`/api/social/followers/${usernameToggleFollow}`, { method: httpMethod });
                             document.querySelectorAll(`[data-follow-icon-for="${usernameToggleFollow}"]`)
                                 .forEach(el => {
                                     el.classList.toggle('bi-person-check-fill');
