@@ -229,6 +229,17 @@
                             let queryResults = await fetch(`/api/social/search?q=${this.usernameToLookup}`).then(res => res.json()).catch(err => console.err(err));
                             if(queryResults.length === undefined) { return; }
                             this.searchUserResults = queryResults;
+                            //window.location.hash = `search?q=${this.usernameToLookup}`;
+                            //console.log('/home'.concat(window.location.hash)); // [ /home#search?q=query
+
+                            /*
+                                / -> signup & index page
+                                /login -> login page
+                                /app#home -> feed
+                                /app#search?q=... -> search users
+                                /app#user?u=... -> profile of user
+                            */
+
                             if(window.visualViewport.width < 991.5) {
                                 console.log(`${window.visualViewport.width} < 972`);
                                 document.getElementById('buttonTogglerContainer').firstElementChild.click();
