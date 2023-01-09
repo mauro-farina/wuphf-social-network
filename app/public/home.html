@@ -76,10 +76,17 @@
 
             <section class="home-section row row-cols-1 text-start font-l">
 
+                <feed-container :user="user" :messages="messages"></feed-container>
+                <!-- 
+                    SHOUTOUT TO FARSAD FAKHIM MY HERO I WAS ABOUT TO GIVE UP AND THIS LEGEND CAME IN CLUTCH 
+                    https://stackoverflow.com/a/47559949
+                -->
+
+
+            <!-- NOW THERE'S A COMPONENT FOR THIS!
                 <article class="col" id="newMessage" v-if="user.authenticated && showFeed" v-cloak>
                     <form>
                         <div class="mb-3">
-                            <!--<label for="newMessageTextArea" class="form-label">What's barking through your mind?</label>-->
                             <textarea class="form-control" id="newMessageTextArea" rows="3" placeholder="What's barking through your mind?"></textarea>
                         </div>
                         <button id="woofNewMessageButton" class="btn btn-dark" type="submit" @click.prevent="postNewMessage">Woof it!</button>
@@ -87,10 +94,8 @@
                 </article>
 
                 <div v-for="msg in messages" v-cloak class="container-fluid col message-container" v-if="user.authenticated && showFeed">
-                    <!--<article class="col message" :id="(msg.messageID).concat('-').concat(msg.username)">-->
                     <article class="message" :id="(msg.username).concat('#').concat(msg.messageID)">
                         <div class="container-fluid">
-                            <!--<button class="btn" :data-username-toggle-follow="msg.username" :data-username-logged="user.username" onclick="toggleFollow(this)" type="submit">-->
                             <button class="btn" @click.prevent="toggleFollow(msg.username)" v-if="msg.username !== user.username" type="submit">
                                 <i class="bi bi-person-check-fill" :data-follow-icon-for="msg.username"></i>
                             </button>
@@ -105,6 +110,7 @@
                         </div>
                     </article>
                 </div>
+            -->
 
                 <article v-if="!user.authenticated" class="col" v-cloak>
                     Create an account to start following users and personalize your feed!
@@ -160,8 +166,154 @@
                     messages : userData.feed, 
                     user : userData.user,
                     usernameToLookup : "",
-                    searchUserResults : []
+                    searchUserResults : [],
+                    currentPath : window.location.hash
                 };
+
+                const FeedContainer = {
+                    props: {
+                        user : Object,
+                        messages : Array
+                    },
+                    template: 
+                        `<div v-if="user.authenticated" v-cloak>
+                            <article class="col" id="newMessage">
+                                <form>
+                                    <div class="mb-3">
+                                        <textarea class="form-control" id="newMessageTextArea" rows="3" placeholder="What's barking through your mind?"></textarea>
+                                    </div>
+                                    <button id="woofNewMessageButton" class="btn btn-dark" type="submit" @click.prevent="postNewMessage">Woof it!</button>
+                                </form>
+                            </article>
+                            <message-container :messages="messages" :user="user"></message-container>
+                        </div>`,
+                    methods: {
+                        async postNewMessage() {
+                            // on send new woof -> show new feed (or just push new msg on top...)
+                            const newMessageTextarea = document.getElementById('newMessageTextArea');
+                            const newWoof = newMessageTextarea.value;
+
+                            // check length != 0 ---
+                            let postNewWoof = await fetch('/api/social/messages', {
+                                method: 'POST',
+                                redirect: 'follow',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    "message" : newWoof
+                                })
+                            }).catch(err => console.err(err));
+
+                            // erase textarea
+                            newMessageTextarea.value = "";
+
+                            // add new message to the feed without reloading!
+                            await fetch(`/api/social/messages/${this.user.username}`)
+                                .then(res => res.json()).then(msgs => this.messages.unshift(msgs[0])).catch(err => console.error(err));
+                        }
+                    }
+                };
+
+                const MessageContainer = {
+                    props: {
+                        user : Object,
+                        messages : Array
+                    },
+                    template: 
+                        `<div v-for="msg in messages" class="container-fluid col message-container">
+                            <article class="message" :id="msg.messageID">
+                                <message-body :user="user" :message="msg"></message-body>
+                            </article>
+                        </div>`
+                };
+
+                const MessageBody = {
+                    props: {
+                        user : Object,
+                        message : Object
+                    },
+                    template:
+                        `<div class="container-fluid">
+                            <button class="btn" @click.prevent="toggleFollow(message.username)" v-if="message.username !== user.username" type="submit">
+                                <i class="bi bi-person-check-fill" :data-follow-icon-for="message.username"></i>
+                            </button>
+                            <span><a :href="'/api/social/users/'.concat(message.username)">@{{message.username}}</a> {{convertDate(message.date)}}</span> 
+                            <p>
+                                {{message.message}}
+                            </p>
+                            <button class="btn" @click.prevent="toggleLike(message.messageID)" type="submit">
+                                <i v-if="user.likedMessages.includes(message.messageID)" class="bi bi-heart-fill" :data-like-icon-for="message.messageID"></i>
+                                <i v-if="!user.likedMessages.includes(message.messageID)" class="bi bi-heart" :data-like-icon-for="message.messageID"></i>
+                            </button>
+                        </div>`,
+                    methods: {
+                        convertDate: function(date) {
+                            const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+                            const dateSplit = date.split('T');
+                            const dateYYYYMMDD = dateSplit[0].split('-'); 
+                            // 2023-01-07 -> January 7, 2023
+                            const datemmDDYYYY = months[parseInt(dateYYYYMMDD[1])-1] 
+                                                    + " " + dateYYYYMMDD[2]
+                                                    + ", " + dateYYYYMMDD[0];
+                            const dateTime = dateSplit[1].split('.')[0].substring(0,5);
+                            return dateTime + " GMT " + datemmDDYYYY;
+                        },
+                        async toggleFollow(usernameToggleFollow) {
+                            const usernameLogged = this.user.username;
+                            const followIconElement = document.querySelector(`[data-follow-icon-for="${usernameToggleFollow}"]`);
+                            const httpMethod = followIconElement.classList.contains("bi-person-fill-add") ? 'POST' : 'DELETE';
+                            let toggleFollowFetch = await fetch(`/api/social/followers/${usernameToggleFollow}`, { method: httpMethod });
+                            document.querySelectorAll(`[data-follow-icon-for="${usernameToggleFollow}"]`)
+                                .forEach(el => {
+                                    el.classList.toggle('bi-person-check-fill');
+                                    el.classList.toggle('bi-person-fill-add');
+                                });
+                        },
+                        async toggleLike(messageID) {
+                            const usernameLogged = this.user.username;
+                            const likeIconElement = document.querySelector(`[data-like-icon-for="${messageID}"]`);
+                            const httpMethod = likeIconElement.classList.contains("bi-heart") ? 'POST' : 'DELETE';
+                            await fetch(`/api/social/like/${messageID}`, { method: httpMethod });
+                            likeIconElement.classList.toggle("bi-heart-fill");
+                            likeIconElement.classList.toggle("bi-heart");
+                        },
+                        async searchUser() {
+                            if(this.usernameToLookup.trim().length == 0) {
+                                window.location.hash = `feed`;
+                            }
+                            let queryResults = await fetch(`/api/social/search?q=${this.usernameToLookup}`).then(res => res.json()).catch(err => console.err(err));
+                            if(queryResults.length === undefined) { return; }
+                            this.searchUserResults = queryResults;
+                            
+                            window.location.hash = `search?q=${this.usernameToLookup}`;
+
+                            //console.log('/home'.concat(window.location.hash)); // [ /home#search?q=query
+
+                            /*
+                                / -> signup & index page
+                                /login -> login page
+                                /app#home -> feed
+                                /app#search?q=... -> search users
+                                /app#user?u=... -> profile of user
+                            */
+
+                            if(window.visualViewport.width < 991.5) {
+                                console.log(`${window.visualViewport.width} < 972`);
+                                document.getElementById('buttonTogglerContainer').firstElementChild.click();
+                            }
+                            //queryResults.forEach(e => console.log(e.username));
+                        }
+                    }
+                };
+
+                /*
+                    / -> signup & index page
+                    /login -> login page
+                    /app#feed -> feed (window.location.hash == #feed)
+                    /app#search?q=... -> search users
+                    /app#user?u=... -> profile of user
+                */
 
                 const app = createApp({
                     data() {
@@ -226,10 +378,15 @@
                             likeIconElement.classList.toggle("bi-heart");
                         },
                         async searchUser() {
+                            if(this.usernameToLookup.trim().length == 0) {
+                                window.location.hash = `feed`;
+                            }
                             let queryResults = await fetch(`/api/social/search?q=${this.usernameToLookup}`).then(res => res.json()).catch(err => console.err(err));
                             if(queryResults.length === undefined) { return; }
                             this.searchUserResults = queryResults;
-                            //window.location.hash = `search?q=${this.usernameToLookup}`;
+                            
+                            window.location.hash = `search?q=${this.usernameToLookup}`;
+
                             //console.log('/home'.concat(window.location.hash)); // [ /home#search?q=query
 
                             /*
@@ -253,9 +410,18 @@
                         },
                         showSearch() {
                             return this.usernameToLookup.trim().length > 0 ? true : false;
+                        },
+                        currentView() {
+                            return this.currentPath.substring(1, this.currentPath);
                         }
+                    },
+                    mounted() {
+                        window.addEventListener('hashchange', () => { this.currentPath = window.location.hash; })
                     }
                 });
+                app.component("FeedContainer", FeedContainer);
+                app.component("MessageContainer", MessageContainer);
+                app.component("MessageBody", MessageBody);
                 app.mount("#app");
             }
         </script>
