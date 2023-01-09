@@ -306,13 +306,15 @@ router.get("/search", async (req, res) => { // Cerca l’utente che matcha la st
     return res.json(correspondingUsers);
 });
 
-router.get("/whoami", async (req, res) => { // Se autenticato, restituisce le informazioni sull’utente
+router.get("/whoami", validateAuthCookie, async (req, res) => { // Se autenticato, restituisce le informazioni sull’utente
+    /*
     const auth_cookie = req.cookies.auth;
     let cookieUsername = await validateAuthCookie(auth_cookie).catch(err => res.json({ authenticated : false, reason : err }));
     if(typeof cookieUsername !== 'string') {
         return;
     }
-
+    */
+    const cookieUsername = req.username;
     const mongo = mongoManager.getDB();
     const queryOptionsUser = {
         projection : {
@@ -339,7 +341,7 @@ router.get("/whoami", async (req, res) => { // Se autenticato, restituisce le in
     userInfo.followers = userFollows.followers;
     return res.json(userInfo);
 });
-
+/*
 function validateAuthCookie(auth_cookie) {
     return new Promise((resolve, reject) => {
         if(!auth_cookie) {
@@ -352,6 +354,21 @@ function validateAuthCookie(auth_cookie) {
             }
             resolve(decodedCookie.username);
         });
+    });
+}
+*/
+function validateAuthCookie(req, res, next) {
+    const auth_cookie = req.cookies.auth;
+    if(!auth_cookie) {
+            return res.json({authenticated : false, reason : "No cookie"});
+        }
+    let cookieUsername;
+    jwt.verify(auth_cookie, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
+        if(err) {
+            return res.json({authenticated : false, reason : "Cookie is invalid"});
+        }
+        req.username = decodedCookie.username;
+        next();
     });
 }
 
