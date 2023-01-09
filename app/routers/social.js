@@ -231,7 +231,7 @@ router.post("/like/:idMessage", validateAuthCookie, async (req, res) => { // req
     const cookieUsername = req.username;
     const mongo = mongoManager.getDB();
     let newLike = await mongo.collection("messages").updateOne( {messageID : parseInt(req.params.idMessage)}, {$push: {likedBy: cookieUsername}} );
-    res.json({"messageID" : req.params.idMessage, "newLikeBy" : cookieUsername, "returnObject" : newLike});
+    res.json({"messageID" : req.params.idMessage, "newLikeBy" : cookieUsername});
 });
 
 
