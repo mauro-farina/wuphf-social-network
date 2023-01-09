@@ -98,6 +98,10 @@
                             <p>
                                 {{msg.message}}
                             </p>
+                            <button class="btn" @click.prevent="toggleLike(msg.messageID)" type="submit">
+                                <i v-if="user.likedMessages.includes(msg.messageID)" class="bi bi-heart-fill" :data-like-icon-for="msg.messageID"></i>
+                                <i v-if="!user.likedMessages.includes(msg.messageID)" class="bi bi-heart" :data-like-icon-for="msg.messageID"></i>
+                            </button>
                         </div>
                     </article>
                 </div>
@@ -223,6 +227,14 @@
                                     el.classList.toggle('bi-person-check-fill');
                                     el.classList.toggle('bi-person-fill-add');
                                 });
+                        },
+                        async toggleLike(messageID) {
+                            const usernameLogged = this.user.username;
+                            const likeIconElement = document.querySelector(`[data-like-icon-for="${messageID}"]`);
+                            const httpMethod = likeIconElement.classList.contains("bi-heart") ? 'POST' : 'DELETE';
+                            await fetch(`/api/social/like/${messageID}`, { method: httpMethod });
+                            likeIconElement.classList.toggle("bi-heart-fill");
+                            likeIconElement.classList.toggle("bi-heart");
                         },
                         async searchUser() {
                             let queryResults = await fetch(`/api/social/search?q=${this.usernameToLookup}`).then(res => res.json()).catch(err => console.err(err));
