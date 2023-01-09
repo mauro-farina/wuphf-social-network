@@ -54,7 +54,7 @@ router.get("/messages/:username", async (req, res) => { // List messages wrote b
     if(messagesOfUser) {
         res.json(messagesOfUser);
     } else {
-        res.send("no messages");
+        res.json({});
     }
 });
 
@@ -79,7 +79,7 @@ router.get("/messages/:username/:messageID", async (req, res) => { // Single mes
     if(messagesOfUser) {
         res.json(messagesOfUser);
     } else {
-        res.send("no messages");
+        res.json({});
     }
 });
 
@@ -87,8 +87,8 @@ router.get("/messages/:username/:messageID", async (req, res) => { // Single mes
 router.post("/messages", validateAuthCookie, async (req, res) => { // New message wrote by req.username
     const cookieUsername = req.username;
     const mongo = mongoManager.getDB();
-    let lastMessageOfUser = await mongo.collection("messages").findOne({username : cookieUsername},{ sort: {messageID: -1}});
-    let msgID = lastMessageOfUser !== null ? lastMessageOfUser.messageID+1 : 0;
+    let lastMessage = await mongo.collection("messages").findOne({},{ sort: {messageID: -1}});
+    let msgID = lastMessage !== null ? lastMessage.messageID+1 : 0;
     let newMessage = {
         messageID : msgID,
         message : req.body.message,
@@ -115,7 +115,7 @@ router.get("/followers/:username", async (req, res) => { // Followers of `:usern
     if(followersOfUser){
         res.json(followersOfUser);
     } else {
-        res.send("no followers");
+        res.json({});
     }
 });
 
