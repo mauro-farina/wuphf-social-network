@@ -308,7 +308,7 @@ router.get("/search", async (req, res) => { // Cerca l’utente che matcha la st
 
 router.get("/whoami", async (req, res) => { // Se autenticato, restituisce le informazioni sull’utente
     const auth_cookie = req.cookies.auth;
-    let cookieUsername = await validateCookie(auth_cookie).catch(err => res.json({ authenticated : false, reason : err }));
+    let cookieUsername = await validateAuthCookie(auth_cookie).catch(err => res.json({ authenticated : false, reason : err }));
     if(typeof cookieUsername !== 'string') {
         return;
     }
@@ -340,7 +340,7 @@ router.get("/whoami", async (req, res) => { // Se autenticato, restituisce le in
     return res.json(userInfo);
 });
 
-function validateCookie(auth_cookie) {
+function validateAuthCookie(auth_cookie) {
     return new Promise((resolve, reject) => {
         if(!auth_cookie) {
             return reject("No cookie");
