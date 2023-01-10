@@ -25,8 +25,17 @@ GET     /api/social/whoami                      Se autenticato, restituisce le i
 
 router.get("/users/:username", async (req, res) => { // Show informationsa about `:username`
     const mongo = mongoManager.getDB();
-    // projection
-    let getUserByUsername = await mongo.collection("users").findOne({username : req.params.username});
+    const queryOptions = {
+        projection : {
+            _id : 0,
+            username : 1,
+            firstName : 1,
+            lastMessage : 1,
+            signUpDate : 1,
+            bio : 1
+        }
+    };
+    let getUserByUsername = await mongo.collection("users").findOne({username : req.params.username}, queryOptions);
     if(getUserByUsername) {
         res.json(getUserByUsername);
     } else {
