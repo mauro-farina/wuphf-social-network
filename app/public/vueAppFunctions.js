@@ -44,7 +44,6 @@ export const methodsFunctions = {
 
         // erase textarea
         newMessageTextarea.value = "";
-
         // add new message to the feed without reloading!
         await fetch(`/api/social/messages/${this.user.username}`)
             .then(res => res.json()).then(msgs => this.messages.unshift(msgs[0])).catch(err => console.error(err));
@@ -81,7 +80,7 @@ export const methodsFunctions = {
     },
     searchUser: async function() {
         if(this.usernameToLookup.trim().length == 0) {
-            window.location.hash = `feed`;
+            this.goTo('feed');
         }
         let queryResults = await fetch(`/api/social/search?q=${this.usernameToLookup}`).then(res => res.json()).catch(err => console.err(err));
         if(queryResults.length === undefined) { return; }
@@ -94,8 +93,11 @@ export const methodsFunctions = {
         document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
         closeNavIfViewportWidthSmall();
     },
-    goTo: function(newAnchor) {
+    goTo: async function(newAnchor) {
         window.location.hash = newAnchor;
+        if(newAnchor === 'feed') {
+            closeNavIfViewportWidthSmall();
+        }
     }
 }
 

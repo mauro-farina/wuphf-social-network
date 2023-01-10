@@ -113,6 +113,8 @@
                 showProfileOf : ""
             };
 
+            console.log(data.user);
+
             const app = createApp({
                 data() {
                     return data;
@@ -120,7 +122,19 @@
                 methods: {
                     backToTop : methodsFunctions.backToTop,
                     searchUser : methodsFunctions.searchUser,
-                    goTo : methodsFunctions.goTo
+                    goTo : methodsFunctions.goTo,
+                    updateUserData: async function() {
+                        let newUserData = await getUserData();
+                        this.messages = newUserData.feed;
+                        this.user = newUserData.user;
+                    }
+                },
+                watch: {
+                    currentPath(newValue, oldValue) {
+                        if(newValue === '#feed') {
+                            this.updateUserData();
+                        }
+                    }
                 },
                 mounted() {
                     window.addEventListener('hashchange', () => {
