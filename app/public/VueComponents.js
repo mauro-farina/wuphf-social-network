@@ -125,6 +125,7 @@ export const UserProfileContainer = {
         `<div v-if="profileReady && currentView.includes('user')" v-cloak>
             <article class="message" :data-user="userProfile.username">
                 <div class="container-fluid">
+                    <img :src="'https://api.dicebear.com/5.x/pixel-art/svg?seed='.concat(userProfile)" width="80" height="80" />
                     <span v-if="userProfile.username === user.username" class="text-muted pe-2">(you)</span>
                     <button class="btn" @click.prevent="toggleFollow(userProfile.username)" type="submit" v-if="user.authenticated && userProfile.username !== user.username">
                         <i v-if="user.followedUsers.includes(userProfile.username)" class="bi bi-person-check-fill" :data-follow-icon-for="userProfile.username"></i>
