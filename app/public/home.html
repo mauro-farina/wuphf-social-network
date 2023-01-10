@@ -35,19 +35,17 @@
                             <span class="navbar-toggler-icon"></span>
                         </button>
                     </div>
-
-                    <!-- navbar-brand -->
-                    <!--
+                <!-- navbar-brand -->
+                <!--
                     <div class="container col" id="nav-icon-container"> 
                         <a class="navbar-brand" href="/home">
                             <img src="./favicon.ico" class="nav-icon">
                         </a>
                     </div>
-                    -->
-                    
-                    <!--<div class="container-fluid collapse navbar-collapse col" id="navbarSupportedContent">-->
+                -->
+                <!--<div class="container-fluid collapse navbar-collapse col" id="navbarSupportedContent">-->
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                        <!--<ul class="nav-list navbar-nav me-auto mt-2" style="flex-direction:column">-->
+                    <!--<ul class="nav-list navbar-nav me-auto mt-2" style="flex-direction:column">-->
                         <ul class="nav-list me-auto mt-2 font-xl" style="flex-direction:column">
                             <li class="nav-item" v-cloak>
                                 <span class="nav-link font-xxl" v-if="user.authenticated">Hi, <a :href="'/api/social/users/'.concat(user.username)" class="local-primary-text link-no-underine">{{user.username}}</a></span>
@@ -56,14 +54,14 @@
                                 </span>
                             </li>
                             <li class="nav-item">
-                                <a href="/home" class="nav-link">Feed</a>
+                                <a href="/home#feed" class="nav-link">Feed</a>
                             </li>
                             <li class="nav-item">
-                                <a href="#top" class="nav-link">New message</a>
+                                <a class="nav-link" v-if="user.authenticated" @click.prevent="backToTop">New message</a>
                             </li>
                             <div class="input-group nav-item" v-cloak>
                                 <input id="searchUserInput" class="form-control" v-model="usernameToLookup" @input.prevent="searchUser" placeholder="Search user" type="search" aria-label="Search">
-                                <!--<button class="btn btn-success" @click.prevent="searchUser" type="submit" id="searchUserButton"><i class="bi bi-search"></i></button>-->
+                            <!--<button class="btn btn-success" @click.prevent="searchUser" type="submit" id="searchUserButton"><i class="bi bi-search"></i></button>-->
                             </div>
 
                         </ul>
@@ -76,87 +74,24 @@
 
             <section class="home-section row row-cols-1 text-start font-l">
 
-                <feed-container :user="user" :messages="messages"></feed-container>
+                <!-- v-if="user.authenticated && currentView === 'feed'" -->
+                <feed-container :user="user" :messages="messages" :current-path="currentPath"></feed-container>
                 <!-- 
-                    SHOUTOUT TO FARSAD FAKHIM MY HERO I WAS ABOUT TO GIVE UP AND THIS LEGEND CAME IN CLUTCH 
-                    https://stackoverflow.com/a/47559949
+                    SHOUTOUT TO FARSAD FAKHIM https://stackoverflow.com/a/47559949
                 -->
 
+                <!-- v-if="!user.authenticated" -->
+                <login-signup-message :user="user"></login-signup-message> 
 
-            <!-- NOW THERE'S A COMPONENT FOR THIS!
-                <article class="col" id="newMessage" v-if="user.authenticated && showFeed" v-cloak>
-                    <form>
-                        <div class="mb-3">
-                            <textarea class="form-control" id="newMessageTextArea" rows="3" placeholder="What's barking through your mind?"></textarea>
-                        </div>
-                        <button id="woofNewMessageButton" class="btn btn-dark" type="submit" @click.prevent="postNewMessage">Woof it!</button>
-                    </form>
-                </article>
-
-                <div v-for="msg in messages" v-cloak class="container-fluid col message-container" v-if="user.authenticated && showFeed">
-                    <article class="message" :id="(msg.username).concat('#').concat(msg.messageID)">
-                        <div class="container-fluid">
-                            <button class="btn" @click.prevent="toggleFollow(msg.username)" v-if="msg.username !== user.username" type="submit">
-                                <i class="bi bi-person-check-fill" :data-follow-icon-for="msg.username"></i>
-                            </button>
-                            <span><a :href="'/api/social/users/'.concat(msg.username)">@{{msg.username}}</a> {{convertDate(msg.date)}}</span> 
-                            <p>
-                                {{msg.message}}
-                            </p>
-                            <button class="btn" @click.prevent="toggleLike(msg.messageID)" type="submit">
-                                <i v-if="user.likedMessages.includes(msg.messageID)" class="bi bi-heart-fill" :data-like-icon-for="msg.messageID"></i>
-                                <i v-if="!user.likedMessages.includes(msg.messageID)" class="bi bi-heart" :data-like-icon-for="msg.messageID"></i>
-                            </button>
-                        </div>
-                    </article>
-                </div>
-            -->
-
-                <article v-if="!user.authenticated" class="col" v-cloak>
-                    Create an account to start following users and personalize your feed!
-                </article>
-
-                <div v-for="foundUser in searchUserResults" class="container-fluid col" v-cloak v-if="showSearch">
-                    <article class="message">
-                        <div class="container-fluid">
-                            <span v-if="foundUser.username === user.username" class="text-muted pe-2">(you)</span>
-                            <button class="btn" @click.prevent="toggleFollow(foundUser.username)" type="submit" v-if="user.authenticated && foundUser.username !== user.username">
-                                <i v-if="user.followedUsers.includes(foundUser.username)" class="bi bi-person-check-fill" :data-follow-icon-for="foundUser.username"></i>
-                                <i v-if="!user.followedUsers.includes(foundUser.username)" class="bi bi-person-fill-add" :data-follow-icon-for="foundUser.username"></i>
-                            </button>
-                            <span><a :href="'/api/social/users/'.concat(foundUser.username)">@{{foundUser.username}}</a> - {{foundUser.firstName}} {{foundUser.lastName}}</span> 
-                            <p>
-                                {{foundUser.bio}}
-                            </p>
-                        </div>
-                    </article>
-                </div>
+                <!-- v-if="showSearch" -->
+                <search-users-container :user="user" username-to-lookup="usernameToLookup" :search-user-results="searchUserResults"></search-users-container>
 
             </section>
 
         </main>
 
-        <script>
-            async function getUserData() {
-                const fetchOptions = {
-                    redirect: 'follow'
-                };
-                let whoamiResponse = await fetch("/api/social/whoami", fetchOptions);
-                if (!whoamiResponse.ok) {
-                    throw new Error(`HTTP error: ${whoamiResponse.status}`);
-                }
-                const user = await whoamiResponse.json();
-
-                let feedResponse = await fetch('/api/social/feed', fetchOptions);
-                if (!feedResponse.ok) {
-                    throw new Error(`HTTP error: ${feedResponse.status}`);
-                }
-                const feed = await feedResponse.json();
-                return {
-                    user : user,
-                    feed : feed
-                };
-            }
+        <script type="module">
+            import {methodsFunctions, computedFunctions, getUserData} from './vueAppFunctions.js';
 
             async function createVueApp() {
                 const { createApp } = Vue;
@@ -173,10 +108,11 @@
                 const FeedContainer = {
                     props: {
                         user : Object,
-                        messages : Array
+                        messages : Array,
+                        currentPath : String
                     },
                     template: 
-                        `<div v-if="user.authenticated" v-cloak>
+                        `<div v-if="user.authenticated && (currentView === 'feed' || currentView === '')" v-cloak>
                             <article class="col" id="newMessage">
                                 <form>
                                     <div class="mb-3">
@@ -188,30 +124,10 @@
                             <message-container :messages="messages" :user="user"></message-container>
                         </div>`,
                     methods: {
-                        async postNewMessage() {
-                            // on send new woof -> show new feed (or just push new msg on top...)
-                            const newMessageTextarea = document.getElementById('newMessageTextArea');
-                            const newWoof = newMessageTextarea.value;
-
-                            // check length != 0 ---
-                            let postNewWoof = await fetch('/api/social/messages', {
-                                method: 'POST',
-                                redirect: 'follow',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({
-                                    "message" : newWoof
-                                })
-                            }).catch(err => console.err(err));
-
-                            // erase textarea
-                            newMessageTextarea.value = "";
-
-                            // add new message to the feed without reloading!
-                            await fetch(`/api/social/messages/${this.user.username}`)
-                                .then(res => res.json()).then(msgs => this.messages.unshift(msgs[0])).catch(err => console.error(err));
-                        }
+                        postNewMessage : methodsFunctions.postNewMessage
+                    },
+                    computed: {
+                        currentView : computedFunctions.currentView
                     }
                 };
 
@@ -248,185 +164,71 @@
                             </button>
                         </div>`,
                     methods: {
-                        convertDate: function(date) {
-                            const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-                            const dateSplit = date.split('T');
-                            const dateYYYYMMDD = dateSplit[0].split('-'); 
-                            // 2023-01-07 -> January 7, 2023
-                            const datemmDDYYYY = months[parseInt(dateYYYYMMDD[1])-1] 
-                                                    + " " + dateYYYYMMDD[2]
-                                                    + ", " + dateYYYYMMDD[0];
-                            const dateTime = dateSplit[1].split('.')[0].substring(0,5);
-                            return dateTime + " GMT " + datemmDDYYYY;
-                        },
-                        async toggleFollow(usernameToggleFollow) {
-                            const usernameLogged = this.user.username;
-                            const followIconElement = document.querySelector(`[data-follow-icon-for="${usernameToggleFollow}"]`);
-                            const httpMethod = followIconElement.classList.contains("bi-person-fill-add") ? 'POST' : 'DELETE';
-                            let toggleFollowFetch = await fetch(`/api/social/followers/${usernameToggleFollow}`, { method: httpMethod });
-                            document.querySelectorAll(`[data-follow-icon-for="${usernameToggleFollow}"]`)
-                                .forEach(el => {
-                                    el.classList.toggle('bi-person-check-fill');
-                                    el.classList.toggle('bi-person-fill-add');
-                                });
-                        },
-                        async toggleLike(messageID) {
-                            const usernameLogged = this.user.username;
-                            const likeIconElement = document.querySelector(`[data-like-icon-for="${messageID}"]`);
-                            const httpMethod = likeIconElement.classList.contains("bi-heart") ? 'POST' : 'DELETE';
-                            await fetch(`/api/social/like/${messageID}`, { method: httpMethod });
-                            likeIconElement.classList.toggle("bi-heart-fill");
-                            likeIconElement.classList.toggle("bi-heart");
-                        },
-                        async searchUser() {
-                            if(this.usernameToLookup.trim().length == 0) {
-                                window.location.hash = `feed`;
-                            }
-                            let queryResults = await fetch(`/api/social/search?q=${this.usernameToLookup}`).then(res => res.json()).catch(err => console.err(err));
-                            if(queryResults.length === undefined) { return; }
-                            this.searchUserResults = queryResults;
-                            
-                            window.location.hash = `search?q=${this.usernameToLookup}`;
-
-                            //console.log('/home'.concat(window.location.hash)); // [ /home#search?q=query
-
-                            /*
-                                / -> signup & index page
-                                /login -> login page
-                                /app#home -> feed
-                                /app#search?q=... -> search users
-                                /app#user?u=... -> profile of user
-                            */
-
-                            if(window.visualViewport.width < 991.5) {
-                                console.log(`${window.visualViewport.width} < 972`);
-                                document.getElementById('buttonTogglerContainer').firstElementChild.click();
-                            }
-                            //queryResults.forEach(e => console.log(e.username));
-                        }
-                    }
+                        convertDate : methodsFunctions.convertDate,
+                        toggleFollow : methodsFunctions.toggleFollow,
+                        toggleLike : methodsFunctions.toggleLike,
+                    },
                 };
 
-                /*
-                    / -> signup & index page
-                    /login -> login page
-                    /app#feed -> feed (window.location.hash == #feed)
-                    /app#search?q=... -> search users
-                    /app#user?u=... -> profile of user
-                */
+                const LoginSignupMessage = {
+                    props: {
+                        user : Object
+                    },
+                    template: 
+                        `<article v-if="!user.authenticated" class="col" v-cloak>
+                            Create an account to start following users and personalize your feed!
+                        </article>`
+                };
+
+                const SearchUsersContainer = {
+                    props: {
+                        user : Object,
+                        usernameToLookup : String,
+                        searchUserResults : Array,
+                    },
+                    template: 
+                        `<div v-for="foundUser in searchUserResults" class="container-fluid col" v-cloak>
+                            <article class="message">
+                                <div class="container-fluid">
+                                    <span v-if="foundUser.username === user.username" class="text-muted pe-2">(you)</span>
+                                    <button class="btn" @click.prevent="toggleFollow(foundUser.username)" type="submit" v-if="user.authenticated && foundUser.username !== user.username">
+                                        <i v-if="user.followedUsers.includes(foundUser.username)" class="bi bi-person-check-fill" :data-follow-icon-for="foundUser.username"></i>
+                                        <i v-if="!user.followedUsers.includes(foundUser.username)" class="bi bi-person-fill-add" :data-follow-icon-for="foundUser.username"></i>
+                                    </button>
+                                    <span><a :href="'/api/social/users/'.concat(foundUser.username)">@{{foundUser.username}}</a> - {{foundUser.firstName}} {{foundUser.lastName}}</span> 
+                                    <p>
+                                        {{foundUser.bio}}
+                                    </p>
+                                </div>
+                            </article>
+                        </div>`,
+                    methods: {
+                        searchUser : methodsFunctions.searchUser,
+                        toggleFollow : methodsFunctions.toggleFollow
+                    }
+                }
 
                 const app = createApp({
                     data() {
                         return data;
                     },
                     methods: {
-                        convertDate(date) {
-                            const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-                            const dateSplit = date.split('T');
-                            const dateYYYYMMDD = dateSplit[0].split('-'); 
-                            // 2023-01-07 -> January 7, 2023
-                            const datemmDDYYYY = months[parseInt(dateYYYYMMDD[1])-1] 
-                                                    + " " + dateYYYYMMDD[2]
-                                                    + ", " + dateYYYYMMDD[0];
-                            const dateTime = dateSplit[1].split('.')[0].substring(0,5);
-                            return dateTime + " GMT " + datemmDDYYYY;
-                        },
-                        async postNewMessage() {
-
-                            // on send new woof -> show new feed (or just push new msg on top...)
-
-                            const newMessageTextarea = document.getElementById('newMessageTextArea');
-                            const newWoof = newMessageTextarea.value;
-
-                            // check length != 0
-
-                            let postNewWoof = await fetch('/api/social/messages', {
-                                method: 'POST',
-                                redirect: 'follow',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({
-                                    "message" : newWoof
-                                })
-                            }).catch(err => console.err(err));
-
-                            // erase textarea
-                            newMessageTextarea.value = "";
-                            
-                            // add new message to the feed without reloading!
-                            await fetch(`/api/social/messages/${this.user.username}`)
-                                .then(res => res.json()).then(msgs => this.messages.unshift(msgs[0])).catch(err => console.error(err));
-                        },
-                        async toggleFollow(usernameToggleFollow) {
-                            const usernameLogged = this.user.username;
-                            const followIconElement = document.querySelector(`[data-follow-icon-for="${usernameToggleFollow}"]`);
-                            const httpMethod = followIconElement.classList.contains("bi-person-fill-add") ? 'POST' : 'DELETE';
-                            let toggleFollowFetch = await fetch(`/api/social/followers/${usernameToggleFollow}`, { method: httpMethod });
-                            document.querySelectorAll(`[data-follow-icon-for="${usernameToggleFollow}"]`)
-                                .forEach(el => {
-                                    el.classList.toggle('bi-person-check-fill');
-                                    el.classList.toggle('bi-person-fill-add');
-                                });
-                        },
-                        async toggleLike(messageID) {
-                            const usernameLogged = this.user.username;
-                            const likeIconElement = document.querySelector(`[data-like-icon-for="${messageID}"]`);
-                            const httpMethod = likeIconElement.classList.contains("bi-heart") ? 'POST' : 'DELETE';
-                            await fetch(`/api/social/like/${messageID}`, { method: httpMethod });
-                            likeIconElement.classList.toggle("bi-heart-fill");
-                            likeIconElement.classList.toggle("bi-heart");
-                        },
-                        async searchUser() {
-                            if(this.usernameToLookup.trim().length == 0) {
-                                window.location.hash = `feed`;
-                            }
-                            let queryResults = await fetch(`/api/social/search?q=${this.usernameToLookup}`).then(res => res.json()).catch(err => console.err(err));
-                            if(queryResults.length === undefined) { return; }
-                            this.searchUserResults = queryResults;
-                            
-                            window.location.hash = `search?q=${this.usernameToLookup}`;
-
-                            //console.log('/home'.concat(window.location.hash)); // [ /home#search?q=query
-
-                            /*
-                                / -> signup & index page
-                                /login -> login page
-                                /app#home -> feed
-                                /app#search?q=... -> search users
-                                /app#user?u=... -> profile of user
-                            */
-
-                            if(window.visualViewport.width < 991.5) {
-                                console.log(`${window.visualViewport.width} < 972`);
-                                document.getElementById('buttonTogglerContainer').firstElementChild.click();
-                            }
-                            //queryResults.forEach(e => console.log(e.username));
-                        }
-                    },
-                    computed: {
-                        showFeed() {
-                            return this.usernameToLookup.trim().length > 0 ? false : true;
-                        },
-                        showSearch() {
-                            return this.usernameToLookup.trim().length > 0 ? true : false;
-                        },
-                        currentView() {
-                            return this.currentPath.substring(1, this.currentPath);
-                        }
+                        backToTop : methodsFunctions.backToTop,
+                        searchUser : methodsFunctions.searchUser
                     },
                     mounted() {
                         window.addEventListener('hashchange', () => { this.currentPath = window.location.hash; })
                     }
                 });
+
                 app.component("FeedContainer", FeedContainer);
                 app.component("MessageContainer", MessageContainer);
                 app.component("MessageBody", MessageBody);
+                app.component("LoginSignupMessage", LoginSignupMessage);
+                app.component("SearchUsersContainer", SearchUsersContainer);
+
                 app.mount("#app");
             }
-        </script>
-
-        <script>
             createVueApp();
         </script>
 
