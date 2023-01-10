@@ -74,6 +74,8 @@
 
             <section class="home-section row row-cols-1 text-start font-l">
 
+                <img src="https://api.dicebear.com/5.x/pixel-art/svg?seed=jack" width="100" height="100" />
+
                 <!-- v-if="user.authenticated && currentView === 'feed'" -->
                 <feed-container :user="user" :messages="messages" :current-path="currentPath"></feed-container>
                 <!-- 
@@ -84,15 +86,16 @@
                 <login-signup-message :user="user"></login-signup-message> 
 
                 <!-- v-if="showSearch" -->
-                <search-users-container :user="user" username-to-lookup="usernameToLookup" :search-user-results="searchUserResults"></search-users-container>
+                <search-users-container :user="user" :username-to-lookup="usernameToLookup" :search-user-results="searchUserResults" :current-path="currentPath"></search-users-container>
 
+                <user-profile-container :user="user" :current-path="currentPath" :show-profile-of="showProfileOf"></user-profile-container>
             </section>
 
         </main>
 
         <script type="module">
             import {methodsFunctions, getUserData} from './vueAppFunctions.js';
-            import {FeedContainer, MessageContainer, MessageBody, LoginSignupMessage, SearchUsersContainer} from './VueComponents.js';
+            import {FeedContainer, MessageContainer, MessageBody, LoginSignupMessage, SearchUsersContainer, UserProfileContainer} from './VueComponents.js';
 
             const { createApp } = Vue;
             const userData = await getUserData();
@@ -104,11 +107,12 @@
             */
 
             const data = { 
-                messages : userData.feed, 
+                messages : userData.feed,
                 user : userData.user,
                 usernameToLookup : "",
                 searchUserResults : [],
-                currentPath : window.location.hash
+                currentPath : window.location.hash,
+                showProfileOf : ""
             };
 
             const app = createApp({
@@ -120,7 +124,12 @@
                     searchUser : methodsFunctions.searchUser
                 },
                 mounted() {
-                    window.addEventListener('hashchange', () => { this.currentPath = window.location.hash; })
+                    window.addEventListener('hashchange', () => {
+                        this.currentPath = window.location.hash; 
+                        if(this.currentPath.includes('user/')) {
+                            this.showProfileOf = this.currentPath.split('/')[1];
+                        }
+                    })
                 }
             });
 
@@ -129,6 +138,7 @@
             app.component("MessageBody", MessageBody);
             app.component("LoginSignupMessage", LoginSignupMessage);
             app.component("SearchUsersContainer", SearchUsersContainer);
+            app.component("UserProfileContainer", UserProfileContainer);
 
             app.mount("#app");
         </script>

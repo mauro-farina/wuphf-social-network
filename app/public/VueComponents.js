@@ -49,7 +49,7 @@ export const MessageBody = {
             <button class="btn" @click.prevent="toggleFollow(message.username)" v-if="message.username !== user.username" type="submit">
                 <i class="bi bi-person-check-fill" :data-follow-icon-for="message.username"></i>
             </button>
-            <span><a :href="'/api/social/users/'.concat(message.username)">@{{message.username}}</a> {{convertDate(message.date)}}</span> 
+            <span><a @click.prevent="showProfile(message.username)">@{{message.username}}</a> {{convertDate(message.date)}}</span> 
             <p>
                 {{message.message}}
             </p>
@@ -62,6 +62,7 @@ export const MessageBody = {
         convertDate : methodsFunctions.convertDate,
         toggleFollow : methodsFunctions.toggleFollow,
         toggleLike : methodsFunctions.toggleLike,
+        showProfile : methodsFunctions.showProfile
     },
 };
 
@@ -80,9 +81,10 @@ export const SearchUsersContainer = {
         user : Object,
         usernameToLookup : String,
         searchUserResults : Array,
+        currentPath : String
     },
     template: 
-        `<div v-for="foundUser in searchUserResults" class="container-fluid col" v-cloak>
+        `<div v-if="currentView.includes('search')" v-for="foundUser in searchUserResults" class="container-fluid col" v-cloak>
             <article class="message">
                 <div class="container-fluid">
                     <span v-if="foundUser.username === user.username" class="text-muted pe-2">(you)</span>
@@ -90,7 +92,8 @@ export const SearchUsersContainer = {
                         <i v-if="user.followedUsers.includes(foundUser.username)" class="bi bi-person-check-fill" :data-follow-icon-for="foundUser.username"></i>
                         <i v-if="!user.followedUsers.includes(foundUser.username)" class="bi bi-person-fill-add" :data-follow-icon-for="foundUser.username"></i>
                     </button>
-                    <span><a :href="'/api/social/users/'.concat(foundUser.username)">@{{foundUser.username}}</a> - {{foundUser.firstName}} {{foundUser.lastName}}</span> 
+                    <!-- <a :href="'/api/social/users/'.concat(foundUser.username)"> -->
+                    <span><a @click.prevent="showProfile(foundUser.username)">@{{foundUser.username}}</a> - {{foundUser.firstName}} {{foundUser.lastName}}</span> 
                     <p>
                         {{foundUser.bio}}
                     </p>
@@ -99,6 +102,77 @@ export const SearchUsersContainer = {
         </div>`,
     methods: {
         searchUser : methodsFunctions.searchUser,
-        toggleFollow : methodsFunctions.toggleFollow
+        toggleFollow : methodsFunctions.toggleFollow,
+        showProfile : methodsFunctions.showProfile
+    },
+    computed: {
+        currentView : computedFunctions.currentView
     }
 }
+
+export const UserProfileContainer = {
+    props: {
+        user : Object,
+        currentPath : String,
+        showProfileOf : String
+    },
+    data() {
+        return {
+            profileReady : false
+        }
+    },
+    template:
+        `<div v-if="profileReady && currentView.includes('user')" v-cloak>
+            <article class="message" :data-user="userProfile.username">
+                <div class="container-fluid">
+                    <span v-if="userProfile.username === user.username" class="text-muted pe-2">(you)</span>
+                    <button class="btn" @click.prevent="toggleFollow(userProfile.username)" type="submit" v-if="user.authenticated && userProfile.username !== user.username">
+                        <i v-if="user.followedUsers.includes(userProfile.username)" class="bi bi-person-check-fill" :data-follow-icon-for="userProfile.username"></i>
+                        <i v-if="!user.followedUsers.includes(userProfile.username)" class="bi bi-person-fill-add" :data-follow-icon-for="userProfile.username"></i>
+                    </button>
+                    <span><a :href="'/api/social/users/'.concat(userProfile.username)">@{{userProfile.username}}</a> - {{userProfile.firstName}} {{userProfile.lastName}}</span> 
+                    <p>
+                        {{userProfile.bio}}
+                    </p>
+                    <p>
+                        Signup up on {{convertDate(userProfile.signUpDate).split("GMT ")[1]}}
+                    </p>
+                </div>
+            </article>
+        </div>`,
+    methods: {
+        postNewMessage : methodsFunctions.postNewMessage,
+        getProfileData: async function() {
+            try{
+                let x = await fetch(`/api/social/users/${this.showProfileOf}`);
+                this.userProfile = await x.json();
+                console.log(this.userProfile.username + " " + this.userProfile.firstName + " " + this.userProfile.lastName);
+                this.profileReady = true;
+            } catch {
+                this.profileReady = false;
+                return;
+            }
+        },
+        convertDate : methodsFunctions.convertDate,
+        toggleFollow : methodsFunctions.toggleFollow
+    },
+    watch: {
+        showProfileOf(newValue, oldValue) {
+            this.profileReady = false;
+            if(newValue !== '') {
+                console.log("new value! new value!");
+                this.getProfileData(newValue);
+            }
+        }
+    },
+    computed: {
+        currentView : computedFunctions.currentView/*,
+        userProfile: async function() {
+            if(!this.currentPath.includes('user')) {return "";}
+            console.log(`show profile of ${this.showProfileOf}`);
+            let x = await fetch(`/api/social/users/${this.showProfileOf}`);
+            console.log(x);
+            return x;
+        }*/
+    }
+};

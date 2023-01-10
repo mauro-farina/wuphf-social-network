@@ -97,5 +97,8 @@ export const methodsFunctions = {
     backToTop: function() {
         document.body.scrollTop = 0; // For Safari
         document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+    },
+    showProfile: async function(profileOfUsername) {
+        window.location.hash = `user/${profileOfUsername}`;
     }
 }
