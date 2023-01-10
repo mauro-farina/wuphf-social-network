@@ -166,13 +166,6 @@ export const UserProfileContainer = {
         }
     },
     computed: {
-        currentView : computedFunctions.currentView/*,
-        userProfile: async function() {
-            if(!this.currentPath.includes('user')) {return "";}
-            console.log(`show profile of ${this.showProfileOf}`);
-            let x = await fetch(`/api/social/users/${this.showProfileOf}`);
-            console.log(x);
-            return x;
-        }*/
+        currentView : computedFunctions.currentView
     }
 };
