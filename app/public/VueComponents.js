@@ -139,14 +139,14 @@ export const UserProfileContainer = {
                     </p>
                 </div>
             </article>
+            <message-container :user="user" :messages="userMessages"></message-container>
         </div>`,
     methods: {
         postNewMessage : methodsFunctions.postNewMessage,
         getProfileData: async function() {
             try{
-                let x = await fetch(`/api/social/users/${this.showProfileOf}`);
-                this.userProfile = await x.json();
-                console.log(this.userProfile.username + " " + this.userProfile.firstName + " " + this.userProfile.lastName);
+                this.userProfile = await (await fetch(`/api/social/users/${this.showProfileOf}`)).json();
+                this.userMessages = await (await fetch(`/api/social/messages/${this.showProfileOf}`)).json();
                 this.profileReady = true;
             } catch {
                 this.profileReady = false;
