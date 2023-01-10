@@ -28,7 +28,7 @@
 
                         <img class="mb-4 img-fluid col" src="./favicon.ico" alt="WUPHF.com">
 
-                        <div id="loginFailedMessageContainer" class="hidden text-danger col mb-3 mt-3 ms-2 me-2"></div>
+                        <div id="loginFailedMessageContainer" class="hidden text-danger col mb-3 mt-3 ms-2 me-2">{{errorMessage}}</div>
 
                         <div class="form-floating col mb-3 mt-3 ms-2 me-2">
                             <input type="text" class="form-control" id="usernameInput" placeholder="Username" required>
@@ -58,7 +58,8 @@
 
 			const data = {
 				inputPasswordType : 'password',
-                togglePwdIconClasses : 'bi bi-eye-fill'
+                togglePwdIconClasses : 'bi bi-eye-fill',
+				errorMessage : ""
 			};
 
 			const app = createApp({
@@ -77,10 +78,8 @@
 					},
 					async login() {
 						const loginFailedMsgContainer = document.getElementById("loginFailedMessageContainer");
-						if(loginFailedMsgContainer.hasChildNodes()) {
-							loginFailedMsgContainer.removeChild(loginFailedMsgContainer.firstChild);
-						}
 						loginFailedMsgContainer.classList.add("hidden");
+						this.errorMessage = "";
 
 						const username = document.getElementById("usernameInput").value;
 						const password = document.getElementById("passwordInput").value;
@@ -99,15 +98,13 @@
 						if(!loginRequest.ok) {
 							loginFailedMsgContainer.classList.remove("hidden");
 							let parseErrors = await loginRequest.json();
-							const errorMessageElement = document.createElement("p");
 							let errorMessageText;
 							if(parseErrors.error !== 'undefined') {
 								errorMessageText = parseErrors.error;
 							} else {
 								errorMessageText = "Error - refresh the page and try again";
 							}
-							errorMessageElement.innerHTML = errorMessageText;
-							loginFailedMsgContainer.appendChild(errorMessageElement);
+							this.errorMessage = errorMessageText;
 						} else { // assuming loginRequest.redirect is true
 							window.location.href = loginRequest.url; // technically works
 							// https://stackoverflow.com/q/53945402

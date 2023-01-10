@@ -37,7 +37,7 @@
 
 								<form class="rounded-3 local-primary-text">
 
-									<div id="signupFailedMessageContainer" class="hidden text-danger mb-3 mt-3 ms-2 me-2"></div>
+									<div id="signupFailedMessageContainer" class="hidden text-danger mb-3 mt-3 ms-2 me-2">{{errorMessage}}</div>
 
 									<div class="form-floating mb-3 mt-3 ms-2 me-2">
 										<input type="text" class="form-control" id="usernameInput" placeholder="Username" required>
@@ -87,7 +87,8 @@
 
 			const data = {
 				inputPasswordType : 'password',
-                togglePwdIconClasses : 'bi bi-eye-fill'
+                togglePwdIconClasses : 'bi bi-eye-fill',
+				errorMessage : ""
 			};
 
 			const app = createApp({
@@ -106,10 +107,8 @@
 					},
 					async signup() {
 						const signupFailedContainer = document.getElementById("signupFailedMessageContainer");
-						if(signupFailedContainer.hasChildNodes()) {
-							signupFailedContainer.removeChild(signupFailedContainer.firstChild);
-						}
 						signupFailedContainer.classList.add("hidden");
+						this.errorMessage = "";
 
 						const username = document.getElementById("usernameInput").value;
 						const password = document.getElementById("passwordInput").value;
@@ -135,15 +134,13 @@
 						if(!signupRequest.ok) {
 							signupFailedContainer.classList.remove("hidden");
 							let parseErrors = await signupRequest.json();
-							const errorMessageElement = document.createElement("p");
 							let errorMessageText;
 							if(parseErrors.error !== 'undefined') {
 								errorMessageText = parseErrors.error;
 							} else {
 								errorMessageText = "Error - refresh the page and try again";
 							}
-							errorMessageElement.innerHTML = errorMessageText;
-							signupFailedContainer.appendChild(errorMessageElement);
+							this.errorMessage = errorMessageText;
 						} else {
 							window.location.href = signupRequest.url; // works, not sure it's the best in terms of XSS-safety
 							// https://stackoverflow.com/q/53945402
