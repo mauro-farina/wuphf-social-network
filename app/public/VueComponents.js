@@ -49,7 +49,7 @@ export const MessageBody = {
             <button class="btn" @click.prevent="toggleFollow(message.username)" v-if="message.username !== user.username" type="submit">
                 <i class="bi bi-person-check-fill" :data-follow-icon-for="message.username"></i>
             </button>
-            <span><a @click.prevent="showProfile(message.username)">@{{message.username}}</a> {{convertDate(message.date)}}</span> 
+            <span><a @click.prevent="goTo('user/'.concat(message.username))">@{{message.username}}</a> {{convertDate(message.date)}}</span> 
             <p>
                 {{message.message}}
             </p>
@@ -62,7 +62,7 @@ export const MessageBody = {
         convertDate : methodsFunctions.convertDate,
         toggleFollow : methodsFunctions.toggleFollow,
         toggleLike : methodsFunctions.toggleLike,
-        showProfile : methodsFunctions.showProfile
+        goTo : methodsFunctions.goTo
     },
 };
 
@@ -93,7 +93,7 @@ export const SearchUsersContainer = {
                         <i v-if="!user.followedUsers.includes(foundUser.username)" class="bi bi-person-fill-add" :data-follow-icon-for="foundUser.username"></i>
                     </button>
                     <!-- <a :href="'/api/social/users/'.concat(foundUser.username)"> -->
-                    <span><a @click.prevent="showProfile(foundUser.username)">@{{foundUser.username}}</a> - {{foundUser.firstName}} {{foundUser.lastName}}</span> 
+                    <span><a @click.prevent="goTo('user/'.concat(foundUser.username))">@{{foundUser.username}}</a> - {{foundUser.firstName}} {{foundUser.lastName}}</span> 
                     <p>
                         {{foundUser.bio}}
                     </p>
@@ -101,9 +101,8 @@ export const SearchUsersContainer = {
             </article>
         </div>`,
     methods: {
-        searchUser : methodsFunctions.searchUser,
         toggleFollow : methodsFunctions.toggleFollow,
-        showProfile : methodsFunctions.showProfile
+        goTo : methodsFunctions.goTo
     },
     computed: {
         currentView : computedFunctions.currentView
@@ -125,7 +124,7 @@ export const UserProfileContainer = {
         `<div v-if="profileReady && currentView.includes('user')" v-cloak>
             <article class="message" :data-user="userProfile.username">
                 <div class="container-fluid">
-                    <img :src="'https://api.dicebear.com/5.x/pixel-art/svg?seed='.concat(userProfile)" width="80" height="80" />
+                    <img :src="'https://api.dicebear.com/5.x/pixel-art/svg?seed='.concat(userProfile.username)" width="80" height="80" />
                     <span v-if="userProfile.username === user.username" class="text-muted pe-2">(you)</span>
                     <button class="btn" @click.prevent="toggleFollow(userProfile.username)" type="submit" v-if="user.authenticated && userProfile.username !== user.username">
                         <i v-if="user.followedUsers.includes(userProfile.username)" class="bi bi-person-check-fill" :data-follow-icon-for="userProfile.username"></i>
@@ -136,7 +135,7 @@ export const UserProfileContainer = {
                         {{userProfile.bio}}
                     </p>
                     <p>
-                        Signup up on {{convertDate(userProfile.signUpDate).split("GMT ")[1]}}
+                        Signed up on {{convertDate(userProfile.signUpDate).split("GMT ")[1]}}
                     </p>
                 </div>
             </article>
@@ -161,8 +160,7 @@ export const UserProfileContainer = {
         showProfileOf(newValue, oldValue) {
             this.profileReady = false;
             if(newValue !== '') {
-                console.log("new value! new value!");
-                this.getProfileData(newValue);
+                this.getProfileData();
             }
         }
     },

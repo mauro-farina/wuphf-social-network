@@ -86,19 +86,21 @@ export const methodsFunctions = {
         let queryResults = await fetch(`/api/social/search?q=${this.usernameToLookup}`).then(res => res.json()).catch(err => console.err(err));
         if(queryResults.length === undefined) { return; }
         this.searchUserResults = queryResults;
-        
-        window.location.hash = `search?q=${this.usernameToLookup}`;
-
-        if(window.visualViewport.width < 991.5) {
-            console.log(`${window.visualViewport.width} < 972`);
-            document.getElementById('buttonTogglerContainer').firstElementChild.click();
-        }
+        this.goTo(`search?q=${this.usernameToLookup}`);
+        closeNavIfViewportWidthSmall();
     },
     backToTop: function() {
         document.body.scrollTop = 0; // For Safari
         document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        closeNavIfViewportWidthSmall();
     },
-    showProfile: async function(profileOfUsername) {
-        window.location.hash = `user/${profileOfUsername}`;
+    goTo: function(newAnchor) {
+        window.location.hash = newAnchor;
+    }
+}
+
+function closeNavIfViewportWidthSmall() {
+    if(window.visualViewport.width < 991.5) {
+        document.getElementById('buttonTogglerContainer').firstElementChild.click();
     }
 }
