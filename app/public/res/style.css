@@ -60,6 +60,10 @@ body {
     font-size: xx-large;
 }
 
+.nav-link:hover {
+    cursor: pointer;
+}
+
 .nav-list {
     list-style: none;
 }
