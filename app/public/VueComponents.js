@@ -26,39 +26,54 @@ export const FeedContainer = {
     }
 };
 
-export const MessageContainer = {
+export const MessageContainer = { //FeedMessageContainer
     props: {
         user : Object,
         messages : Array
     },
     template: 
         `<div v-for="msg in messages" class="col">
-            <article class="message" :id="msg.messageID">
+            <article class="feed-message" :id="msg.messageID">
                 <message-body :user="user" :message="msg"></message-body>
             </article>
         </div>`
 };
 
-export const MessageBody = {
+export const MessageBody = { //FeedMessageBody
     props: {
         user : Object,
         message : Object
     },
     template:
-        `<div class="container-fluid">
-            <button class="btn" @click.prevent="toggleFollow(message.username)" v-if="message.username !== user.username" type="submit">
-                <i v-if="user.followedUsers.includes(message.username)" class="bi bi-person-check-fill" :data-follow-icon-for="message.username"></i>
-                <i v-if="!user.followedUsers.includes(message.username)" class="bi bi-person-fill-add" :data-follow-icon-for="message.username"></i>
-            </button>
-            <span><a @click.prevent="goTo('user/'.concat(message.username))">@{{message.username}}</a> {{convertDate(message.date)}}</span> 
-            <p>
-                {{message.message}}
-            </p>
-            <button class="btn" @click.prevent="toggleLike(message.messageID)" type="submit">
-                <i v-if="user.likedMessages.includes(message.messageID)" class="bi bi-heart-fill" :data-like-icon-for="message.messageID"></i>
-                <i v-if="!user.likedMessages.includes(message.messageID)" class="bi bi-heart" :data-like-icon-for="message.messageID"></i>
-            </button>
-        </div>`,
+        `
+        <!--
+        <button class="btn btn-small feed-message-follow-btn" @click.prevent="toggleFollow(message.username)" v-if="message.username !== user.username" type="submit">
+            <i v-if="user.followedUsers.includes(message.username)" class="bi bi-person-check-fill" :data-follow-icon-for="message.username"></i>
+            <i v-if="!user.followedUsers.includes(message.username)" class="bi bi-person-fill-add" :data-follow-icon-for="message.username"></i>
+        </button>
+        -->
+        <div class="row justify-content-start">
+            <span class="col-auto align-self-start">
+                <img :src="'https://api.dicebear.com/5.x/avataaars-neutral/svg?radius=50&seed='.concat(message.username)" width="40" height="40" />
+            </span>
+            <span class="col-8 fw-bold align-self-start text-start">
+                <a @click.prevent="goTo('user/'.concat(message.username))">@{{message.username}}</a>
+            </span>
+        </div>
+        <p class="feed-message-message">
+            {{message.message}}
+        </p>
+        <div class="row row-cols-2">
+            <span class="col-xs- align-self-start">
+                <button class="btn" @click.prevent="toggleLike(message.messageID)" type="submit">
+                    <i v-if="user.likedMessages.includes(message.messageID)" class="bi bi-heart-fill" :data-like-icon-for="message.messageID"></i>
+                    <i v-if="!user.likedMessages.includes(message.messageID)" class="bi bi-heart" :data-like-icon-for="message.messageID"></i>
+                </button>
+                <span class="text-muted">{{message.likedBy.length}}</span>
+            </span>
+            <span class="col align-self-end text-muted text-end">{{convertDate(message.date)}}</span>
+        </div>
+        `,
     methods: {
         convertDate : methodsFunctions.convertDate,
         toggleFollow : methodsFunctions.toggleFollow,
@@ -86,7 +101,7 @@ export const SearchUsersContainer = {
     },
     template: 
         `<div v-if="currentView.includes('search?q=')" class="container-fluid row row-cols-1" v-cloak>
-            <article class="message col" v-for="foundUser in searchUserResults">
+            <article class="profile-preview col" v-for="foundUser in searchUserResults">
                 <span v-if="foundUser.username === user.username" class="text-muted pe-2">(you)</span>
                 <button class="btn" @click.prevent="toggleFollow(foundUser.username)" type="submit" v-if="user.authenticated && foundUser.username !== user.username">
                     <i v-if="user.followedUsers.includes(foundUser.username)" class="bi bi-person-check-fill" :data-follow-icon-for="foundUser.username"></i>
@@ -136,6 +151,7 @@ export const UserProfileContainer = {
                 </p>
             </article>
             <message-container v-if="user.authenticated" :user="user" :messages="userMessages"></message-container>
+            <!-- PROFILE MESSAGE -->
         </div>`,
     methods: {
         postNewMessage : methodsFunctions.postNewMessage,
