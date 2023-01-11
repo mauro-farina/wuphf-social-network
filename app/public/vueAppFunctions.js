@@ -1,22 +1,16 @@
 export async function getUserData() {
-    const fetchOptions = {
-        redirect: 'follow'
-    };
-    let whoamiResponse = await fetch("/api/social/whoami", fetchOptions);
-    if (!whoamiResponse.ok) {
-        throw new Error(`HTTP error: ${whoamiResponse.status}`);
-    }
-    const user = await whoamiResponse.json();
+    const userData = {};
+    let whoamiResponse = await fetch("/api/social/whoami");
+    userData.user = await whoamiResponse.json();
 
-    let feedResponse = await fetch('/api/social/feed', fetchOptions);
+    let feedResponse = await fetch('/api/social/feed');
     if (!feedResponse.ok) {
-        throw new Error(`HTTP error: ${feedResponse.status}`);
+        userData.feed = [];
+    } else {
+        userData.feed = await feedResponse.json();
     }
-    const feed = await feedResponse.json();
-    return {
-        user : user,
-        feed : feed
-    };
+
+    return userData;
 }
 
 export const computedFunctions = {
