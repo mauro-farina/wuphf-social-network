@@ -51,9 +51,10 @@ router.post("/signup", sanitizeInputSignup, async (req, res) => {
     const mongo = mongoManager.getDB();
 
     // TRY-CATCHES FOR MONGO AND BCRYPT OPERATIONS ?
-    let alreadyExistingUserQuery = await mongo.collection("users").findOne({username: req.body.username}); // to lower case? idk
+    const usernameRegex = new RegExp(["^", req.body.username, "$"].join(""), "i");
+    let alreadyExistingUserQuery = await mongo.collection("users").findOne({username: usernameRegex});
     if(alreadyExistingUserQuery) {
-        return res.status(400).json( { error : `Username ${req.body.username} is already taken` } );
+        return res.status(400).json( { error : `Username ${alreadyExistingUserQuery.username} is already taken` } );
     }
 
     let newUser = {
@@ -95,15 +96,16 @@ router.post("/signin", sanitizeInputSignin, async (req, res) => {
     }
     
     const mongo = mongoManager.getDB();
-    
-    let alreadyExistingUserQuery = await mongo.collection("users").findOne({username: req.body.username});
+
+    const usernameRegex = new RegExp(["^", req.body.username, "$"].join(""), "i");
+    let alreadyExistingUserQuery = await mongo.collection("users").findOne({username: usernameRegex});
     if(!alreadyExistingUserQuery) {
         return res.status(400).json( { error : `Invalid username or password` } );
     }
 
     const compareResult = await bcrypt.compare(req.body.password, alreadyExistingUserQuery.password);
     if(compareResult) {
-        jwt.sign({ username: req.body.username }, process.env.JWT_SECRET_KEY, { expiresIn: "30d"}, (err,token) => {
+        jwt.sign({ username: alreadyExistingUserQuery.username }, process.env.JWT_SECRET_KEY, { expiresIn: "30d"}, (err,token) => {
             return res.cookie("auth", token, {httpOnly: true}).redirect("/home");
         });
     } else {
