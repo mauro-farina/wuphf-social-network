@@ -57,7 +57,6 @@ router.post("/signup", sanitizeInputSignup, async (req, res) => {
     }
 
     let newUser = {
-        //userID : 0,
         username : req.body.username,
         password : req.body.password,
         firstName : req.body.firstName,
@@ -65,11 +64,6 @@ router.post("/signup", sanitizeInputSignup, async (req, res) => {
         bio : req.body.bio,
         signUpDate : new Date()
     };
-    
-    //let lastUserQuery = await mongo.collection("users").findOne({},{ sort: {"userID": -1}});
-    //if(lastUserQuery !== null) {
-    //    newUser.userID = lastUserQuery.userID+1;
-    //}
     
     // salt rounds: 2 for quick testing, 10+ for good security 
     const salt = await bcrypt.genSalt(parseInt(process.env.BCRYPT_ROUNDS_FOR_SALT)); // BCRYPT_ROUNDS_FOR_SALT ignored for some reason
@@ -88,6 +82,7 @@ router.post("/signup", sanitizeInputSignup, async (req, res) => {
     });
 
 });
+
 
 router.post("/signin", sanitizeInputSignin, async (req, res) => {
     const sanitizeInputErrors = validationResult(req);
@@ -114,6 +109,11 @@ router.post("/signin", sanitizeInputSignin, async (req, res) => {
     } else {
         return res.status(400).json( { error : `Invalid username or password` } );
     }
+});
+
+
+router.get("/signoff", async (req, res) => {
+    res.status(200).clearCookie('auth').send();
 });
 
 module.exports = router;
