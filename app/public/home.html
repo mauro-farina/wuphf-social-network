@@ -31,7 +31,7 @@
 
                     <div class="container-fluid" id="buttonTogglerContainer">
                     <!--<div class="container-fluid col" id="buttonTogglerContainer">-->
-                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <button class="navbar-toggler" type="button" data-state="closed" id="toggleNavbarButton" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                             <span class="navbar-toggler-icon"></span>
                         </button>
                     </div>
@@ -48,25 +48,25 @@
                     <!--<ul class="nav-list navbar-nav me-auto mt-2" style="flex-direction:column">-->
                         <ul class="nav-list me-auto mt-2 font-xl" style="flex-direction:column" v-cloak>
                             <li class="nav-item">
-                                <span class="font-xxl" v-if="user.authenticated">Hi, <a :href="'/api/social/users/'.concat(user.username)" class="local-primary-text link-no-underline nav-link">{{user.username}}</a></span>
+                                <span class="font-xxl" v-if="user.authenticated">Hi, <a @click.prevent="goTo('user/'.concat(user.username))" class="local-primary-text link-no-underline">{{user.username}}</a></span>
                                 <span v-if="!user.authenticated">
                                     <a href="/" class="link-no-underline nav-link">Signup</a> or <a href="/login" class="link-no-underline nav-link">Login</a>
                                 </span>
                             </li>
                             <li class="nav-item">
-                                <a @click.prevent="goTo('feed')" class="nav-link">Feed</a>
+                                <a @click.prevent="goTo('feed')">Feed</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" v-if="user.authenticated" @click.prevent="backToTop">New message</a>
+                                <a v-if="user.authenticated" @click.prevent="backToTop">New message</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" v-if="user.authenticated" @click.prevent="signOff">Sign off</a>
+                                <a v-if="user.authenticated" @click.prevent="signOff">Sign off</a>
                             </li>
                             <div class="input-group nav-item">
-                                <input id="searchUserInput" class="form-control" v-model="usernameToLookup" @input.prevent="searchUser" placeholder="Search user" type="search" aria-label="Search">
-                            <!--<button class="btn btn-success" @click.prevent="searchUser" type="submit" id="searchUserButton"><i class="bi bi-search"></i></button>-->
+                                <input id="searchUserInput" class="form-control" v-if="viewportWidth >= 991.5" v-model="usernameToLookup" @input.prevent="searchUser" placeholder="Search user" type="search" aria-label="Search">
+                                <input id="searchUserInput" class="form-control" v-if="viewportWidth < 991.5" v-model="usernameToLookup" placeholder="Search user" type="search" aria-label="Search">
+                                <button class="btn btn-success" v-if="viewportWidth < 991.5" @click.prevent="searchUser" type="submit" id="searchUserButton"><i class="bi bi-search"></i></button>
                             </div>
-
                         </ul>
                     </div>
 
@@ -112,7 +112,8 @@
                 usernameToLookup : "",
                 searchUserResults : [],
                 currentPath : window.location.hash,
-                showProfileOf : ""
+                showProfileOf : "",
+                viewportWidth : window.visualViewport.width
             };
 
             const app = createApp({
@@ -158,6 +159,19 @@
                         this.usernameToLookup = this.currentPath.split('search?q=')[1];
                         this.searchUser();
                     }
+                    /*
+                    const toggleNavbarButton = document.getElementById('toggleNavbarButton');
+                    toggleNavbarButton.addEventListener('click', e => {
+                        e.preventDefault();
+                        if(toggleNavbarButton.getAttribute('data-state') === 'closed') {
+                            toggleNavbarButton.setAttribute('data-state', 'open');
+                            document.getElementsByClassName('home-section')[0].style = "position: fixed";
+                        } else {
+                            toggleNavbarButton.setAttribute('data-state', 'closed');
+                            document.getElementsByClassName('home-section')[0].style = "";
+                        }
+                    });
+                    */
                 }
             });
 

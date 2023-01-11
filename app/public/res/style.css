@@ -60,7 +60,7 @@ body {
     font-size: xx-large;
 }
 
-.nav-link:hover {
+.nav-item a:hover {
     cursor: pointer;
 }
 
@@ -148,18 +148,18 @@ section {
 
     #navbarSupportedContent {
         background-color: var(--bs-dark);
+        width: 100%;
+        position: absolute;
+        top: 70px;
+        left: 0px;
+        padding-right: 30px;
+        height: 100vh !important;
     }
 
     #buttonTogglerContainer {
         background-color: var(--bs-dark);
     }
-
-    /*
-    #navbarSupportedContent {
-        height: 100vh;
-    }
-    */
-
+    
 }
 
 @media screen and (min-width: 991.5px) {

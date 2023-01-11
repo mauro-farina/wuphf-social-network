@@ -1,4 +1,4 @@
-import {methodsFunctions, computedFunctions, getUserData} from './vueAppFunctions.js';
+import {methodsFunctions, computedFunctions} from './vueAppFunctions.js';
 
 export const FeedContainer = {
     props: {
@@ -85,8 +85,8 @@ export const SearchUsersContainer = {
         currentPath : String
     },
     template: 
-        `<div v-if="currentView.includes('search?q=')" v-cloak>
-            <article class="message" v-for="foundUser in searchUserResults">
+        `<div v-if="currentView.includes('search?q=')" class="container-fluid row row-cols-1" v-cloak>
+            <article class="message col" v-for="foundUser in searchUserResults">
                 <span v-if="foundUser.username === user.username" class="text-muted pe-2">(you)</span>
                 <button class="btn" @click.prevent="toggleFollow(foundUser.username)" type="submit" v-if="user.authenticated && foundUser.username !== user.username">
                     <i v-if="user.followedUsers.includes(foundUser.username)" class="bi bi-person-check-fill" :data-follow-icon-for="foundUser.username"></i>
@@ -132,10 +132,10 @@ export const UserProfileContainer = {
                     {{userProfile.bio}}
                 </p>
                 <p>
-                    Signed up on {{convertDate(userProfile.signUpDate).split("GMT ")[1]}}
+                    WUPHF.com member since {{convertDate(userProfile.signUpDate).split("GMT ")[1]}}
                 </p>
             </article>
-            <message-container :user="user" :messages="userMessages"></message-container>
+            <message-container v-if="user.authenticated" :user="user" :messages="userMessages"></message-container>
         </div>`,
     methods: {
         postNewMessage : methodsFunctions.postNewMessage,
