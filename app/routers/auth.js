@@ -19,6 +19,7 @@ const sanitizeInputSignup = [
   body('username')
     .notEmpty().withMessage("Username field is empty")
     .not().matches(' ').withMessage("Username cannot contain spaces")
+    .isLength({max:25}).withMessage("Username cannot be more than 25 characters")
     .escape(),
   body('password', "Password must be at least 8 characters").isLength({ min: 8 }).escape(),
   body('firstName').escape(),
