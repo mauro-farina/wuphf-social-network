@@ -48,9 +48,9 @@
                     <!--<ul class="nav-list navbar-nav me-auto mt-2" style="flex-direction:column">-->
                         <ul class="nav-list me-auto mt-2 font-xl" style="flex-direction:column" v-cloak>
                             <li class="nav-item">
-                                <span class="font-xxl" v-if="user.authenticated">Hi, <a :href="'/api/social/users/'.concat(user.username)" class="local-primary-text link-no-underine nav-link">{{user.username}}</a></span>
+                                <span class="font-xxl" v-if="user.authenticated">Hi, <a :href="'/api/social/users/'.concat(user.username)" class="local-primary-text link-no-underline nav-link">{{user.username}}</a></span>
                                 <span v-if="!user.authenticated">
-                                    <a href="/" class="link-no-underine nav-link">Signup</a> or <a href="/login" class="link-no-underine nav-link">Login</a>
+                                    <a href="/" class="link-no-underline nav-link">Signup</a> or <a href="/login" class="link-no-underline nav-link">Login</a>
                                 </span>
                             </li>
                             <li class="nav-item">
