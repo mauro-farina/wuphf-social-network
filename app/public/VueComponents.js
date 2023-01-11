@@ -47,7 +47,8 @@ export const MessageBody = {
     template:
         `<div class="container-fluid">
             <button class="btn" @click.prevent="toggleFollow(message.username)" v-if="message.username !== user.username" type="submit">
-                <i class="bi bi-person-check-fill" :data-follow-icon-for="message.username"></i>
+                <i v-if="user.followedUsers.includes(message.username)" class="bi bi-person-check-fill" :data-follow-icon-for="message.username"></i>
+                <i v-if="!user.followedUsers.includes(message.username)" class="bi bi-person-fill-add" :data-follow-icon-for="message.username"></i>
             </button>
             <span><a @click.prevent="goTo('user/'.concat(message.username))">@{{message.username}}</a> {{convertDate(message.date)}}</span> 
             <p>
