@@ -7,7 +7,7 @@ export const FeedContainer = {
         currentPath : String
     },
     template: 
-        `<div v-if="user.authenticated && (currentView === 'feed' || currentView === '')" v-cloak>
+        `<div v-if="user.authenticated && (currentView === 'feed' || currentView === '')" v-cloak class="row row-cols-1">
             <article class="col" id="newMessage">
                 <form>
                     <div class="mb-3">
@@ -32,7 +32,7 @@ export const MessageContainer = {
         messages : Array
     },
     template: 
-        `<div v-for="msg in messages" class="container-fluid col message-container">
+        `<div v-for="msg in messages" class="col">
             <article class="message" :id="msg.messageID">
                 <message-body :user="user" :message="msg"></message-body>
             </article>
@@ -71,7 +71,7 @@ export const LoginSignupMessage = {
         user : Object
     },
     template: 
-        `<article v-if="!user.authenticated" class="col" v-cloak>
+        `<article v-if="!user.authenticated" v-cloak>
             Create an account to start following users and personalize your feed!
         </article>`
 };
@@ -84,20 +84,17 @@ export const SearchUsersContainer = {
         currentPath : String
     },
     template: 
-        `<div v-if="currentView.includes('search')" :data-user-query="usernameToLookup" class="container-fluid col" v-cloak>
+        `<div v-if="currentView.includes('search?q=')" v-cloak>
             <article class="message" v-for="foundUser in searchUserResults">
-                <div class="container-fluid">
-                    <span v-if="foundUser.username === user.username" class="text-muted pe-2">(you)</span>
-                    <button class="btn" @click.prevent="toggleFollow(foundUser.username)" type="submit" v-if="user.authenticated && foundUser.username !== user.username">
-                        <i v-if="user.followedUsers.includes(foundUser.username)" class="bi bi-person-check-fill" :data-follow-icon-for="foundUser.username"></i>
-                        <i v-if="!user.followedUsers.includes(foundUser.username)" class="bi bi-person-fill-add" :data-follow-icon-for="foundUser.username"></i>
-                    </button>
-                    <!-- <a :href="'/api/social/users/'.concat(foundUser.username)"> -->
-                    <span><a @click.prevent="goTo('user/'.concat(foundUser.username))">@{{foundUser.username}}</a> - {{foundUser.firstName}} {{foundUser.lastName}}</span> 
-                    <p>
-                        {{foundUser.bio}}
-                    </p>
-                </div>
+                <span v-if="foundUser.username === user.username" class="text-muted pe-2">(you)</span>
+                <button class="btn" @click.prevent="toggleFollow(foundUser.username)" type="submit" v-if="user.authenticated && foundUser.username !== user.username">
+                    <i v-if="user.followedUsers.includes(foundUser.username)" class="bi bi-person-check-fill" :data-follow-icon-for="foundUser.username"></i>
+                    <i v-if="!user.followedUsers.includes(foundUser.username)" class="bi bi-person-fill-add" :data-follow-icon-for="foundUser.username"></i>
+                </button>
+                <span><a @click.prevent="goTo('user/'.concat(foundUser.username))">@{{foundUser.username}}</a> - {{foundUser.firstName}} {{foundUser.lastName}}</span> 
+                <p>
+                    {{foundUser.bio}}
+                </p>
             </article>
         </div>`,
     methods: {
@@ -122,22 +119,20 @@ export const UserProfileContainer = {
     },
     template:
         `<div v-if="profileReady && currentView.includes('user')" v-cloak>
-            <article class="message" :data-user="userProfile.username">
-                <div class="container-fluid">
-                    <img :src="'https://api.dicebear.com/5.x/pixel-art/svg?seed='.concat(userProfile.username)" width="80" height="80" />
-                    <span v-if="userProfile.username === user.username" class="text-muted pe-2">(you)</span>
-                    <button class="btn" @click.prevent="toggleFollow(userProfile.username)" type="submit" v-if="user.authenticated && userProfile.username !== user.username">
-                        <i v-if="user.followedUsers.includes(userProfile.username)" class="bi bi-person-check-fill" :data-follow-icon-for="userProfile.username"></i>
-                        <i v-if="!user.followedUsers.includes(userProfile.username)" class="bi bi-person-fill-add" :data-follow-icon-for="userProfile.username"></i>
-                    </button>
-                    <span><a :href="'/api/social/users/'.concat(userProfile.username)">@{{userProfile.username}}</a> - {{userProfile.firstName}} {{userProfile.lastName}}</span> 
-                    <p>
-                        {{userProfile.bio}}
-                    </p>
-                    <p>
-                        Signed up on {{convertDate(userProfile.signUpDate).split("GMT ")[1]}}
-                    </p>
-                </div>
+            <article class="container-fluid">
+                <img :src="'https://api.dicebear.com/5.x/pixel-art/svg?seed='.concat(userProfile.username)" width="80" height="80" />
+                <span v-if="userProfile.username === user.username" class="text-muted pe-2">(you)</span>
+                <button class="btn" @click.prevent="toggleFollow(userProfile.username)" type="submit" v-if="user.authenticated && userProfile.username !== user.username">
+                    <i v-if="user.followedUsers.includes(userProfile.username)" class="bi bi-person-check-fill" :data-follow-icon-for="userProfile.username"></i>
+                    <i v-if="!user.followedUsers.includes(userProfile.username)" class="bi bi-person-fill-add" :data-follow-icon-for="userProfile.username"></i>
+                </button>
+                <span><a :href="'/api/social/users/'.concat(userProfile.username)">@{{userProfile.username}}</a> - {{userProfile.firstName}} {{userProfile.lastName}}</span> 
+                <p>
+                    {{userProfile.bio}}
+                </p>
+                <p>
+                    Signed up on {{convertDate(userProfile.signUpDate).split("GMT ")[1]}}
+                </p>
             </article>
             <message-container :user="user" :messages="userMessages"></message-container>
         </div>`,

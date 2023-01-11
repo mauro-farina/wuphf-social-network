@@ -26,7 +26,7 @@ body {
 .home-main {
     /* https://mor10.com/wceu2017/ */
     display: grid;
-    grid-template-columns: 1fr 2fr;
+    /*grid-template-columns: 1fr 2fr;*/
     grid-template-areas: 
         "nav section";
     height: 100vh;
@@ -38,10 +38,6 @@ body {
 
 .home-section {
     grid-area: section;
-    padding-left: 12%;
-    padding-right: 12%;
-    padding-bottom: 50px;
-    padding-top: 50px;
 }
 
 .link-no-underine {
@@ -85,8 +81,8 @@ body {
     border-color: var( --bs-border-color);
     border-style: solid;
     padding-top: 15px;
-    padding-right: 15px;
-    padding-left: 15px;
+    padding-right: 0px;
+    padding-left: 0px;
     padding-bottom: 0px;
 }
 
@@ -101,7 +97,7 @@ body {
     opacity: 1; /* Firefox */
 }
 
-#newMessageTextArea::placeholder, #searchUserInput::-ms-input-placeholder { /* Microsoft Edge */
+#newMessageTextArea::-ms-input-placeholder, #searchUserInput::-ms-input-placeholder { /* Microsoft Edge */
     color: red;
 }
 
@@ -163,6 +159,15 @@ section {
 }
 
 @media screen and (min-width: 991.5px) {
+    .home-main {
+        grid-template-columns: 350px auto;
+    }
+    .home-section {
+        padding-left: 6%;
+        padding-right: 6%;
+        padding-bottom: 50px;
+        padding-top: 50px;
+    }
     nav div.container-fluid {
         position: fixed;
         top: 20px;
@@ -178,6 +183,13 @@ section {
 }
 
 @media screen and (min-width: 1200px) {
+    .home-main {
+        grid-template-columns: 450px auto;
+    }
+    .home-section {
+        padding-left: 12%;
+        padding-right: 12%;
+    }
     nav div.container-fluid {
         position: fixed;
         top: 20px;

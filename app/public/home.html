@@ -23,7 +23,7 @@
     
     <body data-bs-theme="dark"> <!-- DARK -->
         
-          <main id="app" class="home-main text-bg-dark">
+        <main id="app" class="home-main text-bg-dark">
 
             <nav class="home-nav navbar navbar-expand-lg collapse-lg fixed-top">
                 <div class="container-fluid">
@@ -73,9 +73,7 @@
                 </div>
             </nav>
 
-            <div id="top"></div>
-
-            <section class="home-section row row-cols-1 text-start font-l">
+            <section class="home-section text-start font-l">
 
                 <!-- v-if="user.authenticated && currentView === 'feed'" -->
                 <feed-container :user="user" :messages="messages" :current-path="currentPath"></feed-container>
