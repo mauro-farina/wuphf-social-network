@@ -46,8 +46,8 @@
                 <!--<div class="container-fluid collapse navbar-collapse col" id="navbarSupportedContent">-->
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!--<ul class="nav-list navbar-nav me-auto mt-2" style="flex-direction:column">-->
-                        <ul class="nav-list me-auto mt-2 font-xl" style="flex-direction:column">
-                            <li class="nav-item" v-cloak>
+                        <ul class="nav-list me-auto mt-2 font-xl" style="flex-direction:column" v-cloak>
+                            <li class="nav-item">
                                 <span class="nav-link font-xxl" v-if="user.authenticated">Hi, <a :href="'/api/social/users/'.concat(user.username)" class="local-primary-text link-no-underine">{{user.username}}</a></span>
                                 <span class="nav-link" v-if="!user.authenticated">
                                     <a href="/" class="link-no-underine">Signup</a> or <a href="/login" class="link-no-underine">Login</a>
@@ -59,7 +59,10 @@
                             <li class="nav-item">
                                 <a class="nav-link" v-if="user.authenticated" @click.prevent="backToTop">New message</a>
                             </li>
-                            <div class="input-group nav-item" v-cloak>
+                            <li class="nav-item">
+                                <a class="nav-link" v-if="user.authenticated" @click.prevent="signOff">Sign off</a>
+                            </li>
+                            <div class="input-group nav-item">
                                 <input id="searchUserInput" class="form-control" v-model="usernameToLookup" @input.prevent="searchUser" placeholder="Search user" type="search" aria-label="Search">
                             <!--<button class="btn btn-success" @click.prevent="searchUser" type="submit" id="searchUserButton"><i class="bi bi-search"></i></button>-->
                             </div>
@@ -126,6 +129,10 @@
                         let newUserData = await getUserData();
                         this.messages = newUserData.feed;
                         this.user = newUserData.user;
+                    },
+                    signOff: async function() {
+                        await fetch('/api/auth/signoff');
+                        window.location.href = "/login";
                     }
                 },
                 watch: {
