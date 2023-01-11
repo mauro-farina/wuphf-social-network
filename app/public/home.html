@@ -114,8 +114,6 @@
                 showProfileOf : ""
             };
 
-            console.log(data.user);
-
             const app = createApp({
                 data() {
                     return data;
@@ -143,7 +141,18 @@
                         if(this.currentPath.includes('user/')) {
                             this.showProfileOf = this.currentPath.split('/')[1];
                         }
-                    })
+                        if(this.currentPath.includes('search?q=')) {
+                            this.usernameToLookup = this.currentPath.split('search?q=')[1];
+                            this.searchUser();
+                        }
+                    });
+                    if(this.currentPath.includes('user/')) {
+                        this.showProfileOf = this.currentPath.split('/')[1];
+                    }
+                    if(this.currentPath.includes('search?q=')) {
+                        this.usernameToLookup = this.currentPath.split('search?q=')[1];
+                        this.searchUser();
+                    }
                 }
             });
 

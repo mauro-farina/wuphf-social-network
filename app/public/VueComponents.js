@@ -84,8 +84,8 @@ export const SearchUsersContainer = {
         currentPath : String
     },
     template: 
-        `<div v-if="currentView.includes('search')" v-for="foundUser in searchUserResults" class="container-fluid col" v-cloak>
-            <article class="message">
+        `<div v-if="currentView.includes('search')" :data-user-query="usernameToLookup" class="container-fluid col" v-cloak>
+            <article class="message" v-for="foundUser in searchUserResults">
                 <div class="container-fluid">
                     <span v-if="foundUser.username === user.username" class="text-muted pe-2">(you)</span>
                     <button class="btn" @click.prevent="toggleFollow(foundUser.username)" type="submit" v-if="user.authenticated && foundUser.username !== user.username">
