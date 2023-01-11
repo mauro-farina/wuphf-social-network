@@ -51,7 +51,12 @@ export const methodsFunctions = {
                                 + " " + dateYYYYMMDD[2]
                                 + ", " + dateYYYYMMDD[0];
         const dateTime = dateSplit[1].split('.')[0].substring(0,5);
-        return dateTime + " GMT " + datemmDDYYYY;
+        const now = new Date();
+        if(Math.abs(now - new Date(date)) / 36e5 < 12) {
+            return dateTime + " GMT";
+        } else {
+            return datemmDDYYYY;
+        }
     },
     toggleFollow: async function(usernameToggleFollow) {
         const usernameLogged = this.user.username;
