@@ -58,15 +58,14 @@ export const methodsFunctions = {
             return datemmDDYYYY;
         }
     },
-    toggleFollow: async function(usernameToggleFollow) {
-        const followIconElement = document.querySelector(`[data-follow-icon-for="${usernameToggleFollow}"]`);
-        const httpMethod = followIconElement.classList.contains("bi-person-fill-add") ? 'POST' : 'DELETE';
-        let toggleFollowFetch = await fetch(`/api/social/followers/${usernameToggleFollow}`, { method: httpMethod });
-        document.querySelectorAll(`[data-follow-icon-for="${usernameToggleFollow}"]`)
-            .forEach(el => {
-                el.classList.toggle('bi-person-check-fill');
-                el.classList.toggle('bi-person-fill-add');
-            });
+    toggleFollow: async function(userToggleFollow, userToggleFollowCurrentFollowers) {
+        const httpMethod = userToggleFollowCurrentFollowers.includes(this.user.username) ? 'DELETE' : 'POST';
+        await fetch(`/api/social/followers/${userToggleFollow.username}`, { method: httpMethod });
+        if(userToggleFollowCurrentFollowers.includes(this.user.username)) {
+            userToggleFollowCurrentFollowers.splice(userToggleFollowCurrentFollowers.indexOf(this.user.username), 1);
+        } else {
+            userToggleFollowCurrentFollowers.push(this.user.username);
+        }
     },
     toggleLike: async function(message) {
         const likeIconElement = document.querySelector(`[data-like-icon-for="${message.messageID}"]`);
