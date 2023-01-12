@@ -101,7 +101,7 @@ export const SearchUsersContainer = {
     },
     template: 
         `<div v-if="currentView.includes('search?q=')" class="container-fluid row row-cols-1" v-cloak>
-            <article id="numSearchResultsFound">{{searchUserResults.length}} results found</article>
+            <article class="padding-20">{{searchUserResults.length}} results found</article>
             <article class="profile-preview col" v-for="foundUser in searchUserResults">
                 <span v-if="foundUser.username === user.username" class="text-muted pe-2">(you)</span>
                 <button class="btn" @click.prevent="toggleFollow(foundUser.username)" type="submit" v-if="user.authenticated && foundUser.username !== user.username">
@@ -131,12 +131,16 @@ export const UserProfileContainer = {
     },
     data() {
         return {
-            profileReady : false
+            profileReady : false,
+            profileExists : false
         }
     },
     template:
         `<div v-if="profileReady && currentView.includes('user')" v-cloak>
-            <article class="container-fluid">
+            <article class="container-fluid padding-20" v-if="!profileExists">
+                '{{showProfileOf}}' is not registered on WUPHF.com.
+            </article>
+            <article class="container-fluid" v-if="profileExists">
                 <img :src="'https://api.dicebear.com/5.x/pixel-art/svg?seed='.concat(userProfile.username)" width="80" height="80" />
                 <span v-if="userProfile.username === user.username" class="text-muted pe-2">(you)</span>
                 <button class="btn" @click.prevent="toggleFollow(userProfile.username)" type="submit" v-if="user.authenticated && userProfile.username !== user.username">
@@ -151,18 +155,27 @@ export const UserProfileContainer = {
                     WUPHF.com member since {{convertDate(userProfile.signUpDate).split("GMT ")[1]}}
                 </p>
             </article>
-            <message-container v-if="user.authenticated" :user="user" :messages="userMessages"></message-container>
+            <message-container v-if="user.authenticated && profileExists" :user="user" :messages="userMessages"></message-container>
             <!-- PROFILE MESSAGE -->
         </div>`,
     methods: {
         postNewMessage : methodsFunctions.postNewMessage,
         getProfileData: async function() {
             try{
-                this.userProfile = await (await fetch(`/api/social/users/${this.showProfileOf}`)).json();
-                this.userMessages = await (await fetch(`/api/social/messages/${this.showProfileOf}`)).json();
+                let userProfileResult = await (await fetch(`/api/social/users/${this.showProfileOf}`)).json();
+                if(userProfileResult.found) {
+                    this.profileExists = true;
+                    this.userProfile = userProfileResult.user;
+                    this.userMessages = await (await fetch(`/api/social/messages/${this.showProfileOf}`)).json();
+                } else {
+                    this.profileExists = false;
+                    this.userProfile = {};
+                }
                 this.profileReady = true;
             } catch {
                 this.profileReady = false;
+                this.profileExists = false;
+                this.userProfile = {};
                 return;
             }
         },

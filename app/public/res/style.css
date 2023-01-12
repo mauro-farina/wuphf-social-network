@@ -138,7 +138,7 @@ input {
     width: 100px;
 }
 
-#numSearchResultsFound {
+.padding-20 {
     padding: 20px;
 }
 

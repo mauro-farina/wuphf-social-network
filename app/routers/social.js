@@ -56,9 +56,12 @@ router.get("/users/:username", sanitizeParamUsername, async (req, res) => { // S
     };
     let getUserByUsername = await mongo.collection("users").findOne({username : req.params.username}, queryOptions);
     if(getUserByUsername) {
-        res.json(getUserByUsername);
+        res.json({
+            found : true,
+            user : getUserByUsername
+        });
     } else {
-        res.send("user does not exist");
+        res.json({found : false});
     }
 });
 
