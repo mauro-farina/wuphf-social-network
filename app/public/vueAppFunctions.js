@@ -101,7 +101,7 @@ export const methodsFunctions = {
 }
 
 function closeNavIfViewportWidthSmall() {
-    if(window.visualViewport.width < 991.5) {
+    if(window.visualViewport.width < 975) {
         document.getElementById('buttonTogglerContainer').firstElementChild.click();
     }
 }
