@@ -144,19 +144,21 @@ export const UserProfileContainer = {
                 '{{showProfileOf}}' is not registered on WUPHF.com.
             </article>
 
-            <article class="container-fluid" v-if="profileExists">
+            <article class="profile-infos container-fluid" v-if="profileExists">
                 <div class="row row-cols-1 justify-content-start">
                     <div class="col row row-cols-2 row-cols-md-3 text-start align-self-start font-xl">
                         <img class="col pfp mx-1" :src="'https://api.dicebear.com/5.x/avataaars-neutral/svg?radius=5&seed='.concat(userProfile.username)" />
-                        <div class="col row row-cols-1">
+                        <div class="col row row-cols-1 flex-grow-1">
                             <span class="col" v-if="typeof userProfile.firstName !== undefined"> 
                                 {{userProfile.firstName}} {{userProfile.lastName}}
                             </span>
                             <span class="col fw-bold local-primary-text px-3">@{{userProfile.username}}</span>
                         </div>
-                        <div class="col row row-cols-md-1 row-cols-2" style="flex-grow:5">
-                            <span class="col">followers: {{userFollowers.length}}</span>
-                            <span class="col">following: {{userFollowing.length}}</span>
+                        <div class="col flex-grow-1">
+                            <ul class="list-group list-group-horizontal font-l">
+                                <li class="list-group-item">followers: {{userFollowers.length}}</li>
+                                <li class="list-group-item">following: {{userFollowing.length}}</li>
+                            </ul>
                         </div>
                     </div>
                     <div class="col">
