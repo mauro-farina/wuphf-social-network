@@ -77,12 +77,8 @@ export const methodsFunctions = {
 
         if(httpMethod === 'POST') {
             message.likedBy.push(updateLike.likedToggledBy);
-            console.log(`add ${updateLike.likedToggledBy}`);
-            console.log(`current (local) likes : ${message.likedBy}`);
         } else {
             message.likedBy.splice(message.likedBy.indexOf(updateLike.likedToggledBy), 1);
-            console.log(`remove ${updateLike.likedToggledBy}`);
-            console.log(`current (local) likes : ${message.likedBy}`);
         }
     },
     searchUser: async function() {
