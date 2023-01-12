@@ -71,7 +71,7 @@ export const MessageBody = {
         toggleFollow : methodsFunctions.toggleFollow,
         toggleLike : methodsFunctions.toggleLike,
         goTo : methodsFunctions.goTo
-    },
+    }
 };
 
 export const LoginSignupMessage = {
@@ -93,7 +93,9 @@ export const SearchUsersContainer = {
     },
     template: 
         `<div v-if="currentView.includes('search?q=')" class="container-fluid row row-cols-1" v-cloak>
-            <article class="padding-20">{{searchUserResults.length}} results found</article>
+            <article class="px-5 py-4">
+                {{searchUserResults.length}} results found
+            </article>
             <article class="profile-preview-search col" v-for="foundUser in searchUserResults">
                 <div class="row justify-content-start">
                     <span class="col-auto align-self-start">
@@ -129,29 +131,54 @@ export const UserProfileContainer = {
     data() {
         return {
             profileReady : false,
-            profileExists : false
+            profileExists : false,
+            userFollowers : []
         }
     },
     template:
         `<div v-if="profileReady && currentView.includes('user')" v-cloak>
-            <article class="container-fluid padding-20" v-if="!profileExists">
+            <article class="px-5 py-4" v-if="!profileExists">
                 '{{showProfileOf}}' is not registered on WUPHF.com.
             </article>
+
+            <!-- - - - -->
+
             <article class="container-fluid" v-if="profileExists">
-                <img :src="'https://api.dicebear.com/5.x/pixel-art/svg?seed='.concat(userProfile.username)" width="80" height="80" />
-                <span v-if="userProfile.username === user.username" class="text-muted pe-2">(you)</span>
-                <button class="btn" @click.prevent="toggleFollow(userProfile.username)" type="submit" v-if="user.authenticated && userProfile.username !== user.username">
-                    <i v-if="user.followedUsers.includes(userProfile.username)" class="bi bi-person-check-fill" :data-follow-icon-for="userProfile.username"></i>
-                    <i v-if="!user.followedUsers.includes(userProfile.username)" class="bi bi-person-fill-add" :data-follow-icon-for="userProfile.username"></i>
-                </button>
-                <span><a :href="'/api/social/users/'.concat(userProfile.username)">@{{userProfile.username}}</a> - {{userProfile.firstName}} {{userProfile.lastName}}</span> 
-                <p>
-                    {{userProfile.bio}}
-                </p>
-                <p>
-                    WUPHF.com member since {{convertDate(userProfile.signUpDate).split("GMT ")[1]}}
-                </p>
+                <div class="row row-cols-1 justify-content-start">
+                    <div class="col row row-cols-2 row-cols-md-3 text-start align-self-start font-xl">
+                        <img class="col pfp mx-1" :src="'https://api.dicebear.com/5.x/avataaars-neutral/svg?radius=5&seed='.concat(userProfile.username)" />
+                        <div class="col row row-cols-1">
+                            <span class="col" v-if="typeof userProfile.firstName !== undefined"> 
+                                {{userProfile.firstName}} {{userProfile.lastName}}
+                            </span>
+                            <span class="col fw-bold local-primary-text px-3">@{{userProfile.username}}</span>
+                        </div>
+                        <div class="col row row-cols-md-1 row-cols-2" style="flex-grow:5">
+                            <span class="col">followers: {{userFollowers.length}}</span>
+                            <span class="col">following: {{userFollowing.length}}</span>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <button class="btn" @click.prevent="toggleFollow(userProfile, userFollowers)" type="submit" v-if="user.authenticated && userProfile.username !== user.username">
+                            <span v-if="!userFollowers.includes(user.username)">FOLLOW</span>
+                            <span v-if="userFollowers.includes(user.username)">FOLLOWING</span>
+                        <!--
+                            <i v-if="userFollowers.includes(user.username)" class="bi bi-person-check-fill" :data-follow-icon-for="userProfile.username"></i>
+                            <i v-if="!userFollowers.includes(user.username)" class="bi bi-person-fill-add" :data-follow-icon-for="userProfile.username"></i>
+                        -->
+                        </button>
+                    </div>
+                    <div class="col text-start align-self-start">
+                        <p class="px-4 py-1">
+                            {{userProfile.bio}}
+                        </p>
+                        <p class="text-start text-muted font-m">
+                            WUPHF.com member since {{convertDate(userProfile.signUpDate)}}
+                        </p>
+                    </div>
+                </div>
             </article>
+
             <message-container v-if="user.authenticated && profileExists" :user="user" :messages="userMessages"></message-container>
         </div>`,
     methods: {
