@@ -75,9 +75,6 @@ export const methodsFunctions = {
         likeIconElement.classList.toggle("bi-heart");
         this.user.likedBy = (await getUserData()).user.likedMessages;
 
-        // WORKS IN FEED
-        // DOES NOT WORK IN PROFILE -> the like is added/removed, the array DOES update, but the number on display no.
-        
         if(httpMethod === 'POST') {
             message.likedBy.push(updateLike.likedToggledBy);
             console.log(`add ${updateLike.likedToggledBy}`);
