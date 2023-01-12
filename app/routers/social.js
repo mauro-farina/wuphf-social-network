@@ -49,7 +49,7 @@ router.get("/users/:username", sanitizeParamUsername, async (req, res) => { // S
             _id : 0,
             username : 1,
             firstName : 1,
-            lastMessage : 1,
+            lastName : 1,
             signUpDate : 1,
             bio : 1
         }
