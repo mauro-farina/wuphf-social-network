@@ -106,8 +106,8 @@ export const methodsFunctions = {
                 // update this.user
                 //this.user = await getUserData();
                 this.userMessages = await (await fetch(`/api/social/messages/${this.showProfileOf}`)).json();
-                this.userFollowers = await (await fetch(`/api/social/followers/${this.showProfileOf}`)).json();
-                this.userFollowing = await (await fetch(`/api/social/following/${this.showProfileOf}`)).json();
+                this.userFollowers = (await (await fetch(`/api/social/followers/${this.showProfileOf}`)).json()).followers;
+                this.userFollowing = (await (await fetch(`/api/social/following/${this.showProfileOf}`)).json()).followedUsers;
                 this.userProfile = userProfileResult.user;
                 this.profileExists = true;
             } else {
