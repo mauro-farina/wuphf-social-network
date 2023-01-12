@@ -170,6 +170,12 @@ section {
     #buttonTogglerContainer {
         background-color: var(--bs-dark);
     }
+
+    .not-found-img {
+        width : 100%;
+        max-width: 400px;
+        margin-top: 20%;
+    }
     
 }
 
@@ -197,6 +203,12 @@ section {
         border-width: 0px 0px 0px 1px;
         border-style: solid;
         border-color: var(--bs-light);
+    }
+
+    .not-found-img {
+        width: 350px;
+        margin-left: 25%;
+        margin-top: 15%;
     }
 }
 

@@ -94,7 +94,10 @@ export const SearchUsersContainer = {
     template: 
         `<div v-if="currentView.includes('search?q=')" class="container-fluid row row-cols-1" v-cloak>
             <article class="px-5 py-4">
-                {{searchUserResults.length}} results found
+                <div>
+                    {{searchUserResults.length}} results found
+                </div>
+                <img v-if="searchUserResults.length === 0" src="./imgs/escobar.jpg" class="not-found-img"/>
             </article>
             <article class="profile-preview-search col" v-for="foundUser in searchUserResults">
                 <div class="row justify-content-start">
