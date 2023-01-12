@@ -265,16 +265,16 @@ router.get("/feed", validateAuthCookie, async (req, res) => { // List of message
 router.post("/like/:messageID", validateAuthCookie, sanitizeParamMessageID, async (req, res) => { // req.username likes message `:messageID`
     const cookieUsername = req.username;
     const mongo = mongoManager.getDB();
-    let updateLikes = await mongo.collection("messages").updateOne( {messageID : parseInt(req.params.messageID)}, {$push: {likedBy: cookieUsername}} );
-    res.json({"messageID" : req.params.messageID, "likes" : updateLikes.likedBy.length});
+    await mongo.collection("messages").updateOne( {messageID : parseInt(req.params.messageID)}, {$push: {likedBy: cookieUsername}} );
+    res.json({"messageID" : req.params.messageID, "likedToggledBy" : cookieUsername});
 });
 
 
 router.delete("/like/:messageID", validateAuthCookie, sanitizeParamMessageID, async (req, res) => { // req.username remove like to message `:messageID`
     const cookieUsername = req.username;
     const mongo = mongoManager.getDB();
-    let updateLikes = await mongo.collection("messages").updateOne( {messageID : parseInt(req.params.messageID)}, {$pull: {likedBy: cookieUsername}} );
-    res.json({"messageID" : req.params.messageID, "likes" : updateLikes.likedBy.length});
+    await mongo.collection("messages").updateOne( {messageID : parseInt(req.params.messageID)}, {$pull: {likedBy: cookieUsername}} );
+    res.json({"messageID" : req.params.messageID, "likedToggledBy" : cookieUsername});
 });
 
 
