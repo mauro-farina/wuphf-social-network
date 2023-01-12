@@ -47,7 +47,7 @@ export const MessageBody = {
     template:
         `<div class="row justify-content-start">
             <span class="col-auto align-self-start">
-                <img :src="'https://api.dicebear.com/5.x/avataaars-neutral/svg?radius=50&seed='.concat(message.username)" width="40" height="40" />
+                <img :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=50&seed='.concat(message.username)" width="40" height="40" />
             </span>
             <span class="col-8 align-self-start text-start">
                 <a @click.prevent="goTo('user/'.concat(message.username))" class="fw-bold pointerOnHover local-primary-text link-no-underline">@{{message.username}}</a>
@@ -99,7 +99,7 @@ export const SearchUsersContainer = {
             <article class="profile-preview-search col" v-for="foundUser in searchUserResults">
                 <div class="row justify-content-start">
                     <span class="col-auto align-self-start">
-                        <img :src="'https://api.dicebear.com/5.x/avataaars-neutral/svg?radius=50&seed='.concat(foundUser.username)" width="40" height="40" />
+                        <img :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=50&seed='.concat(foundUser.username)" width="40" height="40" />
                     </span>
                     <span class="col-8 fw-bold align-self-start text-start pointerOnHover">
                         <span v-if="foundUser.username === user.username" class="text-muted pe-2">
@@ -147,7 +147,7 @@ export const UserProfileContainer = {
             <article class="profile-infos container-fluid" v-if="profileExists">
                 <div class="row row-cols-1 justify-content-start">
                     <div class="col row row-cols-2 row-cols-md-3 text-start align-self-start font-xl">
-                        <img class="col pfp mx-1" :src="'https://api.dicebear.com/5.x/avataaars-neutral/svg?radius=5&seed='.concat(userProfile.username)" />
+                        <img class="col pfp mx-1" :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=5&seed='.concat(userProfile.username)" />
                         <div class="col row row-cols-1 flex-grow-1">
                             <span class="col" v-if="typeof userProfile.firstName !== undefined"> 
                                 {{userProfile.firstName}} {{userProfile.lastName}}
