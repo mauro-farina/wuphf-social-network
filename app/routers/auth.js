@@ -79,8 +79,10 @@ router.post("/signup", sanitizeInputSignup, async (req, res) => {
                 followedUsers : []
             } );
 
-    jwt.sign({ username: req.body.username }, process.env.JWT_SECRET_KEY, { expiresIn: "30d"}, (err,token) => {
-        return res.cookie("auth", token, {httpOnly: true}).redirect("/home");
+    jwt.sign({ username: req.body.username }, process.env.JWT_SECRET_KEY, { expiresIn: "14d"}, (err,token) => {
+        const expDate = new Date();
+        expDate.setDate(expDate.getDate() + 14);
+        return res.cookie("auth", token, {httpOnly: true, expires: expDate }).redirect("/home");
     });
 
 });
@@ -106,8 +108,10 @@ router.post("/signin", sanitizeInputSignin, async (req, res) => {
 
     const compareResult = await bcrypt.compare(req.body.password, alreadyExistingUserQuery.password);
     if(compareResult) {
-        jwt.sign({ username: alreadyExistingUserQuery.username }, process.env.JWT_SECRET_KEY, { expiresIn: "30d"}, (err,token) => {
-            return res.cookie("auth", token, {httpOnly: true}).redirect("/home");
+        jwt.sign({ username: alreadyExistingUserQuery.username }, process.env.JWT_SECRET_KEY, { expiresIn: "14d"}, (err,token) => {
+            const expDate = new Date();
+            expDate.setDate(expDate.getDate() + 14);
+            return res.cookie("auth", token, {httpOnly: true, expires: expDate}).redirect("/home");
         });
     } else {
         return res.status(400).json( { error : `Invalid username or password` } );
