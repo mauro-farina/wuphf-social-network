@@ -50,7 +50,7 @@
                             <li class="nav-item">
                                 <span class="font-xxl" v-if="user.authenticated">Hi, <a @click.prevent="goTo('user/'.concat(user.username))" class="local-primary-text link-no-underline">{{user.username}}</a></span>
                                 <span v-if="!user.authenticated">
-                                    <a href="/" class="link-no-underline nav-link">Signup</a> or <a href="/login" class="link-no-underline nav-link">Login</a>
+                                    <a href="/" class="link-no-underline">Signup</a> or <a href="/login" class="link-no-underline">Login</a>
                                 </span>
                             </li>
                             <li class="nav-item">
