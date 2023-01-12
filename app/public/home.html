@@ -54,7 +54,7 @@
                                 </span>
                             </li>
                             <li class="nav-item">
-                                <a @click.prevent="goTo('feed')">Feed</a>
+                                <a v-if="user.authenticated" @click.prevent="goTo('feed')">Feed</a>
                             </li>
                             <li class="nav-item">
                                 <a v-if="user.authenticated" @click.prevent="backToTop">New message</a>
