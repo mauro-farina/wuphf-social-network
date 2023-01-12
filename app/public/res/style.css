@@ -64,7 +64,7 @@ body {
     overflow-x: hidden;
 }
 
-.nav-item a:hover {
+.pointerOnHover:hover {
     cursor: pointer;
 }
 
@@ -84,7 +84,7 @@ body {
     color: #9D4EDD;
 }
 
-.feed-message {
+.message, .profile-preview-search {
     border-width: 1px 0px 0px 0px;
     border-color: var( --bs-border-color);
     border-style: solid;
@@ -94,26 +94,6 @@ body {
     padding-bottom: 0px;
     overflow-x: hidden;
     max-width: 95vw;
-}
-
-.profile-preview {
-    border-width: 1px 0px 0px 0px;
-    border-color: var( --bs-border-color);
-    border-style: solid;
-    padding-top: 15px;
-    padding-right: 0px;
-    padding-left: 0px;
-    padding-bottom: 0px;
-}
-
-.profile-message {
-    border-width: 1px 0px 0px 0px;
-    border-color: var( --bs-border-color);
-    border-style: solid;
-    padding-top: 15px;
-    padding-right: 0px;
-    padding-left: 0px;
-    padding-bottom: 0px;
 }
 
 #newMessageTextArea {

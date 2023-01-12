@@ -26,54 +26,46 @@ export const FeedContainer = {
     }
 };
 
-export const MessageContainer = { //FeedMessageContainer
+export const MessageContainer = {
     props: {
         user : Object,
         messages : Array
     },
     template: 
         `<div v-for="msg in messages" class="col">
-            <article class="feed-message" :id="msg.messageID">
+            <article class="message" :id="msg.messageID">
                 <message-body :user="user" :message="msg"></message-body>
             </article>
         </div>`
 };
 
-export const MessageBody = { //FeedMessageBody
+export const MessageBody = {
     props: {
         user : Object,
         message : Object
     },
     template:
-        `
-        <!--
-        <button class="btn btn-small feed-message-follow-btn" @click.prevent="toggleFollow(message.username)" v-if="message.username !== user.username" type="submit">
-            <i v-if="user.followedUsers.includes(message.username)" class="bi bi-person-check-fill" :data-follow-icon-for="message.username"></i>
-            <i v-if="!user.followedUsers.includes(message.username)" class="bi bi-person-fill-add" :data-follow-icon-for="message.username"></i>
-        </button>
-        -->
-        <div class="row justify-content-start">
+        `<div class="row justify-content-start">
             <span class="col-auto align-self-start">
                 <img :src="'https://api.dicebear.com/5.x/avataaars-neutral/svg?radius=50&seed='.concat(message.username)" width="40" height="40" />
             </span>
-            <span class="col-8 fw-bold align-self-start text-start">
-                <a @click.prevent="goTo('user/'.concat(message.username))">@{{message.username}}</a>
+            <span class="col-8 align-self-start text-start">
+                <a @click.prevent="goTo('user/'.concat(message.username))" class="fw-bold pointerOnHover local-primary-text link-no-underline">@{{message.username}}</a>
             </span>
         </div>
-        <p class="feed-message-message">
+        <p class="pt-3 px-2">
             {{message.message}}
         </p>
         <div class="row row-cols-2">
             <span class="col-xs- align-self-start">
-                <button class="btn" @click.prevent="toggleLike(message.messageID)" type="submit">
-                    <i v-if="user.likedMessages.includes(message.messageID)" class="bi bi-heart-fill" :data-like-icon-for="message.messageID"></i>
-                    <i v-if="!user.likedMessages.includes(message.messageID)" class="bi bi-heart" :data-like-icon-for="message.messageID"></i>
+                <button class="btn" @click.prevent="toggleLike(message)" type="submit">
+                    <i v-if="message.likedBy.includes(user.username)" class="bi bi-heart-fill" :data-like-icon-for="message.messageID"></i>
+                    <i v-if="!message.likedBy.includes(user.username)" class="bi bi-heart" :data-like-icon-for="message.messageID"></i>
                 </button>
                 <span class="text-muted">{{message.likedBy.length}}</span>
             </span>
             <span class="col align-self-end text-muted text-end">{{convertDate(message.date)}}</span>
-        </div>
-        `,
+        </div>`,
     methods: {
         convertDate : methodsFunctions.convertDate,
         toggleFollow : methodsFunctions.toggleFollow,
@@ -102,14 +94,19 @@ export const SearchUsersContainer = {
     template: 
         `<div v-if="currentView.includes('search?q=')" class="container-fluid row row-cols-1" v-cloak>
             <article class="padding-20">{{searchUserResults.length}} results found</article>
-            <article class="profile-preview col" v-for="foundUser in searchUserResults">
-                <span v-if="foundUser.username === user.username" class="text-muted pe-2">(you)</span>
-                <button class="btn" @click.prevent="toggleFollow(foundUser.username)" type="submit" v-if="user.authenticated && foundUser.username !== user.username">
-                    <i v-if="user.followedUsers.includes(foundUser.username)" class="bi bi-person-check-fill" :data-follow-icon-for="foundUser.username"></i>
-                    <i v-if="!user.followedUsers.includes(foundUser.username)" class="bi bi-person-fill-add" :data-follow-icon-for="foundUser.username"></i>
-                </button>
-                <span><a @click.prevent="goTo('user/'.concat(foundUser.username))">@{{foundUser.username}}</a> - {{foundUser.firstName}} {{foundUser.lastName}}</span> 
-                <p>
+            <article class="profile-preview-search col" v-for="foundUser in searchUserResults">
+                <div class="row justify-content-start">
+                    <span class="col-auto align-self-start">
+                        <img :src="'https://api.dicebear.com/5.x/avataaars-neutral/svg?radius=50&seed='.concat(foundUser.username)" width="40" height="40" />
+                    </span>
+                    <span class="col-8 fw-bold align-self-start text-start pointerOnHover">
+                        <span v-if="foundUser.username === user.username" class="text-muted pe-2">
+                            (you)
+                        </span>
+                        <a @click.prevent="goTo('user/'.concat(foundUser.username))">@{{foundUser.username}}</a>
+                    </span>
+                </div>
+                <p class="px-4 py-1">
                     {{foundUser.bio}}
                 </p>
             </article>
@@ -156,29 +153,10 @@ export const UserProfileContainer = {
                 </p>
             </article>
             <message-container v-if="user.authenticated && profileExists" :user="user" :messages="userMessages"></message-container>
-            <!-- PROFILE MESSAGE -->
         </div>`,
     methods: {
         postNewMessage : methodsFunctions.postNewMessage,
-        getProfileData: async function() {
-            try{
-                let userProfileResult = await (await fetch(`/api/social/users/${this.showProfileOf}`)).json();
-                if(userProfileResult.found) {
-                    this.profileExists = true;
-                    this.userProfile = userProfileResult.user;
-                    this.userMessages = await (await fetch(`/api/social/messages/${this.showProfileOf}`)).json();
-                } else {
-                    this.profileExists = false;
-                    this.userProfile = {};
-                }
-                this.profileReady = true;
-            } catch {
-                this.profileReady = false;
-                this.profileExists = false;
-                this.userProfile = {};
-                return;
-            }
-        },
+        getProfileData : methodsFunctions.getProfileData,
         convertDate : methodsFunctions.convertDate,
         toggleFollow : methodsFunctions.toggleFollow
     },

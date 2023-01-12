@@ -59,7 +59,6 @@ export const methodsFunctions = {
         }
     },
     toggleFollow: async function(usernameToggleFollow) {
-        const usernameLogged = this.user.username;
         const followIconElement = document.querySelector(`[data-follow-icon-for="${usernameToggleFollow}"]`);
         const httpMethod = followIconElement.classList.contains("bi-person-fill-add") ? 'POST' : 'DELETE';
         let toggleFollowFetch = await fetch(`/api/social/followers/${usernameToggleFollow}`, { method: httpMethod });
@@ -69,13 +68,26 @@ export const methodsFunctions = {
                 el.classList.toggle('bi-person-fill-add');
             });
     },
-    toggleLike: async function(messageID) {
-        const usernameLogged = this.user.username;
-        const likeIconElement = document.querySelector(`[data-like-icon-for="${messageID}"]`);
+    toggleLike: async function(message) {
+        const likeIconElement = document.querySelector(`[data-like-icon-for="${message.messageID}"]`);
         const httpMethod = likeIconElement.classList.contains("bi-heart") ? 'POST' : 'DELETE';
-        await fetch(`/api/social/like/${messageID}`, { method: httpMethod });
+        let updateLike = await (await (await fetch(`/api/social/like/${message.messageID}`, { method: httpMethod })).json());
         likeIconElement.classList.toggle("bi-heart-fill");
         likeIconElement.classList.toggle("bi-heart");
+        this.user.likedBy = (await getUserData()).user.likedMessages;
+        
+        // WORKS IN FEED
+        // DOES NOT WORK IN PROFILE -> the like is added/removed, the array DOES update, but the number on display no.
+        
+        if(httpMethod === 'POST') {
+            message.likedBy.push(updateLike.likedToggledBy);
+            console.log(`add ${updateLike.likedToggledBy}`);
+            console.log(`current (local) likes : ${message.likedBy}`);
+        } else {
+            message.likedBy.splice(message.likedBy.indexOf(updateLike.likedToggledBy), 1);
+            console.log(`remove ${updateLike.likedToggledBy}`);
+            console.log(`current (local) likes : ${message.likedBy}`);
+        }
     },
     searchUser: async function() {
         if(this.usernameToLookup.trim().length == 0) {
@@ -86,6 +98,27 @@ export const methodsFunctions = {
         this.searchUserResults = queryResults;
         this.goTo(`search?q=${this.usernameToLookup}`);
         closeNavIfViewportWidthSmall();
+    },
+    getProfileData: async function() {
+        try{
+            let userProfileResult = await (await fetch(`/api/social/users/${this.showProfileOf}`)).json();
+            if(userProfileResult.found) {
+                // update this.user
+                //this.user = await getUserData();
+                this.userMessages = await (await fetch(`/api/social/messages/${this.showProfileOf}`)).json();
+                this.userProfile = userProfileResult.user;
+                this.profileExists = true;
+            } else {
+                this.profileExists = false;
+                this.userProfile = {};
+            }
+            this.profileReady = true;
+        } catch {
+            this.profileReady = false;
+            this.profileExists = false;
+            this.userProfile = {};
+            return;
+        }
     },
     backToTop: function() {
         document.body.scrollTop = 0; // For Safari
