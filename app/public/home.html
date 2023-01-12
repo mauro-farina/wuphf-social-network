@@ -53,14 +53,14 @@
                                     <a href="/" class="link-no-underline">Signup</a> or <a href="/login" class="link-no-underline">Login</a>
                                 </span>
                             </li>
-                            <li class="nav-item">
-                                <a v-if="user.authenticated" @click.prevent="goTo('feed')">Feed</a>
+                            <li v-if="user.authenticated" class="nav-item">
+                                <a @click.prevent="goTo('feed')">Feed</a>
                             </li>
-                            <li class="nav-item">
-                                <a v-if="user.authenticated" @click.prevent="backToTop">New message</a>
+                            <li v-if="user.authenticated" class="nav-item">
+                                <a @click.prevent="backToTop">New message</a>
                             </li>
-                            <li class="nav-item">
-                                <a v-if="user.authenticated" @click.prevent="signOff">Sign off</a>
+                            <li v-if="user.authenticated" class="nav-item">
+                                <a @click.prevent="signOff">Sign off</a>
                             </li>
                             <div class="input-group nav-item">
                                 <input id="searchUserInput" class="form-control" v-if="viewportWidth >= 991.5" v-model="usernameToLookup" @input.prevent="searchUser" placeholder="Search user" type="search" aria-label="Search">
