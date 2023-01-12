@@ -132,7 +132,10 @@ export const UserProfileContainer = {
         return {
             profileReady : false,
             profileExists : false,
-            userFollowers : []
+            userProfile : {},
+            userFollowers : [],
+            userFollowing : [],
+            userMessages : []
         }
     },
     template:
