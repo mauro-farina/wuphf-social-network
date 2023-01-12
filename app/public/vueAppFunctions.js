@@ -75,7 +75,7 @@ export const methodsFunctions = {
         likeIconElement.classList.toggle("bi-heart-fill");
         likeIconElement.classList.toggle("bi-heart");
         this.user.likedBy = (await getUserData()).user.likedMessages;
-        
+
         // WORKS IN FEED
         // DOES NOT WORK IN PROFILE -> the like is added/removed, the array DOES update, but the number on display no.
         
@@ -106,6 +106,8 @@ export const methodsFunctions = {
                 // update this.user
                 //this.user = await getUserData();
                 this.userMessages = await (await fetch(`/api/social/messages/${this.showProfileOf}`)).json();
+                this.userFollowers = await (await fetch(`/api/social/followers/${this.showProfileOf}`)).json();
+                this.userFollowing = await (await fetch(`/api/social/following/${this.showProfileOf}`)).json();
                 this.userProfile = userProfileResult.user;
                 this.profileExists = true;
             } else {
