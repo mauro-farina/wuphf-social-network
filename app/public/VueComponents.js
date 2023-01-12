@@ -141,8 +141,6 @@ export const UserProfileContainer = {
                 '{{showProfileOf}}' is not registered on WUPHF.com.
             </article>
 
-            <!-- - - - -->
-
             <article class="container-fluid" v-if="profileExists">
                 <div class="row row-cols-1 justify-content-start">
                     <div class="col row row-cols-2 row-cols-md-3 text-start align-self-start font-xl">
@@ -162,10 +160,6 @@ export const UserProfileContainer = {
                         <button class="btn" @click.prevent="toggleFollow(userProfile, userFollowers)" type="submit" v-if="user.authenticated && userProfile.username !== user.username">
                             <span v-if="!userFollowers.includes(user.username)">FOLLOW</span>
                             <span v-if="userFollowers.includes(user.username)">FOLLOWING</span>
-                        <!--
-                            <i v-if="userFollowers.includes(user.username)" class="bi bi-person-check-fill" :data-follow-icon-for="userProfile.username"></i>
-                            <i v-if="!userFollowers.includes(user.username)" class="bi bi-person-fill-add" :data-follow-icon-for="userProfile.username"></i>
-                        -->
                         </button>
                     </div>
                     <div class="col text-start align-self-start">
