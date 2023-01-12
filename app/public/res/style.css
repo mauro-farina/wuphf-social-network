@@ -138,6 +138,10 @@ input {
     width: 100px;
 }
 
+#numSearchResultsFound {
+    padding: 20px;
+}
+
 /* TMP BORDERS 
 article {
     box-sizing: border-box;
