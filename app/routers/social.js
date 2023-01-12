@@ -137,6 +137,24 @@ router.post("/messages", validateAuthCookie, sanitizeBodyMessage, async (req, re
 });
 
 
+router.get("/following/:username", sanitizeParamUsername, async (req, res) => { // Users followed by `:username`
+    const mongo = mongoManager.getDB();
+    const queryOptions = {
+        projection : {
+            _id : 0,
+            username : 1,
+            followedUsers : 1
+        }
+    }
+    let followersOfUser = await mongo.collection("follows").findOne({username : req.params.username}, queryOptions);
+    if(followersOfUser){
+        res.json(followersOfUser);
+    } else {
+        res.json({});
+    }
+});
+
+
 router.get("/followers/:username", sanitizeParamUsername, async (req, res) => { // Followers of `:username`
     const mongo = mongoManager.getDB();
     const queryOptions = {
