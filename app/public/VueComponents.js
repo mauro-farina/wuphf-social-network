@@ -167,8 +167,8 @@ export const UserProfileContainer = {
                             <span v-if="userFollowers.includes(user.username)">FOLLOWING</span>
                         </button>
                     </div>
-                    <div class="col text-start align-self-start">
-                        <p class="px-4 py-1">
+                    <div class="col mt-3 mt-1 text-start align-self-start font-l flex-grow-1">
+                        <p>
                             {{userProfile.bio}}
                         </p>
                         <p class="text-start text-muted font-m">
