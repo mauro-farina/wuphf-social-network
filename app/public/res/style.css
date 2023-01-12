@@ -96,6 +96,11 @@ body {
     max-width: 95vw;
 }
 
+.pfp {
+    width: 100px;
+    height: 100px;
+}
+
 #newMessageTextArea {
     resize: none;
     background-color: aliceblue;
@@ -116,10 +121,6 @@ input {
 }
 .nav-icon {
     width: 100px;
-}
-
-.padding-20 {
-    padding: 20px;
 }
 
 /* TMP BORDERS 
