@@ -81,6 +81,24 @@ export const methodsFunctions = {
                         .concat(dateLocalTZ.toDateString().substring(13)); //Jan 13, '23
         }
     },
+    addLinkToTaggedUsers: function(msg) {
+        if(!msg.includes('@')) { return msg; }
+        const commonSymbols = ["'", ",", ";", ":", "?", "!"]
+        for(let submsg of msg.split('@')) {
+            let possibleUsername = submsg.split(' ')[0];
+            for(let symbol of commonSymbols) {
+                if(possibleUsername.includes(symbol)) { 
+                    possibleUsername = possibleUsername.split(symbol)[0];
+                }
+            }
+            if(possibleUsername.length === 0) { continue; }
+            msg = msg.replaceAll(
+                '@'.concat(possibleUsername),
+                `<a href="#/user/${possibleUsername}" class="pointerOnHover local-primary-text link-no-underline">@${possibleUsername}</a>`
+                );
+        }
+        return msg;
+    },
     toggleFollow: async function(userToggleFollow, userToggleFollowCurrentFollowers) {
         const httpMethod = userToggleFollowCurrentFollowers.includes(this.user.username) ? 'DELETE' : 'POST';
         try {

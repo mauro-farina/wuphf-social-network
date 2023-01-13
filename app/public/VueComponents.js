@@ -53,8 +53,8 @@ export const MessageBody = {
                 <a @click.prevent="goTo('/user/'.concat(message.username))" class="fw-bold pointerOnHover local-primary-text link-no-underline">@{{message.username}}</a>
             </span>
         </div>
-        <p class="pt-3 px-2">
-            {{message.message}}
+        <p class="pt-3 px-2" v-html="addLinkToTaggedUsers(message.message)">
+            
         </p>
         <div class="row row-cols-2">
             <span class="col-xs- align-self-start">
@@ -70,7 +70,8 @@ export const MessageBody = {
         convertDate : methodsFunctions.convertDate,
         toggleFollow : methodsFunctions.toggleFollow,
         toggleLike : methodsFunctions.toggleLike,
-        goTo : methodsFunctions.goTo
+        goTo : methodsFunctions.goTo,
+        addLinkToTaggedUsers : methodsFunctions.addLinkToTaggedUsers
     }
 };
 
@@ -118,7 +119,8 @@ export const NewUserRandomMessages = {
         </div>
         `,
     methods: {
-        goTo : methodsFunctions.goTo
+        goTo : methodsFunctions.goTo,
+        addLinkToTaggedUsers : methodsFunctions.addLinkToTaggedUsers
     },
     computed: {
         currentView : computedFunctions.currentView
