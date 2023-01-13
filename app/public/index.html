@@ -56,14 +56,19 @@
                                 <input id="searchUserInput" class="form-control" v-if="!(viewportWidth >= 975)" v-model="usernameToLookup" placeholder="Search user" type="search" aria-label="Search">
                                 <button class="btn btn-success" @click.prevent="searchUser" type="submit" id="searchUserButton"><i class="bi bi-search"></i></button>
                             </div>
-                            <div id="navLiveAlertPlaceholder" class="mt-5 alert alert-warning d-none">Something went wrong.</div>
                         </ul>
                     </div>
 
                 </div>
             </nav>
 
+
             <section class="home-section text-start font-l">
+
+                <div id="navLiveAlertPlaceholder" class="alert alert-warning alert-dismissible d-none" role="alert">
+                    Something went wrong.
+                    <button type="button" class="btn-close btn" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
 
                 <feed-container :user="user" :messages="messages" :current-path="currentPath"></feed-container>
                 <!-- 
@@ -117,13 +122,15 @@
                         this.user = newUserData.user;
                     },
                     signOff: async function() {
-                            const alertPlaceholder = document.getElementById('navLiveAlertPlaceholder');
-                            alertPlaceholder.classList.add("d-none");
                         try{ 
-                            await fetch('/api/auth/signoff');
-                            window.location.href = "/auth/login";
+                            let signoffreq = await fetch('/api/auth/signoff');
+                            if(signoffreq.ok) {
+                                window.location.href = "/auth/login";
+                            } else {
+                                methodsFunctions.somethingWentWrongAlert();
+                            }
                         } catch(err) {
-                            alertPlaceholder.classList.remove("d-none");
+                            methodsFunctions.somethingWentWrongAlert();
                         }
                     },
                     closeNavIfViewportWidthSmall : methodsFunctions.closeNavIfViewportWidthSmall

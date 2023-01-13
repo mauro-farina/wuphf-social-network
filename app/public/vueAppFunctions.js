@@ -23,21 +23,30 @@ export const methodsFunctions = {
     postNewMessage: async function() {
         const newMessageTextarea = document.getElementById('newMessageTextArea');
         const newWoof = newMessageTextarea.value;
+        if(newWoof.trim().length === 0) {
+            return;
+        }
+        try{
+            let postNewWoofRequest = await fetch('/api/social/messages', {
+                method: 'POST',
+                redirect: 'follow',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    "message" : newWoof
+                })
+            });
+            if(!postNewWoofRequest.ok) {
+                somethingWentWrongAlert();
+                // maybe parameter to pass the error
+            }
+        } catch(err) {
+            somethingWentWrongAlert();
+        }
+        
+        newMessageTextarea.value = ""; // erase textarea
 
-        // check length != 0 ---
-        let postNewWoof = await fetch('/api/social/messages', {
-            method: 'POST',
-            redirect: 'follow',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                "message" : newWoof
-            })
-        }).catch(err => console.err(err));
-
-        // erase textarea
-        newMessageTextarea.value = "";
         // add new message to the feed without reloading!
         await fetch(`/api/social/messages/${this.user.username}`)
             .then(res => res.json()).then(msgs => this.messages.unshift(msgs[0])).catch(err => console.error(err));
@@ -60,21 +69,37 @@ export const methodsFunctions = {
     },
     toggleFollow: async function(userToggleFollow, userToggleFollowCurrentFollowers) {
         const httpMethod = userToggleFollowCurrentFollowers.includes(this.user.username) ? 'DELETE' : 'POST';
-        await fetch(`/api/social/followers/${userToggleFollow.username}`, { method: httpMethod });
-        if(userToggleFollowCurrentFollowers.includes(this.user.username)) {
-            userToggleFollowCurrentFollowers.splice(userToggleFollowCurrentFollowers.indexOf(this.user.username), 1);
-        } else {
-            userToggleFollowCurrentFollowers.push(this.user.username);
+        try {
+            let toggleFollowReq = await fetch(`/api/social/followers/${userToggleFollow.username}`, { method: httpMethod });
+            if(toggleFollowReq.ok) {
+                if(userToggleFollowCurrentFollowers.includes(this.user.username)) {
+                    userToggleFollowCurrentFollowers.splice(userToggleFollowCurrentFollowers.indexOf(this.user.username), 1);
+                } else {
+                    userToggleFollowCurrentFollowers.push(this.user.username);
+                }
+            } else {
+                somethingWentWrongAlert();
+            }
+        } catch(err) {
+            somethingWentWrongAlert();
         }
     },
     toggleLike: async function(message) {
         const likeIconElement = document.querySelector(`[data-like-icon-for="${message.messageID}"]`);
         const httpMethod = likeIconElement.classList.contains("bi-heart") ? 'POST' : 'DELETE';
-        let updateLike = await (await (await fetch(`/api/social/like/${message.messageID}`, { method: httpMethod })).json());
-        likeIconElement.classList.toggle("bi-heart-fill");
-        likeIconElement.classList.toggle("bi-heart");
-        this.user.likedBy = (await getUserData()).user.likedMessages;
-
+        try {
+            let updateLikeReq = await fetch(`/api/social/like/${message.messageID}`, { method: httpMethod });
+            if(updateLikeReq.ok) {
+                likeIconElement.classList.toggle("bi-heart");
+                likeIconElement.classList.toggle("bi-heart-fill");
+                this.user.likedBy = (await getUserData()).user.likedMessages;
+            } else {
+                somethingWentWrongAlert();
+            }
+        } catch(err) {
+            somethingWentWrongAlert();
+            return;
+        }
         if(httpMethod === 'POST') {
             message.likedBy.push(updateLike.likedToggledBy);
         } else {
@@ -86,10 +111,18 @@ export const methodsFunctions = {
             this.goTo('/feed');
             this.closeNavIfViewportWidthSmall();
         }
-        let queryResults = await fetch(`/api/social/search?q=${this.usernameToLookup}`).then(res => res.json()).catch(err => console.err(err));
-        if(queryResults.length === undefined) { return; }
-        this.searchUserResults = queryResults;
-        this.goTo(`/search?q=${this.usernameToLookup}`);
+        try {
+            let queryResults = await fetch(`/api/social/search?q=${this.usernameToLookup}`).then(res => res.json()).catch(err => console.err(err));
+            if(queryResults.ok){
+                if(queryResults.length === undefined) { return; }
+                this.searchUserResults = queryResults;
+                this.goTo(`/search?q=${this.usernameToLookup}`);
+            } else {
+                somethingWentWrongAlert();
+            }
+        } catch(err) {
+            somethingWentWrongAlert();
+        }
         this.closeNavIfViewportWidthSmall();
     },
     getProfileData: async function() {
@@ -126,5 +159,10 @@ export const methodsFunctions = {
         if(window.visualViewport.width < 975 && document.getElementById('navbarSupportedContent').classList.contains('show')) {
             document.getElementById('buttonTogglerContainer').firstElementChild.click();
         }
-    }
+    },
+}
+
+function somethingWentWrongAlert() {
+    const alertPlaceholder = document.getElementById('navLiveAlertPlaceholder');
+    alertPlaceholder.classList.remove("d-none");
 }
