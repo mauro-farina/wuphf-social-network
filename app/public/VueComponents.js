@@ -84,6 +84,46 @@ export const LoginSignupMessage = {
         </article>`
 };
 
+export const NewUserRandomMessages = {
+    props: {
+        user : Object,
+        messages : Array,
+        currentPath : String
+    },
+    template: 
+        `
+        <div v-if="user.authenticated && user.followedUsers.length === 0 && messages.length > 0 && (currentView === '/feed' || currentView === '/' || currentView === '')">
+            <article v-cloak>
+                <p>Start following users and personalize your feed!</p>
+            </article>
+            <div>
+                <p>Here are some random <em>Woofs</em> to get you started: </p>
+                <div v-for="msg in messages" class="col">
+                    <article class="message" :id="msg.messageID">
+                        <div class="row justify-content-start">
+                            <span class="col-auto align-self-start">
+                                <img :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=50&seed='.concat(msg.username)" width="40" height="40" />
+                            </span>
+                            <span class="col-8 align-self-start text-start">
+                                <a @click.prevent="goTo('/user/'.concat(msg.username))" class="fw-bold pointerOnHover local-primary-text link-no-underline">@{{msg.username}}</a>
+                            </span>
+                        </div>
+                        <p class="pt-3 px-2">
+                            {{msg.message}}
+                        </p>
+                    </article>
+                </div>
+            </div>
+        </div>
+        `,
+    methods: {
+        goTo : methodsFunctions.goTo
+    },
+    computed: {
+        currentView : computedFunctions.currentView
+    }
+}
+
 export const SearchUsersContainer = {
     props: {
         user : Object,

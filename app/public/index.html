@@ -80,6 +80,8 @@
                     and a special thanks goes to console.log and border: 1px solid red for making this project possible https://www.reddit.com/1086q4s/
                 -->
 
+                <new-user-random-messages :user="user" :messages="randomMessages" :current-path="currentPath"></new-user-random-messages>
+
                 <login-signup-message :user="user"></login-signup-message> 
 
                 <search-users-container :user="user" :username-to-lookup="usernameToLookup" :search-user-results="searchUserResults" :current-path="currentPath"></search-users-container>
@@ -91,7 +93,7 @@
 
         <script type="module">
             import {methodsFunctions, getUserData} from './vueAppFunctions.js';
-            import {FeedContainer, MessageContainer, MessageBody, LoginSignupMessage, SearchUsersContainer, UserProfileContainer} from './VueComponents.js';
+            import {FeedContainer, MessageContainer, MessageBody, LoginSignupMessage, NewUserRandomMessages, SearchUsersContainer, UserProfileContainer} from './VueComponents.js';
 
             const { createApp } = Vue;
             let userData;
@@ -111,12 +113,18 @@
             const data = { 
                 messages : userData.feed,
                 user : userData.user,
+                randomMessages : [],
                 usernameToLookup : "",
                 searchUserResults : [],
                 currentPath : window.location.hash,
                 showProfileOf : "",
                 viewportWidth : window.visualViewport.width
             };
+
+            if(data.messages.length === 0) {
+                let randomMsg = await (await fetch('/api/social/messages?q=random')).json();
+                data.randomMessages = randomMsg;
+            }
 
             const app = createApp({
                 data() {
@@ -188,6 +196,7 @@
             app.component("MessageContainer", MessageContainer);
             app.component("MessageBody", MessageBody);
             app.component("LoginSignupMessage", LoginSignupMessage);
+            app.component("NewUserRandomMessages", NewUserRandomMessages);
             app.component("SearchUsersContainer", SearchUsersContainer);
             app.component("UserProfileContainer", UserProfileContainer);
 
