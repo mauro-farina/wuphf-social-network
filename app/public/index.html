@@ -92,7 +92,7 @@
         </main>
 
         <script type="module">
-            import {methodsFunctions, getUserData} from './vueAppFunctions.js';
+            import {methodsFunctions, getUserData, somethingWentWrongAlert} from './vueAppFunctions.js';
             import {FeedContainer, MessageContainer, MessageBody, LoginSignupMessage, NewUserRandomMessages, SearchUsersContainer, UserProfileContainer} from './VueComponents.js';
 
             const { createApp } = Vue;
@@ -122,8 +122,12 @@
             };
 
             if(data.messages.length === 0) {
-                let randomMsg = await (await fetch('/api/social/messages?q=random')).json();
-                data.randomMessages = randomMsg;
+                try{
+                    let randomMsg = await (await fetch('/api/social/messages?q=random')).json();
+                    data.randomMessages = randomMsg;
+                } catch(err) {
+                    somethingWentWrongAlert();
+                }
             }
 
             const app = createApp({
@@ -145,10 +149,10 @@
                             if(signoffreq.ok) {
                                 window.location.href = "/auth/login";
                             } else {
-                                methodsFunctions.somethingWentWrongAlert();
+                                somethingWentWrongAlert();
                             }
                         } catch(err) {
-                            methodsFunctions.somethingWentWrongAlert();
+                            somethingWentWrongAlert();
                         }
                     },
                     closeNavIfViewportWidthSmall : methodsFunctions.closeNavIfViewportWidthSmall,
