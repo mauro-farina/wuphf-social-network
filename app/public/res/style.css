@@ -175,6 +175,11 @@ section {
         width : 100%;
         max-width: 400px;
     }
+
+    .img-icon-login {
+        width: 70px;
+        height: 70px;
+    }
     
 }
 
@@ -206,6 +211,11 @@ section {
 
     .not-found-img {
         width: 350px;
+    }
+
+    .img-icon-login {
+        width: 120px;
+        height: 120px;
     }
 }
 
