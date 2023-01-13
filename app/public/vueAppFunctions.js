@@ -72,19 +72,13 @@ export const methodsFunctions = {
             .then(res => res.json()).then(msgs => this.messages.unshift(msgs[0])).catch(err => console.error(err));
     },
     convertDate: function(date) {
-        const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-        const dateSplit = date.split('T');
-        const dateYYYYMMDD = dateSplit[0].split('-'); 
-        // 2023-01-07 -> January 7, 2023
-        const datemmDDYYYY = months[parseInt(dateYYYYMMDD[1])-1] 
-                                + " " + dateYYYYMMDD[2]
-                                + ", " + dateYYYYMMDD[0];
-        const dateTime = dateSplit[1].split('.')[0].substring(0,5);
-        const now = new Date();
-        if(Math.abs(now - new Date(date)) / 36e5 < 12) {
-            return dateTime + " GMT";
+        const dateLocalTZ = new Date(date);
+        if(Math.abs(new Date() - dateLocalTZ) / 36e5 < 12) {
+            return dateLocalTZ.toTimeString().split(" GMT")[0].substring(0, 5); //19:35
         } else {
-            return datemmDDYYYY;
+            return dateLocalTZ.toDateString().substring(4,10)
+                        .concat(", '")
+                        .concat(dateLocalTZ.toDateString().substring(13)); //Jan 13, '23
         }
     },
     toggleFollow: async function(userToggleFollow, userToggleFollowCurrentFollowers) {
