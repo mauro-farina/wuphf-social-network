@@ -92,6 +92,9 @@ router.get("/messages/:username", sanitizeParamUsername, async (req, res) => { /
 
 router.get("/messages/:username/:messageID", sanitizeParamUsername, sanitizeParamMessageID, async (req, res) => { // Single message `:messageID` wrote by `:username`
     const mongo = mongoManager.getDB();
+    if(!await mongo.collection("users").findOne({username : req.params.username})) {
+        return res.status(400).json({error : `user ${req.params.username} does not exist`});
+    }
     const query = {
         username : req.params.username, 
         messageID : parseInt(req.params.messageID)
@@ -140,6 +143,9 @@ router.post("/messages", validateAuthCookie, sanitizeBodyMessage, async (req, re
 
 router.get("/following/:username", sanitizeParamUsername, async (req, res) => { // Users followed by `:username`
     const mongo = mongoManager.getDB();
+    if(!await mongo.collection("users").findOne({username : req.params.username})) {
+        return res.status(400).json({error : `user ${req.params.username} does not exist`});
+    }
     const queryOptions = {
         projection : {
             _id : 0,
@@ -158,6 +164,9 @@ router.get("/following/:username", sanitizeParamUsername, async (req, res) => { 
 
 router.get("/followers/:username", sanitizeParamUsername, async (req, res) => { // Followers of `:username`
     const mongo = mongoManager.getDB();
+    if(!await mongo.collection("users").findOne({username : req.params.username})) {
+        return res.status(400).json({error : `user ${req.params.username} does not exist`});
+    }
     const queryOptions = {
         projection : {
             _id : 0,
@@ -177,17 +186,17 @@ router.get("/followers/:username", sanitizeParamUsername, async (req, res) => { 
 router.post("/followers/:username", validateAuthCookie, sanitizeParamUsername, async (req, res) => {   // req.username starts following `:username`
     const cookieUsername = req.username;
     if(cookieUsername.toLowerCase() === req.params.username.toLowerCase()) {
-        return res.json({error : "One cannot follow themselves"});
+        return res.status(400).json({error : "One cannot follow themselves"});
     }
 
     const mongo = mongoManager.getDB();
 
     let getFollowersOfParamsUser = await mongo.collection("follows").findOne({username : req.params.username});
     if(getFollowersOfParamsUser === null) {
-        return res.json({error : `user '${req.params.username}' does not exist`});
+        return res.status(400).json({error : `user '${req.params.username}' does not exist`});
     }
     if(getFollowersOfParamsUser.followers.includes(cookieUsername)) {
-        return res.json({error : `${cookieUsername} is already following ${req.params.username}`})
+        return res.status(400).json({error : `${cookieUsername} is already following ${req.params.username}`})
     }
     
     // `:username` has a new follower: cookieUsername
@@ -206,17 +215,17 @@ router.post("/followers/:username", validateAuthCookie, sanitizeParamUsername, a
 router.delete("/followers/:username", validateAuthCookie, sanitizeParamUsername, async (req, res) => { // req.username stops following `:username`
     const cookieUsername = req.username;
     if(cookieUsername.toLowerCase() === req.params.username.toLowerCase()) {
-        return res.json({error : "One cannot unfollow themself"});
+        return res.status(400).json({error : "One cannot unfollow themself"});
     }
 
     const mongo = mongoManager.getDB();
 
     let getFollowersOfParamsUser = await mongo.collection("follows").findOne({username : req.params.username});
     if(getFollowersOfParamsUser === null) {
-        return res.json({error : `user '${req.params.username}' does not exist`});
+        return res.status(400).json({error : `user '${req.params.username}' does not exist`});
     }
     if(!getFollowersOfParamsUser.followers.includes(cookieUsername)) {
-        return res.json({error : `${cookieUsername} is already not following ${req.params.username}`})
+        return res.status(400).json({error : `${cookieUsername} is already not following ${req.params.username}`})
     }
     // `:username` loses a follower: cookieUsername
     await mongo.collection("follows").updateOne( {username : req.params.username}, { $pull: {followers: cookieUsername} } );
@@ -285,10 +294,10 @@ router.post("/like/:messageID", validateAuthCookie, sanitizeParamMessageID, asyn
 
     let message = await mongo.collection("messages").findOne({messageID : parseInt(req.params.messageID)})
     if(!message) {
-        return res.json({error : `There is no message with ID ${req.params.messageID}`});
+        return res.status(400).json({error : `There is no message with ID ${req.params.messageID}`});
     }
     if(message.likedBy.includes(cookieUsername)) {
-        return res.json({error : `${cookieUsername} already likes message ${req.params.messageID}`});
+        return res.status(400).json({error : `${cookieUsername} already likes message ${req.params.messageID}`});
     }
 
     let pushUsername = await mongo.collection("messages").updateOne( {messageID : parseInt(req.params.messageID)}, {$push: {likedBy: cookieUsername}} );
@@ -309,10 +318,10 @@ router.delete("/like/:messageID", validateAuthCookie, sanitizeParamMessageID, as
 
     let message = await mongo.collection("messages").findOne({messageID : parseInt(req.params.messageID)})
     if(!message) {
-        return res.json({error : `There is no message with ID ${req.params.messageID}`});
+        return res.status(400).json({error : `There is no message with ID ${req.params.messageID}`});
     }
     if(!message.likedBy.includes(cookieUsername)) {
-        return res.json({error : `${cookieUsername} already did not like message ${req.params.messageID}`});
+        return res.status(400).json({error : `${cookieUsername} already did not like message ${req.params.messageID}`});
     }
 
     let pullUsername = await mongo.collection("messages").updateOne( {messageID : parseInt(req.params.messageID)}, {$pull: {likedBy: cookieUsername}} );
@@ -400,11 +409,11 @@ function validateAuthCookie(req, res, next) {
     cookie('auth').escape();
     const auth_cookie = req.cookies.auth;
     if(!auth_cookie) {
-        return res.json({authenticated : false, reason : "No cookie"});
+        return res.status(400).json({authenticated : false, reason : "No cookie"});
     }
     jwt.verify(auth_cookie, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
         if(err) {
-            return res.json({authenticated : false, reason : "Cookie is invalid"});
+            return res.status(400).json({authenticated : false, reason : "Cookie is invalid"});
         }
         req.username = decodedCookie.username;
         next();
