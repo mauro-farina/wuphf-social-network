@@ -23,11 +23,17 @@
     <body data-bs-theme="dark">
     	<main id="app">
             <div class="container-fluid">
-                <div class="container mt-3 text-center">
-                    <form class="rounded-3 mx-auto row row-cols-1 align-items-center" id="login-form">
+                <div class="container my-5 text-center">
+                    <form class="rounded-3 mx-auto pt-5 pb-3 row row-cols-1 align-items-center" id="login-form">
 
-                        <img class="mb-4 img-fluid col" src="./favicon.ico" alt="WUPHF.com">
-
+						<div class="col row justify-content-center">
+							<div class="col-4 mb-4 align-self-end text-end">
+								<img class="img-icon-login end-0" src="../favicon.ico" alt="WUPHF.com">
+							</div>
+							<div class="col-6 mt-3 ms-1 align-self-start text-start">
+								<h1 class="local-primary-text">WUPHF.com</h1>
+							</div>
+						</div>
                         <div id="loginFailedMessageContainer" class="hidden text-danger col mb-3 mt-3 ms-2 me-2">{{errorMessage}}</div>
 
                         <div class="form-floating col mb-3 mt-3 ms-2 me-2">
