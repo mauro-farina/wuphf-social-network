@@ -3,11 +3,11 @@ export async function getUserData() {
     let whoamiResponse = await fetch("/api/social/whoami");
     userData.user = await whoamiResponse.json();
 
-    let feedResponse = await fetch('/api/social/feed');
-    if (!feedResponse.ok) {
-        userData.feed = [];
-    } else {
+    if(userData.user.authenticated){
+        let feedResponse = await fetch('/api/social/feed');
         userData.feed = await feedResponse.json();
+    } else {
+        userData.feed = [];
     }
 
     return userData;
