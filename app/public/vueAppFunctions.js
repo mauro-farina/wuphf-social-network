@@ -187,7 +187,7 @@ export const methodsFunctions = {
     },
 }
 
-function somethingWentWrongAlert() {
+export function somethingWentWrongAlert() {
     const alertPlaceholder = document.getElementById('navLiveAlertPlaceholder');
     alertPlaceholder.classList.remove("d-none");
 }
