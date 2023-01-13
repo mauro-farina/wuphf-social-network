@@ -48,16 +48,16 @@
                     <!--<ul class="nav-list navbar-nav me-auto mt-2" style="flex-direction:column">-->
                         <ul class="nav-list me-auto mt-2 font-xl" style="flex-direction:column" v-cloak>
                             <li class="nav-item">
-                                <span class="font-xxl" v-if="user.authenticated">Hi, <a @click.prevent="goTo('user/'.concat(user.username))" class="local-primary-text link-no-underline pointerOnHover">{{user.username}}</a></span>
+                                <span class="font-xxl" v-if="user.authenticated">Hi, <a @click.prevent="closeNavIfViewportWidthSmall(); goTo('user/'.concat(user.username));" class="local-primary-text link-no-underline pointerOnHover">{{user.username}}</a></span>
                                 <span v-if="!user.authenticated">
                                     <a href="/" class="link-no-underline pointerOnHover">Signup</a> or <a href="/login" class="link-no-underline pointerOnHover">Login</a>
                                 </span>
                             </li>
                             <li v-if="user.authenticated" class="nav-item pointerOnHover">
-                                <a @click.prevent="goTo('feed')">Feed</a>
+                                <a @click.prevent="closeNavIfViewportWidthSmall(); goTo('feed');">Feed</a>
                             </li>
                             <li v-if="user.authenticated" class="nav-item pointerOnHover">
-                                <a @click.prevent="backToTop">New message</a>
+                                <a @click.prevent="closeNavIfViewportWidthSmall(); backToTop();">New message</a>
                             </li>
                             <li v-if="user.authenticated" class="nav-item pointerOnHover">
                                 <a @click.prevent="signOff">Sign off</a>
@@ -132,7 +132,8 @@
                     signOff: async function() {
                         await fetch('/api/auth/signoff');
                         window.location.href = "/login";
-                    }
+                    },
+                    closeNavIfViewportWidthSmall : methodsFunctions.closeNavIfViewportWidthSmall
                 },
                 watch: {
                     currentPath(newValue, oldValue) {

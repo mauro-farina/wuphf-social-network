@@ -84,12 +84,13 @@ export const methodsFunctions = {
     searchUser: async function() {
         if(this.usernameToLookup.trim().length == 0) {
             this.goTo('feed');
+            this.closeNavIfViewportWidthSmall();
         }
         let queryResults = await fetch(`/api/social/search?q=${this.usernameToLookup}`).then(res => res.json()).catch(err => console.err(err));
         if(queryResults.length === undefined) { return; }
         this.searchUserResults = queryResults;
         this.goTo(`search?q=${this.usernameToLookup}`);
-        closeNavIfViewportWidthSmall();
+        this.closeNavIfViewportWidthSmall();
     },
     getProfileData: async function() {
         try{
@@ -117,18 +118,14 @@ export const methodsFunctions = {
     backToTop: function() {
         document.body.scrollTop = 0; // For Safari
         document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
-        closeNavIfViewportWidthSmall();
     },
     goTo: async function(newAnchor) {
         window.location.hash = newAnchor;
-        if(newAnchor === 'feed') {
-            closeNavIfViewportWidthSmall();
+    },
+    closeNavIfViewportWidthSmall: function() {
+        console.log();
+        if(window.visualViewport.width < 975 && document.getElementById('navbarSupportedContent').classList.contains('show')) {
+            document.getElementById('buttonTogglerContainer').firstElementChild.click();
         }
-    }
-}
-
-function closeNavIfViewportWidthSmall() {
-    if(window.visualViewport.width < 975) {
-        document.getElementById('buttonTogglerContainer').firstElementChild.click();
     }
 }
