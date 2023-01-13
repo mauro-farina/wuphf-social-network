@@ -174,7 +174,6 @@ section {
     .not-found-img {
         width : 100%;
         max-width: 400px;
-        margin-top: 20%;
     }
     
 }
@@ -207,8 +206,6 @@ section {
 
     .not-found-img {
         width: 350px;
-        margin-left: 25%;
-        margin-top: 15%;
     }
 }
 

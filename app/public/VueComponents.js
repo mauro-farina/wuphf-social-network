@@ -97,7 +97,9 @@ export const SearchUsersContainer = {
                 <div>
                     {{searchUserResults.length}} results found
                 </div>
-                <img v-if="searchUserResults.length === 0" src="./imgs/escobar.jpg" class="not-found-img"/>
+                <div v-if="searchUserResults.length === 0" class="row justify-content-center my-3">
+                    <img src="./imgs/escobar.jpg" class="not-found-img"/>
+                </div>
             </article>
             <article class="profile-preview-search col" v-for="foundUser in searchUserResults">
                 <div class="row justify-content-start">
