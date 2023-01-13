@@ -94,7 +94,7 @@ export const NewUserRandomMessages = {
         `
         <div v-if="user.authenticated && user.followedUsers.length === 0 && messages.length > 0 && (currentView === '/feed' || currentView === '/' || currentView === '')">
             <article v-cloak>
-                <p>Start following users and personalize your feed!</p>
+                <p>Start following users to personalize your feed!</p>
             </article>
             <div>
                 <p>Here are some random <em>Woofs</em> to get you started: </p>
