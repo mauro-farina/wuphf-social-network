@@ -102,16 +102,16 @@ export const SearchUsersContainer = {
                 </div>
             </article>
             <article class="profile-preview-search col" v-for="foundUser in searchUserResults">
-                <div class="row justify-content-start">
-                    <span class="col-auto align-self-start">
-                        <img :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=50&seed='.concat(foundUser.username)" width="40" height="40" />
-                    </span>
-                    <span class="col-8 align-self-start text-start">
-                        <span v-if="foundUser.username === user.username" class="text-muted pe-2">
-                            (you)
+
+
+                <div class="row row-cols-2 text-start align-self-start">
+                    <img class="col pfp-preview mx-1" :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=5&seed='.concat(foundUser.username)" />
+                    <div class="col row row-cols-1 flex-grow-1">
+                        <span class="col"> 
+                            {{foundUser.firstName}} {{foundUser.lastName}}
                         </span>
-                        <a @click.prevent="goTo('/user/'.concat(foundUser.username))" class="fw-bold pointerOnHover local-primary-text link-no-underline">@{{foundUser.username}}</a>
-                    </span>
+                        <span class="col fw-bold local-primary-text px-3">@{{foundUser.username}}</span>
+                    </div>
                 </div>
                 <p class="px-4 py-1">
                     {{foundUser.bio}}

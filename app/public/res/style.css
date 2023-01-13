@@ -96,9 +96,19 @@ body {
     max-width: 95vw;
 }
 
+.profile-preview-search {
+    padding-right: 15px !important;
+    padding-left: 15px !important;
+}
+
 .pfp {
     width: 100px;
     height: 100px;
+}
+
+.pfp-preview {
+    width: 80px;
+    height: 80px;
 }
 
 #newMessageTextArea {
