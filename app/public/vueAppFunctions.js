@@ -123,7 +123,6 @@ export const methodsFunctions = {
         window.location.hash = newAnchor;
     },
     closeNavIfViewportWidthSmall: function() {
-        console.log();
         if(window.visualViewport.width < 975 && document.getElementById('navbarSupportedContent').classList.contains('show')) {
             document.getElementById('buttonTogglerContainer').firstElementChild.click();
         }

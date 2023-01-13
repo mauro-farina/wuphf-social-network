@@ -21,31 +21,20 @@
         <link rel="stylesheet" href="./res/style.css">
     </head>
     
-    <body data-bs-theme="dark"> <!-- DARK -->
+    <body data-bs-theme="dark">
         
         <main id="app" class="home-main text-bg-dark">
 
             <nav class="home-nav navbar navbar-expand-lg collapse-lg fixed-top">
                 <div class="container-fluid">
-                <!--<div class="container-fluid row flex-lg-column flex-md-row">-->
 
                     <div class="container-fluid" id="buttonTogglerContainer">
-                    <!--<div class="container-fluid col" id="buttonTogglerContainer">-->
                         <button class="navbar-toggler" type="button" data-state="closed" id="toggleNavbarButton" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                             <span class="navbar-toggler-icon"></span>
                         </button>
                     </div>
-                <!-- navbar-brand -->
-                <!--
-                    <div class="container col" id="nav-icon-container"> 
-                        <a class="navbar-brand" href="/home">
-                            <img src="./favicon.ico" class="nav-icon">
-                        </a>
-                    </div>
-                -->
-                <!--<div class="container-fluid collapse navbar-collapse col" id="navbarSupportedContent">-->
+
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <!--<ul class="nav-list navbar-nav me-auto mt-2" style="flex-direction:column">-->
                         <ul class="nav-list me-auto mt-2 font-xl" style="flex-direction:column" v-cloak>
                             <li class="nav-item">
                                 <span class="font-xxl" v-if="user.authenticated">Hi, <a @click.prevent="closeNavIfViewportWidthSmall(); goTo('user/'.concat(user.username));" class="local-primary-text link-no-underline pointerOnHover">{{user.username}}</a></span>
@@ -75,17 +64,14 @@
 
             <section class="home-section text-start font-l">
 
-                <!-- v-if="user.authenticated && currentView === 'feed'" -->
                 <feed-container :user="user" :messages="messages" :current-path="currentPath"></feed-container>
                 <!-- 
                     SHOUTOUT TO FARSAD FAKHIM https://stackoverflow.com/a/47559949
                     and a special thanks goes to console.log and border: 1px solid red for making this project possible https://www.reddit.com/1086q4s/
                 -->
 
-                <!-- v-if="!user.authenticated" -->
                 <login-signup-message :user="user"></login-signup-message> 
 
-                <!-- v-if="showSearch" -->
                 <search-users-container :user="user" :username-to-lookup="usernameToLookup" :search-user-results="searchUserResults" :current-path="currentPath"></search-users-container>
 
                 <user-profile-container :user="user" :current-path="currentPath" :show-profile-of="showProfileOf"></user-profile-container>
@@ -163,19 +149,6 @@
                         this.usernameToLookup = this.currentPath.split('search?q=')[1];
                         this.searchUser();
                     }
-                    /*
-                    const toggleNavbarButton = document.getElementById('toggleNavbarButton');
-                    toggleNavbarButton.addEventListener('click', e => {
-                        e.preventDefault();
-                        if(toggleNavbarButton.getAttribute('data-state') === 'closed') {
-                            toggleNavbarButton.setAttribute('data-state', 'open');
-                            document.getElementsByClassName('home-section')[0].style = "position: fixed";
-                        } else {
-                            toggleNavbarButton.setAttribute('data-state', 'closed');
-                            document.getElementsByClassName('home-section')[0].style = "";
-                        }
-                    });
-                    */
                 }
             });
 
