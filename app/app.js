@@ -26,3 +26,7 @@ app.listen(process.env.PORT, async () => {
     console.log(`listening on port ${process.env.PORT}`);
     await mongoManager.connect().then(console.log("Connected to MongoDB"));
 });
+
+app.get('/auth/signup', (req, res) => {
+    res.redirect('/auth');
+});
