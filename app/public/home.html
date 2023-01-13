@@ -112,7 +112,8 @@
                 usernameToLookup : "",
                 searchUserResults : [],
                 currentPath : window.location.hash,
-                showProfileOf : ""
+                showProfileOf : "",
+                viewportWidth : window.visualViewport.width
             };
 
             const app = createApp({
@@ -140,11 +141,6 @@
                         }
                     }
                 },
-                computed: {
-                    viewportWidth: function() {
-                        return window.visualViewport.width;
-                    }
-                },
                 mounted() {
                     window.addEventListener('hashchange', () => {
                         this.currentPath = window.location.hash; 
@@ -155,6 +151,9 @@
                             this.usernameToLookup = this.currentPath.split('search?q=')[1];
                             this.searchUser();
                         }
+                    });
+                    window.addEventListener('resize', () => {
+                        this.viewportWidth = window.visualViewport.width;
                     });
                     if(this.currentPath.includes('user/')) {
                         this.showProfileOf = this.currentPath.split('/')[1];
