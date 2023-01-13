@@ -42,7 +42,7 @@ const sanitizeQueryQ = [
     query('q').trim().escape()
 ];
 
-router.get("/users/:username", sanitizeParamUsername, async (req, res) => { // Show informationsa about `:username`
+router.get("/users/:username", sanitizeParamUsername, async (req, res) => { // Show informations about `:username`
     const mongo = mongoManager.getDB();
     const queryOptions = {
         projection : {
@@ -133,7 +133,8 @@ router.post("/messages", validateAuthCookie, sanitizeBodyMessage, async (req, re
     }
 
     await mongo.collection("messages").insertOne(newMessage);
-    res.json(newMessage); // _id is sent as well ._.
+    delete newMessage._id;
+    res.json(newMessage);
 });
 
 
@@ -146,9 +147,9 @@ router.get("/following/:username", sanitizeParamUsername, async (req, res) => { 
             followedUsers : 1
         }
     }
-    let followersOfUser = await mongo.collection("follows").findOne({username : req.params.username}, queryOptions);
-    if(followersOfUser){
-        res.json(followersOfUser);
+    let followedUsers = await mongo.collection("follows").findOne({username : req.params.username}, queryOptions);
+    if(followedUsers){
+        res.json(followedUsers);
     } else {
         res.json({});
     }
@@ -175,33 +176,26 @@ router.get("/followers/:username", sanitizeParamUsername, async (req, res) => { 
 
 router.post("/followers/:username", validateAuthCookie, sanitizeParamUsername, async (req, res) => {   // req.username starts following `:username`
     const cookieUsername = req.username;
-    if(cookieUsername === req.params.username) { // is === the best here? maybe tolowercases?
-        return res.status(400).send("One cannot follow themselves");
+    if(cookieUsername.toLowerCase() === req.params.username.toLowerCase()) {
+        return res.json({error : "One cannot follow themselves"});
     }
 
     const mongo = mongoManager.getDB();
 
-    // check if "is already following"
-    
     let getFollowersOfParamsUser = await mongo.collection("follows").findOne({username : req.params.username});
-    if(getFollowersOfParamsUser !== null) {
-        await mongo.collection("follows") // `:username` has a new follower: cookieUsername
-            .updateOne( {username : req.params.username}, { $push: {followers: cookieUsername} } );
-    } else {
-        // weird error i guess, should not happen but you never know
-        // maybe should be handled like: .insertOne(...)
-        return res.status(500).send("error");
+    if(getFollowersOfParamsUser === null) {
+        return res.json({error : `user '${req.params.username}' does not exist`});
     }
+    if(getFollowersOfParamsUser.followers.includes(cookieUsername)) {
+        return res.json({error : `${cookieUsername} is already following ${req.params.username}`})
+    }
+    
+    // `:username` has a new follower: cookieUsername
+    await mongo.collection("follows").updateOne( {username : req.params.username}, { $push: {followers: cookieUsername} } );
 
-    let getFollowedUsersOfCookieUser = await mongo.collection("follows").findOne({username : cookieUsername});
-    if(getFollowedUsersOfCookieUser !== null) {
-        await mongo.collection("follows") // cookieUsername now follows :username
-            .updateOne( {username : cookieUsername}, { $push: {followedUsers: req.params.username} } );
-    } else {
-        // weird error i guess, should not happen but you never know
-        // maybe should be handled like: .insertOne(...)
-        return res.status(500).send("error");
-    }
+    // cookieUsername now follows :username
+    await mongo.collection("follows").updateOne( {username : cookieUsername}, { $push: {followedUsers: req.params.username} } );
+    
     res.status(200).json({
         username : req.params.username,
         newFollower : cookieUsername
@@ -211,23 +205,28 @@ router.post("/followers/:username", validateAuthCookie, sanitizeParamUsername, a
 
 router.delete("/followers/:username", validateAuthCookie, sanitizeParamUsername, async (req, res) => { // req.username stops following `:username`
     const cookieUsername = req.username;
+    if(cookieUsername.toLowerCase() === req.params.username.toLowerCase()) {
+        return res.json({error : "One cannot unfollow themself"});
+    }
+
     const mongo = mongoManager.getDB();
 
-    // check if "is not even following"
-        // as of now: if not following, no errors in mongo or node-app (which is nice)
-    
     let getFollowersOfParamsUser = await mongo.collection("follows").findOne({username : req.params.username});
-    if(getFollowersOfParamsUser !== null) {
-        await mongo.collection("follows") // `:username` loses a follower: cookieUsername
-            .updateOne( {username : req.params.username}, { $pull: {followers: cookieUsername} } );
-    } 
-    let getFollowedUsersOfCookieUser = await mongo.collection("follows").findOne({username : cookieUsername});
-    if(getFollowedUsersOfCookieUser !== null) {
-        await mongo.collection("follows") // cookieUsername stops following :username
-            .updateOne( {username : cookieUsername}, { $pull: {followedUsers: req.params.username} } );
+    if(getFollowersOfParamsUser === null) {
+        return res.json({error : `user '${req.params.username}' does not exist`});
     }
+    if(!getFollowersOfParamsUser.followers.includes(cookieUsername)) {
+        return res.json({error : `${cookieUsername} is already not following ${req.params.username}`})
+    }
+    // `:username` loses a follower: cookieUsername
+    await mongo.collection("follows").updateOne( {username : req.params.username}, { $pull: {followers: cookieUsername} } );
+    // cookieUsername stops following :username
+    await mongo.collection("follows").updateOne( {username : cookieUsername}, { $pull: {followedUsers: req.params.username} } );
     
-    res.send("probably done");
+    res.status(200).json({
+        username : req.params.username,
+        newFollower : cookieUsername
+    });
 });
 
 
@@ -283,25 +282,48 @@ router.get("/feed", validateAuthCookie, async (req, res) => { // List of message
 router.post("/like/:messageID", validateAuthCookie, sanitizeParamMessageID, async (req, res) => { // req.username likes message `:messageID`
     const cookieUsername = req.username;
     const mongo = mongoManager.getDB();
+
+    let message = await mongo.collection("messages").findOne({messageID : parseInt(req.params.messageID)})
+    if(!message) {
+        return res.json({error : `There is no message with ID ${req.params.messageID}`});
+    }
+    if(message.likedBy.includes(cookieUsername)) {
+        return res.json({error : `${cookieUsername} already likes message ${req.params.messageID}`});
+    }
+
     let pushUsername = await mongo.collection("messages").updateOne( {messageID : parseInt(req.params.messageID)}, {$push: {likedBy: cookieUsername}} );
-    res.json({
-        "messageID" : req.params.messageID, 
-        "modified" : pushUsername.modifiedCount === 1 ? true : false,
-        "likeToggledBy" : cookieUsername
-    });
+    if(pushUsername.modifiedCount === 1) {
+        res.json({
+            "messageID" : req.params.messageID,
+            "nowLikedBy" : cookieUsername
+        });
+    } else {
+        res.status(500).json({error : `something went wrong`});
+    }
 });
 
 
 router.delete("/like/:messageID", validateAuthCookie, sanitizeParamMessageID, async (req, res) => { // req.username remove like to message `:messageID`
     const cookieUsername = req.username;
     const mongo = mongoManager.getDB();
+
+    let message = await mongo.collection("messages").findOne({messageID : parseInt(req.params.messageID)})
+    if(!message) {
+        return res.json({error : `There is no message with ID ${req.params.messageID}`});
+    }
+    if(!message.likedBy.includes(cookieUsername)) {
+        return res.json({error : `${cookieUsername} already did not like message ${req.params.messageID}`});
+    }
+
     let pullUsername = await mongo.collection("messages").updateOne( {messageID : parseInt(req.params.messageID)}, {$pull: {likedBy: cookieUsername}} );
-    res.json({
-        "messageID" : req.params.messageID, 
-        "modified" : pullUsername.modifiedCount === 1 ? true : false,
-        "likeToggledBy" : cookieUsername
-    });
-    
+    if(pullUsername.modifiedCount === 1) {
+        res.json({
+            "messageID" : req.params.messageID,
+            "notLikedAnymoreBy" : cookieUsername
+        });
+    } else {
+        res.status(500).json({error : `something went wrong`});
+    } 
 });
 
 
@@ -318,9 +340,7 @@ router.get("/search", sanitizeQueryQ, async (req, res) => { // Search a user bas
             _id : 0,
             username : 1,
             firstName : 1,
-            lastName : 1,
-            bio : 1,
-            signUpDate : 1
+            lastName : 1
         }
     }
     let correspondingUsers = [];
@@ -331,7 +351,6 @@ router.get("/search", sanitizeQueryQ, async (req, res) => { // Search a user bas
             correspondingUsers.push(u);
         }
     });
-    // for each of them, find number of followers and number of following?
     return res.json(correspondingUsers);
 });
 
