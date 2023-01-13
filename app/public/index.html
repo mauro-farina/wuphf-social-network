@@ -53,7 +53,7 @@
                             </li>
                             <div class="input-group nav-item">
                                 <input id="searchUserInput" class="form-control" v-if="viewportWidth >= 975" v-model="usernameToLookup" @input.prevent="searchUser" placeholder="Search user" type="search" aria-label="Search">
-                                <input id="searchUserInput" class="form-control" v-if="!(viewportWidth >= 975)" v-model="usernameToLookup" placeholder="Search user" type="search" aria-label="Search">
+                                <input id="searchUserInput" class="form-control" v-if="!(viewportWidth >= 975)" v-model="usernameToLookup" @keydown="searchByPressingEnter($event)" placeholder="Search user" type="search" aria-label="Search">
                                 <button class="btn btn-success" @click.prevent="searchUser" type="submit" id="searchUserButton"><i class="bi bi-search" style="color: snow"></i></button>
                             </div>
                         </ul>
@@ -143,7 +143,12 @@
                             methodsFunctions.somethingWentWrongAlert();
                         }
                     },
-                    closeNavIfViewportWidthSmall : methodsFunctions.closeNavIfViewportWidthSmall
+                    closeNavIfViewportWidthSmall : methodsFunctions.closeNavIfViewportWidthSmall,
+                    searchByPressingEnter : function(e) {
+                        if(e.key === 'Enter') {
+                            this.searchUser();
+                        }
+                    }
                 },
                 watch: {
                     currentPath(newValue, oldValue) {
