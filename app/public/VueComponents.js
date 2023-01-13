@@ -146,7 +146,10 @@ export const UserProfileContainer = {
     template:
         `<div v-if="profileReady && currentView.includes('user/')" v-cloak>
             <article class="px-5 py-4" v-if="!profileExists">
-                '{{showProfileOf}}' is not registered on WUPHF.com.
+                No one on WUPHF.com has username '{{showProfileOf}}'
+                <div class="row justify-content-center my-3">
+                    <img src="./imgs/spongebob.jpg" class="not-found-img"/>
+                </div>
             </article>
 
             <article class="profile-infos container-fluid" v-if="profileExists">
