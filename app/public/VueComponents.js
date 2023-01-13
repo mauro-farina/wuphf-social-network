@@ -154,7 +154,7 @@ export const UserProfileContainer = {
                     <div class="col row row-cols-2 row-cols-md-3 text-start align-self-start font-xl">
                         <img class="col pfp mx-1" :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=5&seed='.concat(userProfile.username)" />
                         <div class="col row row-cols-1 flex-grow-1">
-                            <span class="col" v-if="typeof userProfile.firstName !== undefined"> 
+                            <span class="col"> 
                                 {{userProfile.firstName}} {{userProfile.lastName}}
                             </span>
                             <span class="col fw-bold local-primary-text px-3">@{{userProfile.username}}</span>
