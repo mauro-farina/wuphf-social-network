@@ -146,6 +146,12 @@
 							// https://stackoverflow.com/q/53945402
 						}
 					}
+				},
+				async mounted() {
+					let checkIfAlreadyAuth = await(await fetch('/api/social/whoami')).json();
+					if(checkIfAlreadyAuth.authenticated) {
+						window.location.href = "/#/feed";
+					}
 				}
 			});
 
