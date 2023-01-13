@@ -148,7 +148,10 @@
                 watch: {
                     currentPath(newValue, oldValue) {
                         if(newValue === '#/feed' || newValue === '#/' || newValue === '#' || newValue === '') {
-                            this.updateUserData();
+                            this.updateUserData(); // updates the feed when coming from another page (user/..., search?q=...)
+                        }
+                        if(!newValue.includes('user/') && oldValue.includes('user/')) {
+                            this.showProfileOf = ""; // this way if one goes back to the same profile, infos will be updated (likes in particular)
                         }
                     }
                 },
