@@ -102,7 +102,7 @@
 								"password" : password
 							})
 						});
-						if(!loginRequest.ok) {
+						if(loginRequest.status === 400) {
 							loginFailedMsgContainer.classList.remove("hidden");
 							let parseErrors = await loginRequest.json();
 							let errorMessageText;
@@ -112,7 +112,8 @@
 								errorMessageText = "Error - refresh the page and try again";
 							}
 							this.errorMessage = errorMessageText;
-						} else { // assuming loginRequest.redirect is true
+						}
+						if(loginRequest.redirected) {
 							window.location.href = loginRequest.url; // technically works
 							// https://stackoverflow.com/q/53945402
 						}
