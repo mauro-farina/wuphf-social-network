@@ -106,11 +106,11 @@ export const SearchUsersContainer = {
                     <span class="col-auto align-self-start">
                         <img :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=50&seed='.concat(foundUser.username)" width="40" height="40" />
                     </span>
-                    <span class="col-8 fw-bold align-self-start text-start pointerOnHover">
+                    <span class="col-8 align-self-start text-start">
                         <span v-if="foundUser.username === user.username" class="text-muted pe-2">
                             (you)
                         </span>
-                        <a @click.prevent="goTo('/user/'.concat(foundUser.username))">@{{foundUser.username}}</a>
+                        <a @click.prevent="goTo('/user/'.concat(foundUser.username))" class="fw-bold pointerOnHover local-primary-text link-no-underline">@{{foundUser.username}}</a>
                     </span>
                 </div>
                 <p class="px-4 py-1">
