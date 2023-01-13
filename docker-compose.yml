@@ -17,3 +17,6 @@ services:
       - ./data:/data/db
     ports:
       - '27017:27017'
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=FramedEmeraldItem
+      - MONGO_INITDB_ROOT_PASSWORD=ShineBrightLike4Diamond
