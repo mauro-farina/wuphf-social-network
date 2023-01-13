@@ -83,13 +83,13 @@ export const methodsFunctions = {
     },
     searchUser: async function() {
         if(this.usernameToLookup.trim().length == 0) {
-            this.goTo('feed');
+            this.goTo('/feed');
             this.closeNavIfViewportWidthSmall();
         }
         let queryResults = await fetch(`/api/social/search?q=${this.usernameToLookup}`).then(res => res.json()).catch(err => console.err(err));
         if(queryResults.length === undefined) { return; }
         this.searchUserResults = queryResults;
-        this.goTo(`search?q=${this.usernameToLookup}`);
+        this.goTo(`/search?q=${this.usernameToLookup}`);
         this.closeNavIfViewportWidthSmall();
     },
     getProfileData: async function() {

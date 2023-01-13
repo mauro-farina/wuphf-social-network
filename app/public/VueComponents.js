@@ -7,7 +7,7 @@ export const FeedContainer = {
         currentPath : String
     },
     template: 
-        `<div v-if="user.authenticated && (currentView === 'feed' || currentView === '')" v-cloak class="row row-cols-1">
+        `<div v-if="user.authenticated && (currentView === '/feed' || currentView === '/' || currentView === '')" v-cloak class="row row-cols-1">
             <article class="col" id="newMessage">
                 <form>
                     <div class="mb-3">
@@ -50,7 +50,7 @@ export const MessageBody = {
                 <img :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=50&seed='.concat(message.username)" width="40" height="40" />
             </span>
             <span class="col-8 align-self-start text-start">
-                <a @click.prevent="goTo('user/'.concat(message.username))" class="fw-bold pointerOnHover local-primary-text link-no-underline">@{{message.username}}</a>
+                <a @click.prevent="goTo('/user/'.concat(message.username))" class="fw-bold pointerOnHover local-primary-text link-no-underline">@{{message.username}}</a>
             </span>
         </div>
         <p class="pt-3 px-2">
@@ -110,7 +110,7 @@ export const SearchUsersContainer = {
                         <span v-if="foundUser.username === user.username" class="text-muted pe-2">
                             (you)
                         </span>
-                        <a @click.prevent="goTo('user/'.concat(foundUser.username))">@{{foundUser.username}}</a>
+                        <a @click.prevent="goTo('/user/'.concat(foundUser.username))">@{{foundUser.username}}</a>
                     </span>
                 </div>
                 <p class="px-4 py-1">
@@ -144,7 +144,7 @@ export const UserProfileContainer = {
         }
     },
     template:
-        `<div v-if="profileReady && currentView.includes('user')" v-cloak>
+        `<div v-if="profileReady && currentView.includes('user/')" v-cloak>
             <article class="px-5 py-4" v-if="!profileExists">
                 '{{showProfileOf}}' is not registered on WUPHF.com.
             </article>

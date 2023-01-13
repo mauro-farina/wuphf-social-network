@@ -89,7 +89,7 @@ router.post("/signup", sanitizeInputSignup, async (req, res) => {
     jwt.sign({ username: req.body.username }, process.env.JWT_SECRET_KEY, { expiresIn: "14d"}, (err,token) => {
         const expDate = new Date();
         expDate.setDate(expDate.getDate() + 14);
-        return res.cookie("auth", token, {httpOnly: true, expires: expDate }).redirect("/home");
+        return res.cookie("auth", token, {httpOnly: true, expires: expDate }).redirect("/#/feed");
     });
 
 });
@@ -118,7 +118,7 @@ router.post("/signin", sanitizeInputSignin, async (req, res) => {
         jwt.sign({ username: alreadyExistingUserQuery.username }, process.env.JWT_SECRET_KEY, { expiresIn: "14d"}, (err,token) => {
             const expDate = new Date();
             expDate.setDate(expDate.getDate() + 14);
-            return res.cookie("auth", token, {httpOnly: true, expires: expDate}).redirect("/home");
+            return res.cookie("auth", token, {httpOnly: true, expires: expDate}).redirect("/#/feed");
         });
     } else {
         return res.status(400).json( { error : `Invalid username or password` } );
