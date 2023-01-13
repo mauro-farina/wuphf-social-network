@@ -102,8 +102,6 @@ export const SearchUsersContainer = {
                 </div>
             </article>
             <article class="profile-preview-search col" v-for="foundUser in searchUserResults">
-
-
                 <div class="row row-cols-2 text-start align-self-start">
                     <img class="col pfp-preview mx-1" :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=5&seed='.concat(foundUser.username)" />
                     <div class="col row row-cols-1 flex-grow-1">
