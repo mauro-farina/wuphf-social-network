@@ -8,7 +8,7 @@ let _db;
 module.exports = {
     getDB: () => _db,
     connect: async () => {
-        await client.connect;
+        await client.connect();
         _db = client.db("wuphf");
     }
 }
