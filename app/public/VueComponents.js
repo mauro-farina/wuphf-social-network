@@ -8,7 +8,7 @@ export const FeedContainer = {
     },
     template: 
         `<div v-if="user.authenticated && (currentView === '/feed' || currentView === '/' || currentView === '')" v-cloak class="row row-cols-1">
-            <article class="col" id="newMessage">
+            <article class="col text-end" id="newMessage">
                 <form>
                     <div class="mb-3">
                         <textarea class="form-control" id="newMessageTextArea" rows="3" placeholder="What's barking through your mind?"></textarea>
@@ -92,6 +92,7 @@ export const NewUserRandomMessages = {
     },
     template: 
         `
+        <hr>
         <div v-if="user.authenticated && user.followedUsers.length === 0 && messages.length > 0 && (currentView === '/feed' || currentView === '/' || currentView === '')">
             <article v-cloak>
                 <p>Start following users to personalize your feed!</p>
