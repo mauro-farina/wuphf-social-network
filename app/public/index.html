@@ -66,8 +66,12 @@
             <section class="home-section text-start font-l">
 
                 <div id="navLiveAlertPlaceholder" class="alert alert-warning alert-dismissible d-none" role="alert">
-                    Something went wrong.
+                    Something went wrong, try refreshing the page.
                     <button type="button" class="btn-close btn" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div id="navLiveDangerAlertPlaceholder" class="alert alert-danger alert-dismissible d-none" role="alert">
+                    Something went very wrong. Try refreshing the page.
                 </div>
 
                 <feed-container :user="user" :messages="messages" :current-path="currentPath"></feed-container>
@@ -90,7 +94,12 @@
             import {FeedContainer, MessageContainer, MessageBody, LoginSignupMessage, SearchUsersContainer, UserProfileContainer} from './VueComponents.js';
 
             const { createApp } = Vue;
-            const userData = await getUserData();
+            try {
+                const userData = await getUserData();
+            } catch(err) {
+                console.error(err);
+                document.getElementById('navLiveDangerAlertPlaceholder').classList.remove('d-none');
+            }
             /*
                 Top level await is a feature available within modules. This means the await keyword can be used. 
                 It allows modules to act as big asynchronous functions meaning code can be evaluated before use in parent modules, 

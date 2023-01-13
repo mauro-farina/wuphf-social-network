@@ -1,11 +1,31 @@
 export async function getUserData() {
     const userData = {};
-    let whoamiResponse = await fetch("/api/social/whoami");
-    userData.user = await whoamiResponse.json();
+    try {
+        let whoamiResponse = await fetch("/api/social/whoami");
+        if(whoamiResponse.status === 200 || whoamiResponse.status === 400) {
+            userData.user = await whoamiResponse.json();
+        } else {
+            somethingWentWrongAlert();
+            throw new Error();
+        }
+    } catch(err) {
+        somethingWentWrongAlert();
+        throw new Error();
+    }
 
     if(userData.user.authenticated){
-        let feedResponse = await fetch('/api/social/feed');
-        userData.feed = await feedResponse.json();
+        try {
+            let feedResponse = await fetch('/api/social/feed');
+            if(feedResponse.ok) {
+                userData.feed = await feedResponse.json();
+            } else {
+                somethingWentWrongAlert();
+                throw new Error();
+            }
+        } catch(err) {
+            somethingWentWrongAlert();
+            throw new Error();
+        }
     } else {
         userData.feed = [];
     }
@@ -92,7 +112,11 @@ export const methodsFunctions = {
             if(updateLikeReq.ok) {
                 likeIconElement.classList.toggle("bi-heart");
                 likeIconElement.classList.toggle("bi-heart-fill");
-                this.user.likedBy = (await getUserData()).user.likedMessages;
+                try {
+                    this.user.likedBy = (await getUserData()).user.likedMessages;
+                } catch(err) {
+                    console.error(err);
+                }
             } else {
                 somethingWentWrongAlert();
             }
@@ -129,8 +153,6 @@ export const methodsFunctions = {
         try{
             let userProfileResult = await (await fetch(`/api/social/users/${this.showProfileOf}`)).json();
             if(userProfileResult.found) {
-                // update this.user
-                //this.user = await getUserData();
                 this.userMessages = await (await fetch(`/api/social/messages/${this.showProfileOf}`)).json();
                 this.userFollowers = (await (await fetch(`/api/social/followers/${this.showProfileOf}`)).json()).followers;
                 this.userFollowing = (await (await fetch(`/api/social/following/${this.showProfileOf}`)).json()).followedUsers;
