@@ -383,7 +383,6 @@ function validateAuthCookie(req, res, next) {
     if(!auth_cookie) {
         return res.json({authenticated : false, reason : "No cookie"});
     }
-    let cookieUsername;
     jwt.verify(auth_cookie, process.env.JWT_SECRET_KEY, (err, decodedCookie) => {
         if(err) {
             return res.json({authenticated : false, reason : "Cookie is invalid"});
