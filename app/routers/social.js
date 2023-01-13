@@ -54,14 +54,19 @@ router.get("/users/:username", sanitizeParamUsername, async (req, res) => { // S
             bio : 1
         }
     };
-    let getUserByUsername = await mongo.collection("users").findOne({username : req.params.username}, queryOptions);
-    if(getUserByUsername) {
-        res.json({
-            found : true,
-            user : getUserByUsername
-        });
-    } else {
-        res.json({found : false});
+    try {
+        let getUserByUsername = await mongo.collection("users").findOne({username : req.params.username}, queryOptions);
+        if(getUserByUsername) {
+            res.json({
+                found : true,
+                user : getUserByUsername
+            });
+        } else {
+            res.json({found : false});
+        }
+    } catch(err) {
+        console.error(`Something went wrong: ${err}`);
+        return res.status(500).json({error : "Server error"});
     }
 });
 
@@ -90,20 +95,25 @@ router.get("/messages", sanitizeQueryQ, async (req, res) => { // Get q (query pa
             likedBy : 1
         }
     }
-    let lastMessage = await mongo.collection("messages").findOne({}, queryOptions);
-    if(!lastMessage) {
-        return res.json({}); // DB is empty!
+    try {
+        let lastMessage = await mongo.collection("messages").findOne({}, queryOptions);
+        if(!lastMessage) {
+            return res.json({}); // DB is empty!
+        }
+        const numberOfMsgs = lastMessage.messageID + 1;
+        let numRandoms = numberOfMsgs < 20 ? Math.floor(numberOfMsgs/2) : 10;
+        const randomMessages = [];
+        for(let i=0; i<numRandoms; i++) {
+            let rnd = Math.floor(Math.random() * numberOfMsgs);
+            let randomMsg = await mongo.collection("messages").findOne({messageID : rnd}, {projection : queryOptions.projection});
+            if(randomMessages.includes(randomMsg)) { i--; }
+            else { randomMessages.push(randomMsg); }
+        }
+        return res.json(randomMessages);
+    } catch(err) {
+        console.error(`Something went wrong: ${err}`);
+        return res.status(500).json({error : "Server error"});
     }
-    const numberOfMsgs = lastMessage.messageID + 1;
-    let numRandoms = numberOfMsgs < 20 ? Math.floor(numberOfMsgs/2) : 10;
-    const randomMessages = [];
-    for(let i=0; i<numRandoms; i++) {
-        let rnd = Math.floor(Math.random() * numberOfMsgs);
-        let randomMsg = await mongo.collection("messages").findOne({messageID : rnd}, {projection : queryOptions.projection});
-        if(randomMessages.includes(randomMsg)) { i--; }
-        else { randomMessages.push(randomMsg); }
-    }
-    return res.json(randomMessages);
 });
 
 
@@ -122,19 +132,30 @@ router.get("/messages/:username", sanitizeParamUsername, async (req, res) => { /
             likedBy : 1
         }
     }
-    let messagesOfUser = await mongo.collection("messages").find({username : req.params.username}, queryOptions).toArray();
-    if(messagesOfUser) {
-        res.json(messagesOfUser);
-    } else {
-        res.json({});
+
+    try {
+        let messagesOfUser = await mongo.collection("messages").find({username : req.params.username}, queryOptions).toArray();
+        if(messagesOfUser) {
+            res.json(messagesOfUser);
+        } else {
+            res.json({});
+        }
+    } catch(err) {
+        console.error(`Something went wrong: ${err}`);
+        return res.status(500).json({error : "Server error"});
     }
 });
 
 
 router.get("/messages/:username/:messageID", sanitizeParamUsername, sanitizeParamMessageID, async (req, res) => { // Single message `:messageID` wrote by `:username`
     const mongo = mongoManager.getDB();
-    if(!await mongo.collection("users").findOne({username : req.params.username})) {
-        return res.status(400).json({error : `user ${req.params.username} does not exist`});
+    try {
+        if(!await mongo.collection("users").findOne({username : req.params.username})) {
+            return res.status(400).json({error : `user ${req.params.username} does not exist`});
+        }
+    } catch(err) {
+        console.error(`Something went wrong: ${err}`);
+        return res.status(500).json({error : "Server error"});
     }
     const query = {
         username : req.params.username, 
@@ -150,11 +171,16 @@ router.get("/messages/:username/:messageID", sanitizeParamUsername, sanitizePara
             likedBy : 1
         }
     }
-    let messagesOfUser = await mongo.collection("messages").findOne(query, queryOptions);
-    if(messagesOfUser) {
-        res.json(messagesOfUser);
-    } else {
-        res.json({});
+    try {
+        let messagesOfUser = await mongo.collection("messages").findOne(query, queryOptions);
+        if(messagesOfUser) {
+            res.json(messagesOfUser);
+        } else {
+            res.json({});
+        }
+    } catch(err) {
+        console.error(`Something went wrong: ${err}`);
+        return res.status(500).json({error : "Server error"});
     }
 });
 
@@ -166,26 +192,36 @@ router.post("/messages", validateAuthCookie, sanitizeBodyMessage, async (req, re
 	}
     const cookieUsername = req.username;
     const mongo = mongoManager.getDB();
-    let lastMessage = await mongo.collection("messages").findOne({},{ sort: {messageID: -1}});
-    let msgID = lastMessage !== null ? lastMessage.messageID+1 : 0;
-    let newMessage = {
-        messageID : msgID,
-        message : req.body.message,
-        username : cookieUsername,
-        date : new Date(),
-        likedBy : []
+    try {
+        let lastMessage = await mongo.collection("messages").findOne({},{ sort: {messageID: -1}});
+        let msgID = lastMessage !== null ? lastMessage.messageID+1 : 0;
+        let newMessage = {
+            messageID : msgID,
+            message : req.body.message,
+            username : cookieUsername,
+            date : new Date(),
+            likedBy : []
+        }
+    
+        await mongo.collection("messages").insertOne(newMessage);
+        delete newMessage._id;
+        res.json(newMessage);
+    } catch(err) {
+        console.error(`Something went wrong: ${err}`);
+        return res.status(500).json({error : "Server error"});
     }
-
-    await mongo.collection("messages").insertOne(newMessage);
-    delete newMessage._id;
-    res.json(newMessage);
 });
 
 
 router.get("/following/:username", sanitizeParamUsername, async (req, res) => { // Users followed by `:username`
     const mongo = mongoManager.getDB();
-    if(!await mongo.collection("users").findOne({username : req.params.username})) {
-        return res.status(400).json({error : `user ${req.params.username} does not exist`});
+    try {
+        if(!await mongo.collection("users").findOne({username : req.params.username})) {
+            return res.status(400).json({error : `user ${req.params.username} does not exist`});
+        }
+    } catch(err) {
+        console.error(`Something went wrong: ${err}`);
+        return res.status(500).json({error : "Server error"});
     }
     const queryOptions = {
         projection : {
@@ -194,19 +230,29 @@ router.get("/following/:username", sanitizeParamUsername, async (req, res) => { 
             followedUsers : 1
         }
     }
-    let followedUsers = await mongo.collection("follows").findOne({username : req.params.username}, queryOptions);
-    if(followedUsers){
-        res.json(followedUsers);
-    } else {
-        res.json({});
+    try {
+        let followedUsers = await mongo.collection("follows").findOne({username : req.params.username}, queryOptions);
+        if(followedUsers){
+            res.json(followedUsers);
+        } else {
+            res.json({});
+        }
+    } catch(err) {
+        console.error(`Something went wrong: ${err}`);
+        return res.status(500).json({error : "Server error"});
     }
 });
 
 
 router.get("/followers/:username", sanitizeParamUsername, async (req, res) => { // Followers of `:username`
     const mongo = mongoManager.getDB();
-    if(!await mongo.collection("users").findOne({username : req.params.username})) {
-        return res.status(400).json({error : `user ${req.params.username} does not exist`});
+    try {
+        if(!await mongo.collection("users").findOne({username : req.params.username})) {
+            return res.status(400).json({error : `user ${req.params.username} does not exist`});
+        }
+    } catch(err) {
+        console.error(`Something went wrong: ${err}`);
+        return res.status(500).json({error : "Server error"});
     }
     const queryOptions = {
         projection : {
@@ -215,11 +261,16 @@ router.get("/followers/:username", sanitizeParamUsername, async (req, res) => { 
             followers : 1
         }
     }
-    let followersOfUser = await mongo.collection("follows").findOne({username : req.params.username}, queryOptions);
-    if(followersOfUser){
-        res.json(followersOfUser);
-    } else {
-        res.json({});
+    try {
+        let followersOfUser = await mongo.collection("follows").findOne({username : req.params.username}, queryOptions);
+        if(followersOfUser){
+            res.json(followersOfUser);
+        } else {
+            res.json({});
+        }
+    } catch(err) {
+        console.error(`Something went wrong: ${err}`);
+        return res.status(500).json({error : "Server error"});
     }
 });
 
@@ -231,25 +282,29 @@ router.post("/followers/:username", validateAuthCookie, sanitizeParamUsername, a
     }
 
     const mongo = mongoManager.getDB();
-
-    let getFollowersOfParamsUser = await mongo.collection("follows").findOne({username : req.params.username});
-    if(getFollowersOfParamsUser === null) {
-        return res.status(400).json({error : `user '${req.params.username}' does not exist`});
-    }
-    if(getFollowersOfParamsUser.followers.includes(cookieUsername)) {
-        return res.status(400).json({error : `${cookieUsername} is already following ${req.params.username}`})
-    }
+    try {
+        let getFollowersOfParamsUser = await mongo.collection("follows").findOne({username : req.params.username});
+        if(getFollowersOfParamsUser === null) {
+            return res.status(400).json({error : `user '${req.params.username}' does not exist`});
+        }
+        if(getFollowersOfParamsUser.followers.includes(cookieUsername)) {
+            return res.status(400).json({error : `${cookieUsername} is already following ${req.params.username}`})
+        }
+        
+        // `:username` has a new follower: cookieUsername
+        await mongo.collection("follows").updateOne( {username : req.params.username}, { $push: {followers: cookieUsername} } );
     
-    // `:username` has a new follower: cookieUsername
-    await mongo.collection("follows").updateOne( {username : req.params.username}, { $push: {followers: cookieUsername} } );
-
-    // cookieUsername now follows :username
-    await mongo.collection("follows").updateOne( {username : cookieUsername}, { $push: {followedUsers: req.params.username} } );
-    
-    res.status(200).json({
-        username : req.params.username,
-        newFollower : cookieUsername
-    });
+        // cookieUsername now follows :username
+        await mongo.collection("follows").updateOne( {username : cookieUsername}, { $push: {followedUsers: req.params.username} } );
+        
+        res.status(200).json({
+            username : req.params.username,
+            newFollower : cookieUsername
+        });
+    } catch(err) {
+        console.error(`Something went wrong: ${err}`);
+        return res.status(500).json({error : "Server error"});
+    }
 });
 
 
@@ -260,23 +315,27 @@ router.delete("/followers/:username", validateAuthCookie, sanitizeParamUsername,
     }
 
     const mongo = mongoManager.getDB();
-
-    let getFollowersOfParamsUser = await mongo.collection("follows").findOne({username : req.params.username});
-    if(getFollowersOfParamsUser === null) {
-        return res.status(400).json({error : `user '${req.params.username}' does not exist`});
+    try {
+        let getFollowersOfParamsUser = await mongo.collection("follows").findOne({username : req.params.username});
+        if(getFollowersOfParamsUser === null) {
+            return res.status(400).json({error : `user '${req.params.username}' does not exist`});
+        }
+        if(!getFollowersOfParamsUser.followers.includes(cookieUsername)) {
+            return res.status(400).json({error : `${cookieUsername} is already not following ${req.params.username}`})
+        }
+        // `:username` loses a follower: cookieUsername
+        await mongo.collection("follows").updateOne( {username : req.params.username}, { $pull: {followers: cookieUsername} } );
+        // cookieUsername stops following :username
+        await mongo.collection("follows").updateOne( {username : cookieUsername}, { $pull: {followedUsers: req.params.username} } );
+        
+        res.status(200).json({
+            username : req.params.username,
+            newFollower : cookieUsername
+        });
+    } catch(err) {
+        console.error(`Something went wrong: ${err}`);
+        return res.status(500).json({error : "Server error"});
     }
-    if(!getFollowersOfParamsUser.followers.includes(cookieUsername)) {
-        return res.status(400).json({error : `${cookieUsername} is already not following ${req.params.username}`})
-    }
-    // `:username` loses a follower: cookieUsername
-    await mongo.collection("follows").updateOne( {username : req.params.username}, { $pull: {followers: cookieUsername} } );
-    // cookieUsername stops following :username
-    await mongo.collection("follows").updateOne( {username : cookieUsername}, { $pull: {followedUsers: req.params.username} } );
-    
-    res.status(200).json({
-        username : req.params.username,
-        newFollower : cookieUsername
-    });
 });
 
 
@@ -292,40 +351,44 @@ router.get("/feed", validateAuthCookie, async (req, res) => { // List of message
             followedUsers : 1
         }
     }
+    try {
+        let followedUsers = await mongo.collection("follows").findOne(queryFollowedUsers, queryFollowedUsersOptions);
+        followedUsers.followedUsers.push(cookieUsername);
+        let feed = [];
+        for(let user of followedUsers.followedUsers) {
+            const queryMessages = {
+                username : user
+            }
+            const queryMessagesOptions = {
+                projection : {
+                    _id : 0,
+                    messageID : 1,
+                    message : 1,
+                    username : 1,
+                    date : 1,
+                    likedBy : 1
+                }
+            }
+            let messagesOfUser = await mongo.collection("messages").find(queryMessages, queryMessagesOptions).toArray();
     
-    let followedUsers = await mongo.collection("follows").findOne(queryFollowedUsers, queryFollowedUsersOptions);
-    followedUsers.followedUsers.push(cookieUsername);
-    let feed = [];
-    for(let user of followedUsers.followedUsers) {
-        const queryMessages = {
-            username : user
-        }
-        const queryMessagesOptions = {
-            projection : {
-                _id : 0,
-                messageID : 1,
-                message : 1,
-                username : 1,
-                date : 1,
-                likedBy : 1
+            for(let messageObject of messagesOfUser) {
+                feed.push(messageObject);
             }
         }
-        let messagesOfUser = await mongo.collection("messages").find(queryMessages, queryMessagesOptions).toArray();
-
-        for(let messageObject of messagesOfUser) {
-            feed.push(messageObject);
-        }
+        feed.sort( (msg1, msg2) => { // cookie preferences : sorting order
+            if(msg1.date > msg2.date) {
+                return -1;
+            } else if(msg1.date < msg2.date) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+        res.json(feed);
+    } catch(err) {
+        console.error(`Something went wrong: ${err}`);
+        return res.status(500).json({error : "Server error"});
     }
-    feed.sort( (msg1, msg2) => { // cookie preferences : sorting order
-        if(msg1.date > msg2.date) {
-            return -1;
-        } else if(msg1.date < msg2.date) {
-            return 1;
-        } else {
-            return 0;
-        }
-    });
-    res.json(feed);
 });
 
 
@@ -333,47 +396,57 @@ router.post("/like/:messageID", validateAuthCookie, sanitizeParamMessageID, asyn
     const cookieUsername = req.username;
     const mongo = mongoManager.getDB();
 
-    let message = await mongo.collection("messages").findOne({messageID : parseInt(req.params.messageID)})
-    if(!message) {
-        return res.status(400).json({error : `There is no message with ID ${req.params.messageID}`});
+    try {
+        let message = await mongo.collection("messages").findOne({messageID : parseInt(req.params.messageID)})
+        if(!message) {
+            return res.status(400).json({error : `There is no message with ID ${req.params.messageID}`});
+        }
+        if(message.likedBy.includes(cookieUsername)) {
+            return res.status(400).json({error : `${cookieUsername} already likes message ${req.params.messageID}`});
+        }
+    
+        let pushUsername = await mongo.collection("messages").updateOne( {messageID : parseInt(req.params.messageID)}, {$push: {likedBy: cookieUsername}} );
+        if(pushUsername.modifiedCount === 1) {
+            res.json({
+                "messageID" : req.params.messageID,
+                "nowLikedBy" : cookieUsername
+            });
+        } else {
+            res.status(500).json({error : `something went wrong`});
+        }
+    } catch(err) {
+        console.error(`Something went wrong: ${err}`);
+        return res.status(500).json({error : "Server error"});
     }
-    if(message.likedBy.includes(cookieUsername)) {
-        return res.status(400).json({error : `${cookieUsername} already likes message ${req.params.messageID}`});
-    }
-
-    let pushUsername = await mongo.collection("messages").updateOne( {messageID : parseInt(req.params.messageID)}, {$push: {likedBy: cookieUsername}} );
-    if(pushUsername.modifiedCount === 1) {
-        res.json({
-            "messageID" : req.params.messageID,
-            "nowLikedBy" : cookieUsername
-        });
-    } else {
-        res.status(500).json({error : `something went wrong`});
-    }
+    
 });
 
 
 router.delete("/like/:messageID", validateAuthCookie, sanitizeParamMessageID, async (req, res) => { // req.username remove like to message `:messageID`
     const cookieUsername = req.username;
     const mongo = mongoManager.getDB();
-
-    let message = await mongo.collection("messages").findOne({messageID : parseInt(req.params.messageID)})
-    if(!message) {
-        return res.status(400).json({error : `There is no message with ID ${req.params.messageID}`});
+    try {
+        let message = await mongo.collection("messages").findOne({messageID : parseInt(req.params.messageID)})
+        if(!message) {
+            return res.status(400).json({error : `There is no message with ID ${req.params.messageID}`});
+        }
+        if(!message.likedBy.includes(cookieUsername)) {
+            return res.status(400).json({error : `${cookieUsername} already did not like message ${req.params.messageID}`});
+        }
+    
+        let pullUsername = await mongo.collection("messages").updateOne( {messageID : parseInt(req.params.messageID)}, {$pull: {likedBy: cookieUsername}} );
+        if(pullUsername.modifiedCount === 1) {
+            res.json({
+                "messageID" : req.params.messageID,
+                "notLikedAnymoreBy" : cookieUsername
+            });
+        } else {
+            res.status(500).json({error : `something went wrong`});
+        } 
+    } catch(err) {
+        console.error(`Something went wrong: ${err}`);
+        return res.status(500).json({error : "Server error"});
     }
-    if(!message.likedBy.includes(cookieUsername)) {
-        return res.status(400).json({error : `${cookieUsername} already did not like message ${req.params.messageID}`});
-    }
-
-    let pullUsername = await mongo.collection("messages").updateOne( {messageID : parseInt(req.params.messageID)}, {$pull: {likedBy: cookieUsername}} );
-    if(pullUsername.modifiedCount === 1) {
-        res.json({
-            "messageID" : req.params.messageID,
-            "notLikedAnymoreBy" : cookieUsername
-        });
-    } else {
-        res.status(500).json({error : `something went wrong`});
-    } 
 });
 
 
@@ -394,14 +467,19 @@ router.get("/search", sanitizeQueryQ, async (req, res) => { // Search a user bas
         }
     }
     let correspondingUsers = [];
-    await mongo.collection("users").find({}, queryOptions).forEach(u => {
-        if(u.username.toLowerCase().includes(req.query.q.toLowerCase())
-                || u.firstName.toLowerCase().includes(req.query.q.toLowerCase()) 
-                || u.lastName.toLowerCase().includes(req.query.q.toLowerCase())) {
-            correspondingUsers.push(u);
-        }
-    });
-    return res.json(correspondingUsers);
+    try {
+        await mongo.collection("users").find({}, queryOptions).forEach(u => {
+            if(u.username.toLowerCase().includes(req.query.q.toLowerCase())
+                    || u.firstName.toLowerCase().includes(req.query.q.toLowerCase()) 
+                    || u.lastName.toLowerCase().includes(req.query.q.toLowerCase())) {
+                correspondingUsers.push(u);
+            }
+        });
+        return res.json(correspondingUsers);
+    } catch(err) {
+        console.error(`Something went wrong: ${err}`);
+        return res.status(500).json({error : "Server error"});
+    }
 });
 
 
@@ -432,17 +510,21 @@ router.get("/whoami", validateAuthCookie, async (req, res) => { // If authentica
             messageID : 1
         }
     }
-
-    let userInfo = await mongo.collection("users").findOne({username : cookieUsername}, queryOptionsUser);
-    let userFollows = await mongo.collection("follows").findOne({username : cookieUsername}, queryOptionsFollows);
-    userInfo.followedUsers = userFollows.followedUsers;
-    userInfo.followers = userFollows.followers;
-    userInfo.likedMessages = [];
-    await mongo.collection("messages").find({likedBy : cookieUsername}, queryOptionsLikes).forEach(msg => {
-        userInfo.likedMessages.push(msg.messageID);
-    });
-    userInfo.authenticated = true;
-    return res.json(userInfo);
+    try {
+        let userInfo = await mongo.collection("users").findOne({username : cookieUsername}, queryOptionsUser);
+        let userFollows = await mongo.collection("follows").findOne({username : cookieUsername}, queryOptionsFollows);
+        userInfo.followedUsers = userFollows.followedUsers;
+        userInfo.followers = userFollows.followers;
+        userInfo.likedMessages = [];
+        await mongo.collection("messages").find({likedBy : cookieUsername}, queryOptionsLikes).forEach(msg => {
+            userInfo.likedMessages.push(msg.messageID);
+        });
+        userInfo.authenticated = true;
+        return res.json(userInfo);
+    } catch(err) {
+        console.error(`Something went wrong: ${err}`);
+        return res.status(500).json({error : "Server error"});
+    }
 });
 
 
