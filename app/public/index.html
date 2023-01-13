@@ -94,8 +94,9 @@
             import {FeedContainer, MessageContainer, MessageBody, LoginSignupMessage, SearchUsersContainer, UserProfileContainer} from './VueComponents.js';
 
             const { createApp } = Vue;
+            let userData;
             try {
-                const userData = await getUserData();
+                userData = await getUserData();
             } catch(err) {
                 console.error(err);
                 document.getElementById('navLiveDangerAlertPlaceholder').classList.remove('d-none');

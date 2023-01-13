@@ -107,8 +107,9 @@ export const methodsFunctions = {
     toggleLike: async function(message) {
         const likeIconElement = document.querySelector(`[data-like-icon-for="${message.messageID}"]`);
         const httpMethod = likeIconElement.classList.contains("bi-heart") ? 'POST' : 'DELETE';
+        let updateLikeReq;
         try {
-            let updateLikeReq = await fetch(`/api/social/like/${message.messageID}`, { method: httpMethod });
+            updateLikeReq = await fetch(`/api/social/like/${message.messageID}`, { method: httpMethod });
             if(updateLikeReq.ok) {
                 likeIconElement.classList.toggle("bi-heart");
                 likeIconElement.classList.toggle("bi-heart-fill");
@@ -124,10 +125,11 @@ export const methodsFunctions = {
             somethingWentWrongAlert();
             return;
         }
+        let updateLikeJson = await updateLikeReq.json();
         if(httpMethod === 'POST') {
-            message.likedBy.push(updateLike.likedToggledBy);
+            message.likedBy.push(updateLikeJson.likedToggledBy);
         } else {
-            message.likedBy.splice(message.likedBy.indexOf(updateLike.likedToggledBy), 1);
+            message.likedBy.splice(message.likedBy.indexOf(updateLikeJson.likedToggledBy), 1);
         }
     },
     searchUser: async function() {
@@ -136,8 +138,9 @@ export const methodsFunctions = {
             this.closeNavIfViewportWidthSmall();
         }
         try {
-            let queryResults = await fetch(`/api/social/search?q=${this.usernameToLookup}`).then(res => res.json()).catch(err => console.err(err));
-            if(queryResults.ok){
+            let queryResultsReq = await fetch(`/api/social/search?q=${this.usernameToLookup}`);
+            if(queryResultsReq.ok){
+                let queryResults = await queryResultsReq.json();
                 if(queryResults.length === undefined) { return; }
                 this.searchUserResults = queryResults;
                 this.goTo(`/search?q=${this.usernameToLookup}`);
