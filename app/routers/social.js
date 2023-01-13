@@ -66,6 +66,47 @@ router.get("/users/:username", sanitizeParamUsername, async (req, res) => { // S
 });
 
 
+router.get("/messages", sanitizeQueryQ, async (req, res) => { // Get q (query parameter) random messages
+    if(req.query.q === undefined) {
+        return res.json({});
+    }
+    if(req.query.q.length === 0) {
+        return res.json({});
+    }
+    if(req.query.q !== 'random') {
+        return res.json({});
+    }
+    const mongo = mongoManager.getDB();
+    const queryOptions = {
+        sort : {
+            messageID : -1
+        },
+        projection : {
+            _id : 0,
+            messageID : 1,
+            message : 1,
+            username : 1,
+            date : 1,
+            likedBy : 1
+        }
+    }
+    let lastMessage = await mongo.collection("messages").findOne({}, queryOptions);
+    if(!lastMessage) {
+        return res.json({}); // DB is empty!
+    }
+    const numberOfMsgs = lastMessage.messageID + 1;
+    let numRandoms = numberOfMsgs < 20 ? Math.floor(numberOfMsgs/2) : 10;
+    const randomMessages = [];
+    for(let i=0; i<numRandoms; i++) {
+        let rnd = Math.floor(Math.random() * numberOfMsgs);
+        let randomMsg = await mongo.collection("messages").findOne({messageID : rnd}, {projection : queryOptions.projection});
+        if(randomMessages.includes(randomMsg)) { i--; }
+        else { randomMessages.push(randomMsg); }
+    }
+    return res.json(randomMessages);
+});
+
+
 router.get("/messages/:username", sanitizeParamUsername, async (req, res) => { // List messages wrote by `:username`
     const mongo = mongoManager.getDB();
     const queryOptions = {
