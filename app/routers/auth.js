@@ -87,6 +87,10 @@ router.post("/signup", sanitizeInputSignup, async (req, res) => {
             } );
 
     jwt.sign({ username: req.body.username }, process.env.JWT_SECRET_KEY, { expiresIn: "14d"}, (err,token) => {
+        if(err){
+            console.log(err);
+            return res.status(500);
+        }
         const expDate = new Date();
         expDate.setDate(expDate.getDate() + 14);
         return res.cookie("auth", token, {httpOnly: true, expires: expDate }).redirect("/#/feed");
@@ -116,6 +120,10 @@ router.post("/signin", sanitizeInputSignin, async (req, res) => {
     const compareResult = await bcrypt.compare(req.body.password, alreadyExistingUserQuery.password);
     if(compareResult) {
         jwt.sign({ username: alreadyExistingUserQuery.username }, process.env.JWT_SECRET_KEY, { expiresIn: "14d"}, (err,token) => {
+            if(err){
+                console.log(err);
+                return res.status(500);
+            }
             const expDate = new Date();
             expDate.setDate(expDate.getDate() + 14);
             return res.cookie("auth", token, {httpOnly: true, expires: expDate}).redirect("/#/feed");
