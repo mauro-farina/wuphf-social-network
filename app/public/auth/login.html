@@ -113,8 +113,8 @@
 							}
 							this.errorMessage = errorMessageText;
 						}
-						if(loginRequest.redirected) {
-							window.location.href = loginRequest.url; // technically works
+						if(loginRequest.ok) {
+							window.location.href = "/#/feed";
 							// https://stackoverflow.com/q/53945402
 						}
 					}

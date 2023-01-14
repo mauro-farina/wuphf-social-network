@@ -142,8 +142,8 @@
 							}
 							this.errorMessage = errorMessageText;
 						}
-						if(signupRequest.redirected) {
-							window.location.href = signupRequest.url; // works, not sure it's the best in terms of XSS-safety
+						if(signupRequest.ok) {
+							window.location.href = "/#/feed";
 							// https://stackoverflow.com/q/53945402
 						}
 					}
