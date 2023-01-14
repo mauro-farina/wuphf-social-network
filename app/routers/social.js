@@ -6,7 +6,6 @@ const bcrypt = require("bcryptjs"); // https://www.npmjs.com/package/bcryptjs
 require("dotenv").config({ path: './private/settings.env' });
 const mongoManager = require("../mongodb-manager.js");
 const { body, param, query, cookie, validationResult } = require('express-validator');
-const e = require("express");
 
 /*
 GET     /api/social/users/:id                   Visualizzazione informazione dell’utente con ID id
