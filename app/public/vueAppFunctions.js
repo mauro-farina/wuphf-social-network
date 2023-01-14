@@ -162,7 +162,7 @@ export const methodsFunctions = {
                 this.messageExists = false;
                 this.userProfile = {};
             } else {
-                // something went wrong!
+                somethingWentWrongAlert();
                 this.messageExists = false;
                 return;
             }
