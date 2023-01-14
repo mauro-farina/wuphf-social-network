@@ -194,6 +194,9 @@ export const methodsFunctions = {
             document.getElementById('buttonTogglerContainer').firstElementChild.click();
         }
     },
+    openSingleMessage: function(message) {
+        window.location.href = `/#/user/${message.username}/msg/${message.messageID}`;
+    }
 }
 
 function goTo(newAnchor) {

@@ -66,9 +66,7 @@ export const MessageBody = {
             <span class="col align-self-end text-muted text-end">{{convertDate(message.date)}}</span>
         </div>`,
     methods: {
-        openSingleMessage: function(message) {
-            window.location.href = `/#/user/${message.username}/msg/${message.messageID}`;
-        },
+        openSingleMessage: methodsFunctions.openSingleMessage,
         convertDate : methodsFunctions.convertDate,
         toggleFollow : methodsFunctions.toggleFollow,
         toggleLike : methodsFunctions.toggleLike,
