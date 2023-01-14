@@ -258,7 +258,21 @@ export const UserProfileContainer = {
         convertDate : methodsFunctions.convertDate,
         toggleFollow : methodsFunctions.toggleFollow
     },
-    watch: {
+    watch: { 
+        currentPath(newValue, oldValue) {
+            /* Why does this piece of code even exist? 
+                ... To solve the following problem: 
+                    - view single message
+                    - click username to go to profile
+                    - currentPath changed, showProfileOf DOESNT
+                    - no fetching for updated info => inconsistency */
+            if(oldValue.includes('/user/') && newValue.includes('/user/') && !newValue.includes('/msg/')) {
+                this.profileReady = false;
+                if(this.showProfileOf !== '') {
+                    this.getProfileData();
+                }
+            }
+        },
         showProfileOf(newValue, oldValue) {
             this.profileReady = false;
             if(newValue !== '') {
@@ -304,32 +318,7 @@ export const SingleMessage = {
             </div>
         </div>`,
     methods: {
-        getSingleMessage: async function() {
-            this.messageReady = false;
-            this.messageExists = false;
-            this.messageToShow = {};
-            try{
-                let messageQuery = await fetch(`/api/social/messages/${this.showProfileOf}/${this.messageId}`);
-                if(messageQuery.ok) {
-                    this.messageToShow = await messageQuery.json();
-                    this.messageExists = true;
-                } else if (messageQuery.status === 400) {
-                    this.messageExists = false;
-                    this.userProfile = {};
-                } else {
-                    // something went wrong!
-                    this.messageExists = false;
-                    console.log("uhm")
-                    return;
-                }
-                this.messageReady = true;
-            } catch {
-                this.messageReady = false;
-                this.messageExists = false;
-                this.messageToShow = {};
-                return;
-            }
-        }
+        getSingleMessage : methodsFunctions.getSingleMessage
     },
     watch: {
         messageId(newValue, oldValue) {

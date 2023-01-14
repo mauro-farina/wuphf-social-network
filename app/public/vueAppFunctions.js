@@ -123,16 +123,18 @@ export const methodsFunctions = {
         try {
             updateLikeReq = await fetch(`/api/social/like/${message.messageID}`, { method: httpMethod });
             if(updateLikeReq.ok) {
-                likeIconElement.classList.toggle("bi-heart");
-                likeIconElement.classList.toggle("bi-heart-fill");
                 try {
                     this.user.likedBy = (await getUserData()).user.likedMessages;
                 } catch(err) {
+                    somethingWentWrongAlert();
                     console.error(err);
                 }
-            } else {
+            } else if(updateLikeReq.status !== 400) {
                 somethingWentWrongAlert();
+                return;
             }
+            likeIconElement.classList.toggle("bi-heart");
+            likeIconElement.classList.toggle("bi-heart-fill");
         } catch(err) {
             somethingWentWrongAlert();
             return;
@@ -142,6 +144,31 @@ export const methodsFunctions = {
             message.likedBy.push(updateLikeJson.likedToggledBy);
         } else {
             message.likedBy.splice(message.likedBy.indexOf(updateLikeJson.likedToggledBy), 1);
+        }
+    },
+    getSingleMessage: async function() {
+        this.messageReady = false;
+        this.messageExists = false;
+        this.messageToShow = {};
+        try{
+            let messageQuery = await fetch(`/api/social/messages/${this.showProfileOf}/${this.messageId}`);
+            if(messageQuery.ok) {
+                this.messageToShow = await messageQuery.json();
+                this.messageExists = true;
+            } else if (messageQuery.status === 400) {
+                this.messageExists = false;
+                this.userProfile = {};
+            } else {
+                // something went wrong!
+                this.messageExists = false;
+                return;
+            }
+            this.messageReady = true;
+        } catch {
+            this.messageReady = false;
+            this.messageExists = false;
+            this.messageToShow = {};
+            return;
         }
     },
     searchUser: async function() {
@@ -165,6 +192,8 @@ export const methodsFunctions = {
         this.closeNavIfViewportWidthSmall();
     },
     getProfileData: async function() {
+        //console.log(this.user.likedMessages);
+        // from single BACK to profile => showProfileOf does NOT change (even thoufh the currentPath/View does) => no fetching for new infos
         try{
             let userProfileResult = await (await fetch(`/api/social/users/${this.showProfileOf}`)).json();
             if(userProfileResult.found) {
