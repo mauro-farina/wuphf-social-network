@@ -7,7 +7,7 @@ export const FeedContainer = {
         currentPath : String
     },
     template: 
-        `<div v-if="user.authenticated && (currentView === '/feed' || currentView === '/' || currentView === '')" v-cloak class="row row-cols-1">
+        `<div v-if="user.authenticated && (currentView === '/feed' || currentView === '/feed/' || currentView === '/' || currentView === '')" v-cloak class="row row-cols-1">
             <article class="col text-end" id="newMessage">
                 <form>
                     <div class="mb-3">
@@ -47,14 +47,13 @@ export const MessageBody = {
     template:
         `<div class="row justify-content-start">
             <span class="col-auto align-self-start">
-                <img :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=50&seed='.concat(message.username)" width="40" height="40" />
+                <a :href="'/#/user/'.concat(message.username)"><img :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=50&seed='.concat(message.username)" width="40" height="40" /></a>
             </span>
             <span class="col-8 align-self-start text-start">
-                <a @click.prevent="goTo('/user/'.concat(message.username))" class="fw-bold pointerOnHover local-primary-text link-no-underline">@{{message.username}}</a>
+                <a :href="'/#/user/'.concat(message.username)" class="fw-bold pointerOnHover local-primary-text link-no-underline">@{{message.username}}</a>
             </span>
         </div>
         <p class="pt-3 px-2" v-html="addLinkToTaggedUsers(message.message)">
-            
         </p>
         <div class="row row-cols-2">
             <span class="col-xs- align-self-start">
@@ -70,7 +69,6 @@ export const MessageBody = {
         convertDate : methodsFunctions.convertDate,
         toggleFollow : methodsFunctions.toggleFollow,
         toggleLike : methodsFunctions.toggleLike,
-        goTo : methodsFunctions.goTo,
         addLinkToTaggedUsers : methodsFunctions.addLinkToTaggedUsers
     }
 };
@@ -94,7 +92,7 @@ export const NewUserRandomMessages = {
     template: 
         `
         <hr>
-        <div v-if="user.authenticated && user.followedUsers.length === 0 && messages.length > 0 && (currentView === '/feed' || currentView === '/' || currentView === '')">
+        <div v-if="user.authenticated && user.followedUsers.length === 0 && messages.length > 0 && (currentView === '/feed' || currentView === '/feed/' || currentView === '/' || currentView === '')">
             <article v-cloak>
                 <p>Start following users to personalize your feed!</p>
             </article>
@@ -107,11 +105,11 @@ export const NewUserRandomMessages = {
                                 <img :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=50&seed='.concat(msg.username)" width="40" height="40" />
                             </span>
                             <span class="col-8 align-self-start text-start">
-                                <a @click.prevent="goTo('/user/'.concat(msg.username))" class="fw-bold pointerOnHover local-primary-text link-no-underline">@{{msg.username}}</a>
+                                <a :href="'/#/user/'.concat(msg.username)" class="fw-bold pointerOnHover local-primary-text link-no-underline">@{{msg.username}}</a>
                             </span>
                         </div>
-                        <p class="pt-3 px-2">
-                            {{msg.message}}
+                        <p class="pt-3 px-2" v-html="addLinkToTaggedUsers(msg.message)">
+                            
                         </p>
                     </article>
                 </div>
@@ -119,7 +117,6 @@ export const NewUserRandomMessages = {
         </div>
         `,
     methods: {
-        goTo : methodsFunctions.goTo,
         addLinkToTaggedUsers : methodsFunctions.addLinkToTaggedUsers
     },
     computed: {
@@ -145,25 +142,28 @@ export const SearchUsersContainer = {
                 </div>
             </article>
             <article class="profile-preview-search col" v-for="foundUser in searchUserResults">
-                <div class="row row-cols-2 text-start align-self-start pointerOnHover" @click.prevent="goTo('/user/'.concat(foundUser.username))">
-                    <img class="col pfp-preview mx-1" :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=5&seed='.concat(foundUser.username)" />
+                <div class="row row-cols-2 text-start align-self-start font-l">
+                    <div class="col mx-1 pfp-preview">
+                        <a :href="'/#/user/'.concat(foundUser.username)">
+                            <img class="pointerOnHover" :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=5&seed='.concat(foundUser.username)" />
+                        </a>
+                    </div>
                     <div class="col row row-cols-1 flex-grow-1">
                         <span class="col"> 
-                            {{foundUser.firstName}} {{foundUser.lastName}}
+                            <a :href="'/#/user/'.concat(foundUser.username)" class="link-no-underline pointerOnHover">{{foundUser.firstName}} {{foundUser.lastName}}</a>
                         </span>
                         <span class="col px-3">
-                           <a class="fw-bold local-primary-text link-no-underline"> @{{foundUser.username}} </a>
+                           <a :href="'/#/user/'.concat(foundUser.username)" class="fw-bold local-primary-text link-no-underline pointerOnHover"> @{{foundUser.username}} </a>
                         </span>
                     </div>
                 </div>
-                <p class="px-4 py-1">
+                <p class="px-4 py-1 font-m">
                     {{foundUser.bio}}
                 </p>
             </article>
         </div>`,
     methods: {
-        toggleFollow : methodsFunctions.toggleFollow,
-        goTo : methodsFunctions.goTo
+        toggleFollow : methodsFunctions.toggleFollow
     },
     computed: {
         currentView : computedFunctions.currentView

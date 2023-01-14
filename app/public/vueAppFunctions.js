@@ -146,7 +146,7 @@ export const methodsFunctions = {
     },
     searchUser: async function() {
         if(this.usernameToLookup.trim().length == 0) {
-            this.goTo('/feed');
+            goTo('/feed');
             this.closeNavIfViewportWidthSmall();
         }
         try {
@@ -155,7 +155,7 @@ export const methodsFunctions = {
                 let queryResults = await queryResultsReq.json();
                 if(queryResults.length === undefined) { return; }
                 this.searchUserResults = queryResults;
-                this.goTo(`/search?q=${this.usernameToLookup}`);
+                goTo(`/search?q=${this.usernameToLookup}`);
             } else {
                 somethingWentWrongAlert();
             }
@@ -189,14 +189,15 @@ export const methodsFunctions = {
         document.body.scrollTop = 0; // For Safari
         document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
     },
-    goTo: async function(newAnchor) {
-        window.location.hash = newAnchor;
-    },
     closeNavIfViewportWidthSmall: function() {
         if(window.visualViewport.width < 975 && document.getElementById('navbarSupportedContent').classList.contains('show')) {
             document.getElementById('buttonTogglerContainer').firstElementChild.click();
         }
     },
+}
+
+function goTo(newAnchor) {
+    window.location.hash = newAnchor;
 }
 
 export function somethingWentWrongAlert() {

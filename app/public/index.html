@@ -37,19 +37,19 @@
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul class="nav-list me-auto mt-2 font-xl" style="flex-direction:column" v-cloak>
                             <li class="nav-item">
-                                <span class="font-xxl" v-if="user.authenticated">Hi, <a @click.prevent="closeNavIfViewportWidthSmall(); goTo('/user/'.concat(user.username));" class="local-primary-text link-no-underline pointerOnHover">{{user.username}}</a></span>
+                                <span class="font-xxl" v-if="user.authenticated">Hi, <a @click="closeNavIfViewportWidthSmall" :href="'/#/user/'.concat(user.username)" class="local-primary-text link-no-underline pointerOnHover">{{user.username}}</a></span>
                                 <span v-if="!user.authenticated">
                                     <a href="/auth/" class="link-no-underline pointerOnHover">Signup</a> or <a href="/auth/login" class="link-no-underline pointerOnHover">Login</a>
                                 </span>
                             </li>
-                            <li v-if="user.authenticated" class="nav-item pointerOnHover">
-                                <a @click.prevent="closeNavIfViewportWidthSmall(); goTo('/feed');">Feed</a>
+                            <li v-if="user.authenticated" class="nav-item">
+                                <a href="/#/feed" class="pointerOnHover link-no-underline text-bg-dark" @click="closeNavIfViewportWidthSmall">Feed</a>
                             </li>
-                            <li v-if="user.authenticated" class="nav-item pointerOnHover">
-                                <a @click.prevent="closeNavIfViewportWidthSmall(); backToTop();">New message</a>
+                            <li v-if="user.authenticated" class="nav-item">
+                                <a @click.prevent="closeNavIfViewportWidthSmall(); backToTop();" class="pointerOnHover link-no-underline text-bg-dark">New message</a>
                             </li>
-                            <li v-if="user.authenticated" class="nav-item pointerOnHover">
-                                <a @click.prevent="signOff">Sign off</a>
+                            <li v-if="user.authenticated" class="nav-item">
+                                <a @click.prevent="signOff" class="pointerOnHover link-no-underline text-bg-dark">Sign off</a>
                             </li>
                             <div class="input-group nav-item">
                                 <input id="searchUserInput" class="form-control" v-if="viewportWidth >= 975" v-model="usernameToLookup" @input.prevent="searchUser" placeholder="Search user" type="search" aria-label="Search">
@@ -75,10 +75,6 @@
                 </div>
 
                 <feed-container :user="user" :messages="messages" :current-path="currentPath"></feed-container>
-                <!-- 
-                    SHOUTOUT TO FARSAD FAKHIM https://stackoverflow.com/a/47559949
-                    and a special thanks goes to console.log and border: 1px solid red for making this project possible https://www.reddit.com/1086q4s/
-                -->
 
                 <new-user-random-messages :user="user" :messages="randomMessages" :current-path="currentPath"></new-user-random-messages>
 
@@ -137,7 +133,6 @@
                 methods: {
                     backToTop : methodsFunctions.backToTop,
                     searchUser : methodsFunctions.searchUser,
-                    goTo : methodsFunctions.goTo,
                     updateUserData: async function() {
                         let newUserData = await getUserData();
                         this.messages = newUserData.feed;
