@@ -107,7 +107,6 @@ router.post("/signup", sanitizeInputSignup, async (req, res) => {
 
 
 router.post("/signin", sanitizeInputSignin, async (req, res) => {
-    console.log("signin");
     const sanitizeInputErrors = validationResult(req);
 	if (!sanitizeInputErrors.isEmpty()) {
         return res.status(400).json({ error : sanitizeInputErrors.array()[0].msg });
@@ -116,12 +115,8 @@ router.post("/signin", sanitizeInputSignin, async (req, res) => {
     if(req.body == undefined) {
         return res.status(400).json({error : "Content-Type in the HTTP POST Request has to be application/json"});
     }
-    console.log("pre check guud");
 
     const mongo = mongoManager.getDB();
-
-    console.log("got db");
-
 
     const usernameRegex = new RegExp(["^", req.body.username, "$"].join(""), "i");
     let alreadyExistingUserQuery;
@@ -135,22 +130,14 @@ router.post("/signin", sanitizeInputSignin, async (req, res) => {
         return res.status(500).json({error : "Server error"});
     }
 
-    console.log("past exist query");
-
-
     try {
         const compareResult = await bcrypt.compare(req.body.password, alreadyExistingUserQuery.password);
-        console.log("compared");
-
         if(compareResult) {
-            console.log("it went well");
-
             jwt.sign({ username: alreadyExistingUserQuery.username }, process.env.JWT_SECRET_KEY, { expiresIn: "14d"}, (err,token) => {
                 if(err) {
                     console.log(err);
                     return res.status(500).json({error : "Server error"});
                 }
-                console.log("now we return");
                 const expDate = new Date();
                 expDate.setDate(expDate.getDate() + 14);
                 return res
