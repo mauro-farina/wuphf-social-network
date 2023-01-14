@@ -8,7 +8,7 @@ export const FeedContainer = {
     },
     template: 
         `<div v-if="user.authenticated && (currentView === '/feed' || currentView === '/feed/' || currentView === '/' || currentView === '')" v-cloak class="row row-cols-1">
-            <article class="col text-end" id="newMessage">
+            <article class="col text-end mb-3" id="newMessage">
                 <form>
                     <div class="mb-3">
                         <textarea class="form-control" id="newMessageTextArea" rows="3" placeholder="What's barking through your mind?"></textarea>
@@ -57,7 +57,7 @@ export const MessageBody = {
         </p>
         <div class="row row-cols-2">
             <span class="col-xs- align-self-start">
-                <button class="btn" @click.prevent="toggleLike(message)" type="submit">
+                <button class="btn btn-lg" @click.prevent="toggleLike(message)" type="submit">
                     <i v-if="message.likedBy.includes(user.username)" class="bi bi-heart-fill" :data-like-icon-for="message.messageID"></i>
                     <i v-if="!message.likedBy.includes(user.username)" class="bi bi-heart" :data-like-icon-for="message.messageID"></i>
                 </button>
