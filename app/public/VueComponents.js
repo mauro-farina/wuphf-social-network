@@ -115,9 +115,6 @@ export const NewUser = {
                 <random-messages :messages="messages"></random-messages>
             </div>
         </div>`,
-    methods: {
-        addLinkToTaggedUsers : methodsFunctions.addLinkToTaggedUsers
-    },
     computed: {
         currentView : computedFunctions.currentView
     }
@@ -139,12 +136,13 @@ export const RandomMessages = {
                         <a :href="'/#/user/'.concat(msg.username)" class="fw-bold pointerOnHover local-primary-text link-no-underline">@{{msg.username}}</a>
                     </span>
                 </div>
-                <p class="pt-3 px-2" v-html="addLinkToTaggedUsers(msg.message)">
+                <p class="pt-3 px-2" v-html="addLinkToTaggedUsers(msg.message)" @click="openSingleMessage(message)">
                 </p>
             </article>
         </div>`,
     methods: {
-        addLinkToTaggedUsers : methodsFunctions.addLinkToTaggedUsers
+        addLinkToTaggedUsers : methodsFunctions.addLinkToTaggedUsers,
+        openSingleMessage : methodsFunctions.openSingleMessage
     }
 }
 
