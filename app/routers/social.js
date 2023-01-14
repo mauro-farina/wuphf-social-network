@@ -71,7 +71,7 @@ router.get("/users/:username", sanitizeParamUsername, async (req, res) => { // S
 });
 
 
-router.get("/messages", sanitizeQueryQ, async (req, res) => { // Get q (query parameter) random messages
+router.get("/messages", sanitizeQueryQ, async (req, res) => { // Get some random messages if ?q=random
     if(req.query.q === undefined) {
         return res.json({});
     }
@@ -101,12 +101,12 @@ router.get("/messages", sanitizeQueryQ, async (req, res) => { // Get q (query pa
             return res.json({}); // DB is empty!
         }
         const numberOfMsgs = lastMessage.messageID + 1;
-        let numRandoms = numberOfMsgs < 20 ? Math.floor(numberOfMsgs/2) : 10;
+        let numRandoms = numberOfMsgs < 20 ? Math.max(1,Math.floor(numberOfMsgs/3)) : 10;
         const randomMessages = [];
         for(let i=0; i<numRandoms; i++) {
             let rnd = Math.floor(Math.random() * numberOfMsgs);
             let randomMsg = await mongo.collection("messages").findOne({messageID : rnd}, {projection : queryOptions.projection});
-            if(randomMessages.includes(randomMsg)) { i--; }
+            if(randomMessages.includes(randomMsg)) { i--; continue; }
             else { randomMessages.push(randomMsg); }
         }
         return res.json(randomMessages);
