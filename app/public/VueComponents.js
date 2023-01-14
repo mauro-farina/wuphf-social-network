@@ -62,9 +62,12 @@ export const MessageBody = {
         </p>
         <div class="row row-cols-2">
             <span class="col-xs- align-self-start">
-                <button class="btn btn-lg" @click.prevent="toggleLike(message)" type="submit">
+                <button v-if="user.authenticated" class="btn btn-lg" @click.prevent="toggleLike(message)" type="submit">
                     <i v-if="message.likedBy.includes(user.username)" class="bi bi-heart-fill" :data-like-icon-for="message.messageID"></i>
                     <i v-if="!message.likedBy.includes(user.username)" class="bi bi-heart" :data-like-icon-for="message.messageID"></i>
+                </button>
+                <button v-if="!user.authenticated" class="btn btn-lg">
+                    <i class="bi bi-heart-fill"></i>
                 </button>
                 <span class="text-muted">{{message.likedBy.length}}</span>
             </span>
