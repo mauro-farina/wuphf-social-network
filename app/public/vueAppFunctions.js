@@ -100,7 +100,7 @@ export const methodsFunctions = {
         return msg;
     },
     copyMessageUrlToClipboard : function(msg) {
-        navigator.clipboard.writeText(`http://domainName/#/user/${msg.username}/msg/${msg.messageID}`);
+        navigator.clipboard.writeText(`http://localhost:8080/#/user/${msg.username}/msg/${msg.messageID}`);
     },
     toggleFollow: async function(userToggleFollow, userToggleFollowCurrentFollowers) {
         const httpMethod = userToggleFollowCurrentFollowers.includes(this.user.username) ? 'DELETE' : 'POST';
