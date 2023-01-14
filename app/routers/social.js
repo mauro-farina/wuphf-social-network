@@ -54,8 +54,9 @@ router.get("/users/:username", sanitizeParamUsername, async (req, res) => { // S
             bio : 1
         }
     };
+    const usernameRegex = new RegExp(["^", req.params.username, "$"].join(""), "i");
     try {
-        let getUserByUsername = await mongo.collection("users").findOne({username : req.params.username}, queryOptions);
+        let getUserByUsername = await mongo.collection("users").findOne({username : usernameRegex}, queryOptions);
         if(getUserByUsername) {
             res.json({
                 found : true,
@@ -138,9 +139,9 @@ router.get("/messages/:username", sanitizeParamUsername, async (req, res) => { /
             likedBy : 1
         }
     }
-
+    const usernameRegex = new RegExp(["^", req.params.username, "$"].join(""), "i");
     try {
-        let messagesOfUser = await mongo.collection("messages").find({username : req.params.username}, queryOptions).toArray();
+        let messagesOfUser = await mongo.collection("messages").find({username : usernameRegex}, queryOptions).toArray();
         if(messagesOfUser) {
             res.json(messagesOfUser);
         } else {
@@ -155,8 +156,9 @@ router.get("/messages/:username", sanitizeParamUsername, async (req, res) => { /
 
 router.get("/messages/:username/:messageID", sanitizeParamUsername, sanitizeParamMessageID, async (req, res) => { // Single message `:messageID` wrote by `:username`
     const mongo = mongoManager.getDB();
+    const usernameRegex = new RegExp(["^", req.params.username, "$"].join(""), "i");
     try {
-        if(!await mongo.collection("users").findOne({username : req.params.username})) {
+        if(!await mongo.collection("users").findOne({username : usernameRegex})) {
             return res.status(400).json({error : `user ${req.params.username} does not exist`});
         }
     } catch(err) {
@@ -164,7 +166,7 @@ router.get("/messages/:username/:messageID", sanitizeParamUsername, sanitizePara
         return res.status(500).json({error : "Server error"});
     }
     const query = {
-        username : req.params.username, 
+        username : usernameRegex, 
         messageID : parseInt(req.params.messageID)
     }
     const queryOptions = {
@@ -221,8 +223,9 @@ router.post("/messages", validateAuthCookie, sanitizeBodyMessage, async (req, re
 
 router.get("/following/:username", sanitizeParamUsername, async (req, res) => { // Users followed by `:username`
     const mongo = mongoManager.getDB();
+    const usernameRegex = new RegExp(["^", req.params.username, "$"].join(""), "i");
     try {
-        if(!await mongo.collection("users").findOne({username : req.params.username})) {
+        if(!await mongo.collection("users").findOne({username : usernameRegex})) {
             return res.status(400).json({error : `user ${req.params.username} does not exist`});
         }
     } catch(err) {
@@ -237,7 +240,7 @@ router.get("/following/:username", sanitizeParamUsername, async (req, res) => { 
         }
     }
     try {
-        let followedUsers = await mongo.collection("follows").findOne({username : req.params.username}, queryOptions);
+        let followedUsers = await mongo.collection("follows").findOne({username : usernameRegex}, queryOptions);
         if(followedUsers){
             res.json(followedUsers);
         } else {
@@ -252,8 +255,9 @@ router.get("/following/:username", sanitizeParamUsername, async (req, res) => { 
 
 router.get("/followers/:username", sanitizeParamUsername, async (req, res) => { // Followers of `:username`
     const mongo = mongoManager.getDB();
+    const usernameRegex = new RegExp(["^", req.params.username, "$"].join(""), "i");
     try {
-        if(!await mongo.collection("users").findOne({username : req.params.username})) {
+        if(!await mongo.collection("users").findOne({username : usernameRegex})) {
             return res.status(400).json({error : `user ${req.params.username} does not exist`});
         }
     } catch(err) {
@@ -268,7 +272,7 @@ router.get("/followers/:username", sanitizeParamUsername, async (req, res) => { 
         }
     }
     try {
-        let followersOfUser = await mongo.collection("follows").findOne({username : req.params.username}, queryOptions);
+        let followersOfUser = await mongo.collection("follows").findOne({username : usernameRegex}, queryOptions);
         if(followersOfUser){
             res.json(followersOfUser);
         } else {
@@ -283,13 +287,14 @@ router.get("/followers/:username", sanitizeParamUsername, async (req, res) => { 
 
 router.post("/followers/:username", validateAuthCookie, sanitizeParamUsername, async (req, res) => {   // req.username starts following `:username`
     const cookieUsername = req.username;
+    const usernameRegex = new RegExp(["^", req.params.username, "$"].join(""), "i");
     if(cookieUsername.toLowerCase() === req.params.username.toLowerCase()) {
         return res.status(400).json({error : "One cannot follow themselves"});
     }
 
     const mongo = mongoManager.getDB();
     try {
-        let getFollowersOfParamsUser = await mongo.collection("follows").findOne({username : req.params.username});
+        let getFollowersOfParamsUser = await mongo.collection("follows").findOne({username : usernameRegex});
         if(getFollowersOfParamsUser === null) {
             return res.status(400).json({error : `user '${req.params.username}' does not exist`});
         }
@@ -298,7 +303,7 @@ router.post("/followers/:username", validateAuthCookie, sanitizeParamUsername, a
         }
         
         // `:username` has a new follower: cookieUsername
-        await mongo.collection("follows").updateOne( {username : req.params.username}, { $push: {followers: cookieUsername} } );
+        await mongo.collection("follows").updateOne( {username : usernameRegex}, { $push: {followers: cookieUsername} } );
     
         // cookieUsername now follows :username
         await mongo.collection("follows").updateOne( {username : cookieUsername}, { $push: {followedUsers: req.params.username} } );
@@ -319,10 +324,10 @@ router.delete("/followers/:username", validateAuthCookie, sanitizeParamUsername,
     if(cookieUsername.toLowerCase() === req.params.username.toLowerCase()) {
         return res.status(400).json({error : "One cannot unfollow themself"});
     }
-
+    const usernameRegex = new RegExp(["^", req.params.username, "$"].join(""), "i");
     const mongo = mongoManager.getDB();
     try {
-        let getFollowersOfParamsUser = await mongo.collection("follows").findOne({username : req.params.username});
+        let getFollowersOfParamsUser = await mongo.collection("follows").findOne({username : usernameRegex});
         if(getFollowersOfParamsUser === null) {
             return res.status(400).json({error : `user '${req.params.username}' does not exist`});
         }
@@ -330,7 +335,7 @@ router.delete("/followers/:username", validateAuthCookie, sanitizeParamUsername,
             return res.status(400).json({error : `${cookieUsername} is already not following ${req.params.username}`})
         }
         // `:username` loses a follower: cookieUsername
-        await mongo.collection("follows").updateOne( {username : req.params.username}, { $pull: {followers: cookieUsername} } );
+        await mongo.collection("follows").updateOne( {username : usernameRegex}, { $pull: {followers: cookieUsername} } );
         // cookieUsername stops following :username
         await mongo.collection("follows").updateOne( {username : cookieUsername}, { $pull: {followedUsers: req.params.username} } );
         
