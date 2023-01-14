@@ -75,47 +75,43 @@ export const MessageBody = {
 
 export const LoginSignupMessage = {
     props: {
-        user : Object
+        user : Object,
+        messages : Array,
+        currentPath : String
     },
     template: 
-        `<article v-if="!user.authenticated" v-cloak>
-            Create an account to start following users and personalize your feed!
-        </article>`
+        `<div v-if="!user.authenticated" v-cloak>
+            <article v-if="!user.authenticated" class="my-3" v-cloak>
+                Create an account to start following users and personalize your feed!
+                <hr v-if="!currentView.includes('feed')">
+            </article>
+            <div v-if="messages.length > 0 && (currentView === '/feed' || currentView === '/feed/' || currentView === '/' || currentView === '')">
+                <p>In the meantime, enjoy some <em>Woofs</em></p>
+                <random-messages :messages="messages"></random-messages>
+            </div>
+        </div>`,
+    computed: {
+        currentView : computedFunctions.currentView
+    }
 };
 
-export const NewUserRandomMessages = {
+export const NewUser = {
     props: {
         user : Object,
         messages : Array,
         currentPath : String
     },
     template: 
-        `
-        <hr>
+        `<hr>
         <div v-if="user.authenticated && user.followedUsers.length === 0 && messages.length > 0 && (currentView === '/feed' || currentView === '/feed/' || currentView === '/' || currentView === '')">
             <article v-cloak>
                 <p>Start following users to personalize your feed!</p>
             </article>
             <div>
                 <p>Here are some random <em>Woofs</em> to get you started: </p>
-                <div v-for="msg in messages" class="col">
-                    <article class="message" :id="msg.messageID">
-                        <div class="row justify-content-start">
-                            <span class="col-auto align-self-start">
-                                <img :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=50&seed='.concat(msg.username)" width="40" height="40" />
-                            </span>
-                            <span class="col-8 align-self-start text-start">
-                                <a :href="'/#/user/'.concat(msg.username)" class="fw-bold pointerOnHover local-primary-text link-no-underline">@{{msg.username}}</a>
-                            </span>
-                        </div>
-                        <p class="pt-3 px-2" v-html="addLinkToTaggedUsers(msg.message)">
-                            
-                        </p>
-                    </article>
-                </div>
+                <random-messages :messages="messages"></random-messages>
             </div>
-        </div>
-        `,
+        </div>`,
     methods: {
         addLinkToTaggedUsers : methodsFunctions.addLinkToTaggedUsers
     },
@@ -123,6 +119,32 @@ export const NewUserRandomMessages = {
         currentView : computedFunctions.currentView
     }
 }
+
+
+export const RandomMessages = {
+    props: {
+        messages : Array
+    },
+    template: 
+        `<div v-for="msg in messages" class="col">
+            <article class="message" :id="msg.messageID">
+                <div class="row justify-content-start">
+                    <span class="col-auto align-self-start">
+                        <img :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=50&seed='.concat(msg.username)" width="40" height="40" />
+                    </span>
+                    <span class="col-8 align-self-start text-start">
+                        <a :href="'/#/user/'.concat(msg.username)" class="fw-bold pointerOnHover local-primary-text link-no-underline">@{{msg.username}}</a>
+                    </span>
+                </div>
+                <p class="pt-3 px-2" v-html="addLinkToTaggedUsers(msg.message)">
+                </p>
+            </article>
+        </div>`,
+    methods: {
+        addLinkToTaggedUsers : methodsFunctions.addLinkToTaggedUsers
+    }
+}
+
 
 export const SearchUsersContainer = {
     props: {
@@ -229,7 +251,7 @@ export const UserProfileContainer = {
                 </div>
             </article>
 
-            <message-container v-if="user.authenticated && profileExists" :user="user" :messages="userMessages"></message-container>
+            <message-container v-if="profileExists" :user="user" :messages="userMessages"></message-container>
         </div>`,
     methods: {
         postNewMessage : methodsFunctions.postNewMessage,

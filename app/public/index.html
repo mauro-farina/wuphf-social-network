@@ -42,7 +42,7 @@
                                     <a href="/auth/" class="link-no-underline pointerOnHover">Signup</a> or <a href="/auth/login" class="link-no-underline pointerOnHover">Login</a>
                                 </span>
                             </li>
-                            <li v-if="user.authenticated" class="nav-item">
+                            <li class="nav-item">
                                 <a href="/#/feed" class="pointerOnHover link-no-underline text-bg-dark" @click="closeNavIfViewportWidthSmall">Feed</a>
                             </li>
                             <li v-if="user.authenticated" class="nav-item">
@@ -76,9 +76,9 @@
 
                 <feed-container :user="user" :messages="messages" :current-path="currentPath"></feed-container>
 
-                <new-user-random-messages :user="user" :messages="randomMessages" :current-path="currentPath"></new-user-random-messages>
+                <new-user :user="user" :messages="randomMessages" :current-path="currentPath"></new-user>
 
-                <login-signup-message :user="user"></login-signup-message> 
+                <login-signup-message :user="user" :messages="randomMessages" :current-path="currentPath"></login-signup-message> 
 
                 <search-users-container :user="user" :username-to-lookup="usernameToLookup" :search-user-results="searchUserResults" :current-path="currentPath"></search-users-container>
 
@@ -89,7 +89,7 @@
 
         <script type="module">
             import {methodsFunctions, getUserData, somethingWentWrongAlert} from './vueAppFunctions.js';
-            import {FeedContainer, MessageContainer, MessageBody, LoginSignupMessage, NewUserRandomMessages, SearchUsersContainer, UserProfileContainer} from './VueComponents.js';
+            import {FeedContainer, MessageContainer, MessageBody, LoginSignupMessage, NewUser, RandomMessages, SearchUsersContainer, UserProfileContainer} from './VueComponents.js';
 
             const { createApp } = Vue;
             let userData;
@@ -195,9 +195,10 @@
             app.component("MessageContainer", MessageContainer);
             app.component("MessageBody", MessageBody);
             app.component("LoginSignupMessage", LoginSignupMessage);
-            app.component("NewUserRandomMessages", NewUserRandomMessages);
+            app.component("NewUser", NewUser);
             app.component("SearchUsersContainer", SearchUsersContainer);
             app.component("UserProfileContainer", UserProfileContainer);
+            app.component("RandomMessages", RandomMessages);
 
             app.mount("#app");
         </script>
