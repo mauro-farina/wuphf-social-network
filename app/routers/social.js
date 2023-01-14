@@ -103,10 +103,16 @@ router.get("/messages", sanitizeQueryQ, async (req, res) => { // Get some random
         const numberOfMsgs = lastMessage.messageID + 1;
         let numRandoms = numberOfMsgs < 20 ? Math.max(1,Math.floor(numberOfMsgs/3)) : 10;
         const randomMessages = [];
+        let controlBool = false;
         for(let i=0; i<numRandoms; i++) {
             let rnd = Math.floor(Math.random() * numberOfMsgs);
             let randomMsg = await mongo.collection("messages").findOne({messageID : rnd}, {projection : queryOptions.projection});
-            if(randomMessages.includes(randomMsg)) { i--; continue; }
+            randomMessages.forEach(m => {
+                if(m.messageID === randomMsg.messageID) {
+                    controlBool = true;
+                }
+            })
+            if(controlBool) { i--; controlBool = false; continue; }
             else { randomMessages.push(randomMsg); }
         }
         return res.json(randomMessages);
