@@ -463,7 +463,8 @@ router.get("/search", sanitizeQueryQ, async (req, res) => { // Search a user bas
             _id : 0,
             username : 1,
             firstName : 1,
-            lastName : 1
+            lastName : 1,
+            bio : 1
         }
     }
     let correspondingUsers = [];
