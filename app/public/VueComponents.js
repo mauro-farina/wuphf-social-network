@@ -134,7 +134,7 @@ export const RandomMessages = {
                         <a :href="'/#/user/'.concat(msg.username)" class="fw-bold pointerOnHover local-primary-text link-no-underline">@{{msg.username}}</a>
                     </span>
                 </div>
-                <p class="pt-3 px-2" v-html="addLinkToTaggedUsers(msg.message)" @click="openSingleMessage(message)">
+                <p class="pt-3 px-2 pointerOnHover" v-html="addLinkToTaggedUsers(msg.message)" @click="openSingleMessage(msg)">
                 </p>
             </article>
         </div>`,
