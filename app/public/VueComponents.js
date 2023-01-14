@@ -47,7 +47,7 @@ export const MessageBody = {
     template:
         `<div class="row justify-content-start">
             <span class="col-auto align-self-start">
-                <a :href="'/#/user/'.concat(message.username)"><img :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=50&seed='.concat(message.username)" width="40" height="40" /></a>
+                <a :href="'/#/user/'.concat(message.username)"><img class="message-pfp" :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=50&seed='.concat(message.username)" /></a>
             </span>
             <span class="col-8 align-self-start text-start">
                 <a :href="'/#/user/'.concat(message.username)" class="fw-bold pointerOnHover local-primary-text link-no-underline">@{{message.username}}</a>
@@ -128,7 +128,7 @@ export const RandomMessages = {
             <article class="message" :id="msg.messageID">
                 <div class="row justify-content-start">
                     <span class="col-auto align-self-start">
-                        <img :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=50&seed='.concat(msg.username)" width="40" height="40" />
+                        <img class="message-pfp" :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=50&seed='.concat(msg.username)" />
                     </span>
                     <span class="col-8 align-self-start text-start">
                         <a :href="'/#/user/'.concat(msg.username)" class="fw-bold pointerOnHover local-primary-text link-no-underline">@{{msg.username}}</a>
