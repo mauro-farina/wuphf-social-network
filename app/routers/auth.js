@@ -45,24 +45,24 @@ router.post("/signup", sanitizeInputSignup, async (req, res) => {
         //return res.status(400).json({ inputValidationErrors : sanitizeInputErrors.array() });
         return res.status(400).json({ error : sanitizeInputErrors.array()[0].msg });
         /* "errors": [ {
-                        "value": "panda84",
-                        "msg": "Password must be at least 8 characters",
-                        "param": "password",
-                        "location": "body"
+                        "value": "panda84", "msg": "Password must be at least 8 characters", "param": "password", "location": "body"
                        } ] */
 	}
-    
     if(req.body == undefined) {
-        return res.status(400).send("Make sure Content-Type is application/json in the HTTP POST Request"); //json?
+        return res.status(400).json({error : "Content-Type in the HTTP POST Request has to be application/json"});
     }
     
     const mongo = mongoManager.getDB();
 
-    // TRY-CATCHES FOR MONGO AND BCRYPT OPERATIONS ?
     const usernameRegex = new RegExp(["^", req.body.username, "$"].join(""), "i");
-    let alreadyExistingUserQuery = await mongo.collection("users").findOne({username: usernameRegex});
-    if(alreadyExistingUserQuery) {
-        return res.status(400).json( { error : `Username ${alreadyExistingUserQuery.username} is already taken` } );
+    try{
+        let alreadyExistingUserQuery = await mongo.collection("users").findOne({username: usernameRegex});
+        if(alreadyExistingUserQuery) {
+            return res.status(400).json( { error : `Username ${alreadyExistingUserQuery.username} is already taken` } );
+        }
+    } catch(err) {
+        console.error(`Something went wrong: ${err}`);
+        return res.status(500).json({error : "Server error"});
     }
 
     let newUser = {
@@ -73,68 +73,101 @@ router.post("/signup", sanitizeInputSignup, async (req, res) => {
         bio : req.body.bio,
         signUpDate : new Date()
     };
+    try{
+        // salt rounds: 10+ for good security
+        const salt = await bcrypt.genSalt(parseInt(process.env.BCRYPT_ROUNDS_FOR_SALT));
+        newUser.password = await bcrypt.hash(newUser.password, salt);
     
-    // salt rounds: 2 for quick testing, 10+ for good security 
-    const salt = await bcrypt.genSalt(parseInt(process.env.BCRYPT_ROUNDS_FOR_SALT)); // BCRYPT_ROUNDS_FOR_SALT ignored for some reason
-    newUser.password = await bcrypt.hash(newUser.password, salt);
-
-    await mongo.collection("users").insertOne(newUser);
-    await mongo.collection("follows")
-            .insertOne( { 
-                username : req.body.username, 
-                followers : [], 
-                followedUsers : []
-            } );
+        await mongo.collection("users").insertOne(newUser);
+        await mongo.collection("follows")
+                .insertOne( { 
+                    username : req.body.username, 
+                    followers : [], 
+                    followedUsers : []
+                } );
+    } catch(err) {
+        console.error(`Something went wrong: ${err}`);
+        return res.status(500).json({error : "Server error"});
+    }
 
     jwt.sign({ username: req.body.username }, process.env.JWT_SECRET_KEY, { expiresIn: "14d"}, (err,token) => {
         if(err){
-            console.log(err);
+            console.log(`Something went wrong: ${err}`);
             return res.status(500).json({error : "Server error"});
         }
         const expDate = new Date();
         expDate.setDate(expDate.getDate() + 14);
-        return res.cookie("auth", token, {httpOnly: true, expires: expDate }).redirect("/#/feed");
+        delete newUser._id;
+        return res
+                .cookie("auth", token, {httpOnly: true, expires: expDate })
+                .json({newUser});
     });
 
 });
 
 
 router.post("/signin", sanitizeInputSignin, async (req, res) => {
+    console.log("signin");
     const sanitizeInputErrors = validationResult(req);
 	if (!sanitizeInputErrors.isEmpty()) {
         return res.status(400).json({ error : sanitizeInputErrors.array()[0].msg });
 	}
 
     if(req.body == undefined) {
-        return res.status(400).send("Make sure Content-Type is application/json in the HTTP POST Request"); //json?
+        return res.status(400).json({error : "Content-Type in the HTTP POST Request has to be application/json"});
     }
-    
+    console.log("pre check guud");
+
     const mongo = mongoManager.getDB();
 
+    console.log("got db");
+
+
     const usernameRegex = new RegExp(["^", req.body.username, "$"].join(""), "i");
-    let alreadyExistingUserQuery = await mongo.collection("users").findOne({username: usernameRegex});
-    if(!alreadyExistingUserQuery) {
-        return res.status(400).json( { error : `Invalid username or password` } );
+    let alreadyExistingUserQuery;
+    try {
+        alreadyExistingUserQuery = await mongo.collection("users").findOne({username: usernameRegex});
+        if(!alreadyExistingUserQuery) {
+            return res.status(400).json( { error : `Invalid username or password` } );
+        }
+    } catch(err) {
+        console.error(`Something went wrong: ${err}`);
+        return res.status(500).json({error : "Server error"});
     }
 
-    const compareResult = await bcrypt.compare(req.body.password, alreadyExistingUserQuery.password);
-    if(compareResult) {
-        jwt.sign({ username: alreadyExistingUserQuery.username }, process.env.JWT_SECRET_KEY, { expiresIn: "14d"}, (err,token) => {
-            if(err){
-                console.log(err);
-                return res.status(500).json({error : "Server error"});
-            }
-            const expDate = new Date();
-            expDate.setDate(expDate.getDate() + 14);
-            return res.cookie("auth", token, {httpOnly: true, expires: expDate}).redirect("/#/feed");
-        });
-    } else {
-        return res.status(400).json( { error : `Invalid username or password` } );
+    console.log("past exist query");
+
+
+    try {
+        const compareResult = await bcrypt.compare(req.body.password, alreadyExistingUserQuery.password);
+        console.log("compared");
+
+        if(compareResult) {
+            console.log("it went well");
+
+            jwt.sign({ username: alreadyExistingUserQuery.username }, process.env.JWT_SECRET_KEY, { expiresIn: "14d"}, (err,token) => {
+                if(err) {
+                    console.log(err);
+                    return res.status(500).json({error : "Server error"});
+                }
+                console.log("now we return");
+                const expDate = new Date();
+                expDate.setDate(expDate.getDate() + 14);
+                return res
+                        .cookie("auth", token, {httpOnly: true, expires: expDate})
+                        .json({username: alreadyExistingUserQuery.username, authenticated : true});
+            });
+        } else {
+            return res.status(400).json( { error : `Invalid username or password` } );
+        }
+    } catch(err) {
+        console.error(`Something went wrong: ${err}`);
+        return res.status(500).json({error : "Server error"});
     }
 });
 
 
-router.get("/signoff", async (req, res) => {
+router.get("/signoff", (req, res) => {
     res.status(200).clearCookie('auth').send();
 });
 
