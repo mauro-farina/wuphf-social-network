@@ -52,6 +52,11 @@ export const MessageBody = {
             <span class="col-8 align-self-start text-start">
                 <a :href="'/#/user/'.concat(message.username)" class="fw-bold pointerOnHover local-primary-text link-no-underline">@{{message.username}}</a>
             </span>
+            <span class="col-2 align-self-end text-end flex-grow-1">
+                <button class="btn" @click="copyMessageUrlToClipboard(message)" title="Copy message URL to clipboard">
+                    <i class="bi bi-link"></i>
+                </button>
+            </span>
         </div>
         <p class="pt-3 px-2 pointerOnHover" v-html="addLinkToTaggedUsers(message.message)" @click="openSingleMessage(message)">
         </p>
@@ -70,7 +75,8 @@ export const MessageBody = {
         convertDate : methodsFunctions.convertDate,
         toggleFollow : methodsFunctions.toggleFollow,
         toggleLike : methodsFunctions.toggleLike,
-        addLinkToTaggedUsers : methodsFunctions.addLinkToTaggedUsers
+        addLinkToTaggedUsers : methodsFunctions.addLinkToTaggedUsers,
+        copyMessageUrlToClipboard : methodsFunctions.copyMessageUrlToClipboard
     }
 };
 
