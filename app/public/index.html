@@ -168,6 +168,11 @@
                         }
                         if(!newValue.includes('user/') && oldValue.includes('user/')) {
                             this.showProfileOf = ""; // this way if one goes back to the same profile, infos will be updated (likes in particular)
+                            this.showSingleMessageID = ""; // this way if one goes back to the same profile, infos will be updated (likes in particular)
+                        }
+                        if(newValue.includes('user/') && !newValue.includes('/msg/')  
+                                    && oldValue.includes('user/') && oldValue.includes('/msg/')) {
+                            this.showSingleMessageID = ""; // this way if one goes back to the same profile, infos will be updated (likes in particular)
                         }
                     }
                 },
