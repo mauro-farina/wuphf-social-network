@@ -53,7 +53,7 @@ export const MessageBody = {
                 <a :href="'/#/user/'.concat(message.username)" class="fw-bold pointerOnHover local-primary-text link-no-underline">@{{message.username}}</a>
             </span>
         </div>
-        <p class="pt-3 px-2" v-html="addLinkToTaggedUsers(message.message)">
+        <p class="pt-3 px-2 pointerOnHover" v-html="addLinkToTaggedUsers(message.message)" @click="openSingleMessage(message)">
         </p>
         <div class="row row-cols-2">
             <span class="col-xs- align-self-start">
@@ -66,6 +66,9 @@ export const MessageBody = {
             <span class="col align-self-end text-muted text-end">{{convertDate(message.date)}}</span>
         </div>`,
     methods: {
+        openSingleMessage: function(message) {
+            window.location.href = `/#/user/${message.username}/msg/${message.messageID}`;
+        },
         convertDate : methodsFunctions.convertDate,
         toggleFollow : methodsFunctions.toggleFollow,
         toggleLike : methodsFunctions.toggleLike,
@@ -102,8 +105,8 @@ export const NewUser = {
         currentPath : String
     },
     template: 
-        `<hr>
-        <div v-if="user.authenticated && user.followedUsers.length === 0 && messages.length > 0 && (currentView === '/feed' || currentView === '/feed/' || currentView === '/' || currentView === '')">
+        `<div v-if="user.authenticated && user.followedUsers.length === 0 && messages.length > 0 && (currentView === '/feed' || currentView === '/feed/' || currentView === '/' || currentView === '')">
+            <hr>
             <article v-cloak>
                 <p>Start following users to personalize your feed!</p>
             </article>
@@ -209,7 +212,7 @@ export const UserProfileContainer = {
         }
     },
     template:
-        `<div v-if="profileReady && currentView.includes('user/')" v-cloak>
+        `<div v-if="profileReady && currentView.includes('user/') && !currentView.includes('/msg/')" v-cloak>
             <article class="px-5 py-4" v-if="!profileExists">
                 No one on WUPHF.com has username '{{showProfileOf}}'
                 <div class="row justify-content-center my-3">
@@ -264,6 +267,79 @@ export const UserProfileContainer = {
             this.profileReady = false;
             if(newValue !== '') {
                 this.getProfileData();
+            }
+        }
+    },
+    computed: {
+        currentView : computedFunctions.currentView
+    }
+};
+
+
+export const SingleMessage = {
+    props: {
+        user : Object,
+        messageId : String,
+        showProfileOf : String,
+        currentPath : String
+    },
+    data() {
+        return {
+            messageReady : false,
+            messageExists : false,
+            messageToShow : {}
+        };
+    },
+    template:
+        `<div v-if="currentView.includes('user/') && currentView.includes('/msg/') && messageReady" v-cloak>
+            <!-- message does not exist -->
+            <div v-if="!messageExists">
+                <p>
+                    Looks like the message you were looking for does not exist
+                </p>
+                <div class="row justify-content-center my-3">
+                    <img src="./imgs/confused-cat.jpg" class="not-found-img">
+                </div>
+            </div>
+
+            <!-- message -->
+            <div v-if="messageExists" class="my-5">
+                <message-body :user="user" :message="messageToShow"></message-body>
+            </div>
+        </div>`,
+    methods: {
+        getSingleMessage: async function() {
+            this.messageReady = false;
+            this.messageExists = false;
+            this.messageToShow = {};
+            try{
+                let messageQuery = await fetch(`/api/social/messages/${this.showProfileOf}/${this.messageId}`);
+                if(messageQuery.ok) {
+                    this.messageToShow = await messageQuery.json();
+                    this.messageExists = true;
+                } else if (messageQuery.status === 400) {
+                    this.messageExists = false;
+                    this.userProfile = {};
+                } else {
+                    // something went wrong!
+                    this.messageExists = false;
+                    console.log("uhm")
+                    return;
+                }
+                this.messageReady = true;
+            } catch {
+                this.messageReady = false;
+                this.messageExists = false;
+                this.messageToShow = {};
+                return;
+            }
+        }
+    },
+    watch: {
+        messageId(newValue, oldValue) {
+            this.messageReady = false;
+            if(newValue !== '') {
+                this.getSingleMessage();
             }
         }
     },
