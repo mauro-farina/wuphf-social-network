@@ -182,7 +182,7 @@ router.get("/messages/:username/:messageID", sanitizeParamUsername, sanitizePara
         if(messagesOfUser) {
             res.json(messagesOfUser);
         } else {
-            res.json({});
+            res.status(400).json({error : `Could not find message ${req.params.messageID} by ${req.params.username}`});
         }
     } catch(err) {
         console.error(`Something went wrong: ${err}`);
