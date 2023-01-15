@@ -515,12 +515,6 @@ router.get("/whoami", validateAuthCookie, async (req, res) => { // If authentica
             followedUsers : 1
         }
     }
-    const queryOptionsLikes = {
-        projection : {
-            _id : 0,
-            messageID : 1
-        }
-    }
     try {
         let userInfo = await mongo.collection("users").findOne({username : cookieUsername}, queryOptionsUser);
         let userFollows = await mongo.collection("follows").findOne({username : cookieUsername}, queryOptionsFollows);
