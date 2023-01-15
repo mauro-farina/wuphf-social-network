@@ -512,8 +512,7 @@ router.get("/whoami", validateAuthCookie, async (req, res) => { // If authentica
         projection : {
             _id : 0,
             username : 1,
-            followedUsers : 1,
-            followers : 1
+            followedUsers : 1
         }
     }
     const queryOptionsLikes = {
@@ -526,11 +525,6 @@ router.get("/whoami", validateAuthCookie, async (req, res) => { // If authentica
         let userInfo = await mongo.collection("users").findOne({username : cookieUsername}, queryOptionsUser);
         let userFollows = await mongo.collection("follows").findOne({username : cookieUsername}, queryOptionsFollows);
         userInfo.followedUsers = userFollows.followedUsers;
-        userInfo.followers = userFollows.followers;
-        userInfo.likedMessages = [];
-        await mongo.collection("messages").find({likedBy : cookieUsername}, queryOptionsLikes).forEach(msg => {
-            userInfo.likedMessages.push(msg.messageID);
-        });
         userInfo.authenticated = true;
         return res.json(userInfo);
     } catch(err) {
