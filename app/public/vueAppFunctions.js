@@ -15,6 +15,15 @@ export async function getUserData() {
 
     if(userData.user.authenticated){
         try {
+            // followedUsers
+            let followedUsersQuery = await fetch(`/api/social/following/${userData.user.username}`);
+            if(followedUsersQuery.ok) {
+                userData.user.followedUsers = (await followedUsersQuery.json()).followedUsers;
+            } else {
+                somethingWentWrongAlert();
+                throw new Error();
+            }
+            // feed-messages
             let feedResponse = await fetch('/api/social/feed');
             if(feedResponse.ok) {
                 userData.feed = await feedResponse.json();
