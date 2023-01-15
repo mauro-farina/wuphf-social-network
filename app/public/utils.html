@@ -11,7 +11,6 @@
             <li><a href="/api/utils/collection/users" target="_blank">List users</a></li>
             <li><a href="/api/utils/collection/follows" target="_blank">List follows</a></li>
             <li><a href="/api/utils/collection/messages" target="_blank">List messages</a></li>
-            <li><a href="/api/utils/collection/likes" target="_blank">List likes</a></li>
             <li>Clear the database <button id="clearCollectionsButton">Clear DB</button></li>
             <li>Load Mongo with data <button id="loadMongoButton">Load data</button></li>
         </ul>
@@ -22,9 +21,8 @@
                     method: 'GET',
                 }
                 fetch("/api/utils/clear/users", requestOptions);
-                fetch("/api/utils//clear/follows", requestOptions);
-                fetch("/api/utils//clear/messages", requestOptions);
-                fetch("/api/utils//clear/likes", requestOptions);
+                fetch("/api/utils/clear/follows", requestOptions);
+                fetch("/api/utils/clear/messages", requestOptions);
             });
         </script>
 
