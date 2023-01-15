@@ -3,7 +3,7 @@
 ## Somewhat useful informations
 - It's a Twitter rip-off, with less features and no cookie banners
 - Built with [Express](https://expressjs.com/) (Node), [Vue.js](https://vuejs.org/), [Bootstrap](https://getbootstrap.com/) and [MongoDB](https://www.mongodb.com/)
-- `docker-compose` ready to go
+- [docker-compose](https://docs.docker.com/compose/) ready to go
 - Yes, it's a [The Office](https://theoffice.fandom.com/wiki/WUPHF.com_(Website)) reference
 
 ## How to
