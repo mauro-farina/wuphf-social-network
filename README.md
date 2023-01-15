@@ -28,7 +28,7 @@
 - Make sure that the exposed port in `Dockerfile` matches the ones in `docker-compose.yml`
 
 ## Settings
-- File `./app/private/settings.env` contains a couple parameters you should change
+- File `./app/private/settings.env` contains a few parameters you should probably change
     - `MONGODB_URI`: has to match the `username:password` of the MongoDB container in `docker-compose.yml`
         - for more information visit [MongoDB official documentation](https://www.mongodb.com/compatibility/docker#using-mongodb-with-docker-compose)
     - `JWT_SECRET_KEY`: secret cryptographic key used by the [jsonwebtoken library](https://www.npmjs.com/package/jsonwebtoken)
