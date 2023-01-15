@@ -123,7 +123,7 @@
                 viewportWidth : window.visualViewport.width
             };
 
-            if(data.messages.length === 0) {
+            if(data.user.followedUsers.length === 0) {
                 try{
                     let randomMsg = await (await fetch('/api/social/messages?q=random')).json();
                     data.randomMessages = randomMsg;
