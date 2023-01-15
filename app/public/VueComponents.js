@@ -154,7 +154,7 @@ export const SearchUsersContainer = {
                     </div>
                     <div class="col row row-cols-1 flex-grow-1">
                         <span class="col"> 
-                            <a :href="'/#/user/'.concat(foundUser.username)" class="link-no-underline pointerOnHover">{{foundUser.firstName}} {{foundUser.lastName}}</a>
+                            <a :href="'/#/user/'.concat(foundUser.username)" class="link-no-underline pointerOnHover text-bg-dark">{{foundUser.firstName}} {{foundUser.lastName}}</a>
                         </span>
                         <span class="col px-3">
                            <a :href="'/#/user/'.concat(foundUser.username)" class="fw-bold local-primary-text link-no-underline pointerOnHover"> @{{foundUser.username}} </a>
