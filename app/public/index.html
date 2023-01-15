@@ -76,12 +76,12 @@
                     Something went very wrong. Try refreshing the page.
                 </div>
 
-                <feed-container :user="user" :messages="messages" :current-path="currentPath"></feed-container>
-
-                <new-user :user="user" :messages="randomMessages" :current-path="currentPath"></new-user>
-
                 <login-signup-message :user="user" :messages="randomMessages" :current-path="currentPath"></login-signup-message> 
-
+                
+                <feed-container :user="user" :messages="messages" :current-path="currentPath"></feed-container>
+                
+                <new-user :user="user" :messages="randomMessages" :current-path="currentPath"></new-user>
+                
                 <search-users-container :user="user" :username-to-lookup="usernameToLookup" :search-user-results="searchUserResults" :current-path="currentPath"></search-users-container>
 
                 <user-profile-container :user="user" :current-path="currentPath" :show-profile-of="showProfileOf"></user-profile-container>
