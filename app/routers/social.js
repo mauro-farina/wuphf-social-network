@@ -234,12 +234,10 @@ router.get("/following/:username", sanitizeParamUsername, async (req, res) => { 
     const queryOptions = {
         projection : {
             _id : 0,
-            username : 1,
-            //followedUsers : 1
+            username : 1
         }
     }
     try {
-        //let followedUsers = await mongo.collection("follows").findOne({username : usernameRegex}, queryOptions);
         let followedUsers = await mongo.collection("follows").find({followers : usernameRegex}, queryOptions).toArray();
         if(followedUsers){
             res.json({
@@ -352,21 +350,18 @@ router.delete("/followers/:username", validateAuthCookie, sanitizeParamUsername,
 router.get("/feed", validateAuthCookie, async (req, res) => { // List of messages (newst-to-oldest) sent users followed by req.username
     const cookieUsername = req.username;
     const mongo = mongoManager.getDB();
-    const queryFollowedUsers = {
-        username : cookieUsername
-    }
     const queryFollowedUsersOptions = {
         projection : {
             _id : 0,
-            followedUsers : 1
+            username : 1
         }
     }
     try {
-        let followedUsers = await mongo.collection("follows").findOne(queryFollowedUsers, queryFollowedUsersOptions);
-        followedUsers.followedUsers.push(cookieUsername);
+        let followedUsers = await mongo.collection("follows").find({followers : cookieUsername}, queryFollowedUsersOptions).toArray();
+        followedUsers.push({ username : cookieUsername});
         let feed = [];
-        for(let user of followedUsers.followedUsers) {
-            const followedUser = new RegExp(["^", user, "$"].join(""), "i");
+        for(let user of followedUsers) {
+            const followedUser = new RegExp(["^", user.username, "$"].join(""), "i");
             const queryMessages = {
                 username : followedUser
             }
@@ -386,7 +381,7 @@ router.get("/feed", validateAuthCookie, async (req, res) => { // List of message
                 feed.push(messageObject);
             }
         }
-        feed.sort( (msg1, msg2) => { // cookie preferences : sorting order
+        feed.sort( (msg1, msg2) => {
             if(msg1.date > msg2.date) {
                 return -1;
             } else if(msg1.date < msg2.date) {
