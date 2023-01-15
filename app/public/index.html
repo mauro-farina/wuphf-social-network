@@ -125,8 +125,14 @@
 
             if(data.user.followedUsers.length === 0) {
                 try{
-                    let randomMsg = await (await fetch('/api/social/messages?q=random')).json();
-                    data.randomMessages = randomMsg;
+                    let randomMsgQuery = await fetch('/api/social/messages?q=random');
+                    if(randomMsgQuery.ok) {
+                        let randomMsg = await randomMsgQuery.json();
+                        console.log(randomMsg);
+                        if(randomMsg.length > 0) {
+                            data.randomMessages = randomMsg;
+                        }
+                    }
                 } catch(err) {
                     somethingWentWrongAlert();
                 }
