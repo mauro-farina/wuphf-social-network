@@ -366,8 +366,9 @@ router.get("/feed", validateAuthCookie, async (req, res) => { // List of message
         followedUsers.followedUsers.push(cookieUsername);
         let feed = [];
         for(let user of followedUsers.followedUsers) {
+            const followedUser = new RegExp(["^", user, "$"].join(""), "i");
             const queryMessages = {
-                username : user
+                username : followedUser
             }
             const queryMessagesOptions = {
                 projection : {
