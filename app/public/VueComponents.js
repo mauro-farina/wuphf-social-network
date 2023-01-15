@@ -148,7 +148,7 @@ export const RandomMessages = {
                         </button>
                     </span>
                 </div>
-                <p class="pt-3 px-2 pointerOnHover" v-html="addLinkToTaggedUsers(msg.message)" @click="openSingleMessage(msg)">
+                <p class="pt-3 px-2 pointerOnHover" v-html="addLinkToTaggedUsers(msg.message)" @click.self="openSingleMessage(msg)">
                 </p>
             </article>
         </div>`,
