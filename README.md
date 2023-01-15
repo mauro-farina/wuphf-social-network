@@ -11,6 +11,7 @@
     1. `git clone`
     2. `cd ./wuphf-social-network`
     3. `docker-compose up`
+    4. If you wish to fill MongoDB with some **example data**, open your browser and visit `https://localhost:PORT/api/utils/mongo-loader`
 - Without Docker (requires Mongo installed and running locally):
     1. `git clone`
     2. `cd ./wuphf-social-network/app`
