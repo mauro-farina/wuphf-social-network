@@ -3,6 +3,7 @@ services:
   app:
     container_name: app
     build: .
+    command: node app.js
     ports:
       - "8080:8080"
     links:
