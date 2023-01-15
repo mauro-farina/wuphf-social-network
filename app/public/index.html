@@ -94,7 +94,7 @@
 
         <script type="module">
             import {methodsFunctions, getUserData, somethingWentWrongAlert} from './vueAppFunctions.js';
-            import {FeedContainer, MessageContainer, MessageBody, LoginSignupMessage, NewUser, RandomMessages, SearchUsersContainer, UserProfileContainer, SingleMessage} from './VueComponents.js';
+            import {FeedContainer, MessageContainer, MessageBody, LoginSignupMessage, NewUser, SearchUsersContainer, UserProfileContainer, SingleMessage} from './VueComponents.js';
 
             const { createApp } = Vue;
             let userData;
@@ -161,12 +161,34 @@
                         if(e.key === 'Enter') {
                             this.searchUser();
                         }
+                    },
+                    updateRandomMessages: async function() {
+                        let randomMessagesUpdated = [];
+                        for(let randomMsg of this.randomMessages) {
+                            try{
+                                let getUpdatedMsg = await fetch(`/api/social/messages/${randomMsg.username}/${randomMsg.messageID}`);
+                                if(getUpdatedMsg.ok) {
+                                    randomMessagesUpdated.push(await getUpdatedMsg.json());
+                                } else {
+                                    somethingWentWrongAlert();
+                                }
+                            } catch(err) {
+                                somethingWentWrongAlert();
+                            }
+                        }
+                        this.randomMessages = randomMessagesUpdated;
                     }
                 },
                 watch: {
                     currentPath(newValue, oldValue) {
                         if(newValue === '#/feed' || newValue === '#/' || newValue === '#' || newValue === '') {
                             this.updateUserData(); // updates the feed when coming from another page (user/..., search?q=...)
+
+                            // update random msgs when going back to feed WITHOUT loading *new* random messages...
+                            // why do i overcomplicate my life?
+                            if(this.user.followedUsers.length === 0 && this.randomMessages.length !== 0) {
+                                this.updateRandomMessages();
+                            }
                         }
                         if(!newValue.includes('user/') && oldValue.includes('user/')) {
                             this.showProfileOf = ""; // this way if one goes back to the same profile, likes will be updated
@@ -215,7 +237,6 @@
             app.component("NewUser", NewUser);
             app.component("SearchUsersContainer", SearchUsersContainer);
             app.component("UserProfileContainer", UserProfileContainer);
-            app.component("RandomMessages", RandomMessages);
             app.component("SingleMessage", SingleMessage);
 
             app.mount("#app");

@@ -97,7 +97,7 @@ export const LoginSignupMessage = {
             </article>
             <div v-if="messages.length > 0 && (currentView === '/feed' || currentView === '/feed/' || currentView === '/' || currentView === '')">
                 <p>In the meantime, enjoy some <em>Woofs</em></p>
-                <random-messages :messages="messages"></random-messages>
+                <message-container :user="user" :messages="messages"></message-container>
             </div>
         </div>`,
     computed: {
@@ -119,43 +119,11 @@ export const NewUser = {
             </article>
             <div v-if="messages.length > 0">
                 <p>Here are some random <em>Woofs</em> to get you started: </p>
-                <random-messages :messages="messages"></random-messages>
+                <message-container :user="user" :messages="messages"></message-container>
             </div>
         </div>`,
     computed: {
         currentView : computedFunctions.currentView
-    }
-}
-
-
-export const RandomMessages = {
-    props: {
-        messages : Array
-    },
-    template: 
-        `<div v-for="msg in messages" class="col">
-            <article class="message" :id="msg.messageID">
-                <div class="row justify-content-start">
-                    <span class="col-auto align-self-start">
-                        <img class="message-pfp" :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=50&seed='.concat(msg.username)" />
-                    </span>
-                    <span class="col-8 align-self-start text-start">
-                        <a :href="'/#/user/'.concat(msg.username)" class="fw-bold pointerOnHover local-primary-text link-no-underline">@{{msg.username}}</a>
-                    </span>
-                    <span class="col-2 align-self-end text-end flex-grow-1">
-                        <button class="btn" @click="copyMessageUrlToClipboard(msg)" title="Copy message URL to clipboard">
-                            <i class="bi bi-link"></i>
-                        </button>
-                    </span>
-                </div>
-                <p class="pt-3 px-2 pointerOnHover" v-html="addLinkToTaggedUsers(msg.message)" @click.self="openSingleMessage(msg)">
-                </p>
-            </article>
-        </div>`,
-    methods: {
-        addLinkToTaggedUsers : methodsFunctions.addLinkToTaggedUsers,
-        openSingleMessage : methodsFunctions.openSingleMessage,
-        copyMessageUrlToClipboard : methodsFunctions.copyMessageUrlToClipboard
     }
 }
 
