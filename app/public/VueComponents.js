@@ -45,12 +45,12 @@ export const MessageBody = {
         message : Object
     },
     template:
-        `<div class="row justify-content-start">
-            <span class="col-auto align-self-start">
-                <a :href="'/#/user/'.concat(message.username)"><img class="message-pfp" :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=50&seed='.concat(message.username)" /></a>
+        `<div class="row justify-content-start pointerOnHover">
+            <span class="col-auto align-self-start pointerOnHover" @click="openProfile(message.username)">
+                <img class="message-pfp" :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=50&seed='.concat(message.username)" />
             </span>
-            <span class="col-8 align-self-start text-start">
-                <a :href="'/#/user/'.concat(message.username)" class="fw-bold pointerOnHover local-primary-text link-no-underline">@{{message.username}}</a>
+            <span class="col-8 align-self-start text-start pointerOnHover" @click="openProfile(message.username)">
+                <a class="fw-bold local-primary-text link-no-underline">@{{message.username}}</a>
             </span>
             <span class="col-2 align-self-end text-end flex-grow-1">
                 <button class="btn" @click="copyMessageUrlToClipboard(message)" title="Copy message URL to clipboard">
@@ -79,7 +79,8 @@ export const MessageBody = {
         toggleFollow : methodsFunctions.toggleFollow,
         toggleLike : methodsFunctions.toggleLike,
         addLinkToTaggedUsers : methodsFunctions.addLinkToTaggedUsers,
-        copyMessageUrlToClipboard : methodsFunctions.copyMessageUrlToClipboard
+        copyMessageUrlToClipboard : methodsFunctions.copyMessageUrlToClipboard,
+        openProfile : methodsFunctions.openProfile
     }
 };
 
@@ -145,19 +146,17 @@ export const SearchUsersContainer = {
                     <img src="./imgs/escobar.jpg" class="not-found-img"/>
                 </div>
             </article>
-            <article class="profile-preview-search col" v-for="foundUser in searchUserResults">
+            <article class="profile-preview-search col pointerOnHover" v-for="foundUser in searchUserResults" @click="openProfile(foundUser.username)">
                 <div class="row row-cols-2 text-start align-self-start font-l">
                     <div class="col mx-1 pfp-preview">
-                        <a :href="'/#/user/'.concat(foundUser.username)">
-                            <img class="pointerOnHover" :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=5&seed='.concat(foundUser.username)" />
-                        </a>
+                        <img class="pointerOnHover" :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=5&seed='.concat(foundUser.username)" />
                     </div>
                     <div class="col row row-cols-1 flex-grow-1">
                         <span class="col"> 
-                            <a :href="'/#/user/'.concat(foundUser.username)" class="link-no-underline pointerOnHover text-bg-dark">{{foundUser.firstName}} {{foundUser.lastName}}</a>
+                            <a class="link-no-underline text-bg-dark">{{foundUser.firstName}} {{foundUser.lastName}}</a>
                         </span>
                         <span class="col px-3">
-                           <a :href="'/#/user/'.concat(foundUser.username)" class="fw-bold local-primary-text link-no-underline pointerOnHover"> @{{foundUser.username}} </a>
+                           <a class="fw-bold local-primary-text link-no-underline"> @{{foundUser.username}} </a>
                         </span>
                     </div>
                 </div>
@@ -167,7 +166,8 @@ export const SearchUsersContainer = {
             </article>
         </div>`,
     methods: {
-        toggleFollow : methodsFunctions.toggleFollow
+        toggleFollow : methodsFunctions.toggleFollow,
+        openProfile : methodsFunctions.openProfile
     },
     computed: {
         currentView : computedFunctions.currentView

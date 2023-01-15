@@ -236,6 +236,9 @@ export const methodsFunctions = {
     },
     openSingleMessage: function(message) {
         window.location.href = `/#/user/${message.username}/msg/${message.messageID}`;
+    },
+    openProfile: function(goToProfileOf) {
+        goTo(`/user/${goToProfileOf}`);
     }
 }
 
