@@ -125,14 +125,7 @@ export const methodsFunctions = {
         let updateLikeReq;
         try {
             updateLikeReq = await fetch(`/api/social/like/${message.messageID}`, { method: httpMethod });
-            if(updateLikeReq.ok) {
-                try {
-                    this.user.likedBy = (await getUserData()).user.likedMessages;
-                } catch(err) {
-                    somethingWentWrongAlert();
-                    console.error(err);
-                }
-            } else if(updateLikeReq.status !== 400) {
+            if(updateLikeReq.status !== 400 && updateLikeReq.status !== 200) {
                 somethingWentWrongAlert();
                 return;
             }
@@ -142,11 +135,18 @@ export const methodsFunctions = {
             somethingWentWrongAlert();
             return;
         }
-        let updateLikeJson = await updateLikeReq.json();
-        if(httpMethod === 'POST') {
-            message.likedBy.push(updateLikeJson.likedToggledBy);
-        } else {
-            message.likedBy.splice(message.likedBy.indexOf(updateLikeJson.likedToggledBy), 1);
+        try{
+            let updateLikeJson = await updateLikeReq.json();
+            if(updateLikeJson.error === undefined){
+                if(httpMethod === 'POST') {
+                    message.likedBy.push(updateLikeJson.likedToggledBy);
+                } else {
+                    message.likedBy.splice(message.likedBy.indexOf(updateLikeJson.likedToggledBy), 1);
+                }
+            }
+        } catch(err) {
+            somethingWentWrongAlert();
+            return;
         }
     },
     getSingleMessage: async function() {
@@ -195,8 +195,6 @@ export const methodsFunctions = {
         this.closeNavIfViewportWidthSmall();
     },
     getProfileData: async function() {
-        //console.log(this.user.likedMessages);
-        // from single BACK to profile => showProfileOf does NOT change (even thoufh the currentPath/View does) => no fetching for new infos
         try{
             let userProfileResult = await (await fetch(`/api/social/users/${this.showProfileOf}`)).json();
             if(userProfileResult.found) {
