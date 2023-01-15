@@ -77,9 +77,19 @@ export const methodsFunctions = {
         
         newMessageTextarea.value = ""; // erase textarea
 
-        // add new message to the feed without reloading!
-        await fetch(`/api/social/messages/${this.user.username}`)
-            .then(res => res.json()).then(msgs => this.messages.unshift(msgs[0])).catch(err => console.error(err));
+        // add new message to the feed
+        try {
+            let addLatestMsgQuery = await fetch(`/api/social/messages/${this.user.username}`);
+            if(addLatestMsgQuery.ok) {
+                let latestMsg = (await addLatestMsgQuery.json())[0];
+                this.messages.unshift(latestMsg);
+            } else {
+                somethingWentWrongAlert();
+            }
+        } catch(err) {
+            somethingWentWrongAlert();
+        }
+        
     },
     convertDate: function(date) {
         const dateLocalTZ = new Date(date);
