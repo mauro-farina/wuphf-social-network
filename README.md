@@ -19,11 +19,12 @@
     5. Make sure `MONGODB_URI` from `settings.env` is configured accordingly
 
 ## Docker
-- You should probably change username and password for mongoDB root user
-    - (from `docker-compose.yml`)
-    `environment:
+- You should probably change username and password for mongoDB root user (`docker-compose.yml`)
+```
+    environment:
         - MONGO_INITDB_ROOT_USERNAME=FramedEmeraldItem
-        - MONGO_INITDB_ROOT_PASSWORD=ShineBrightLike4Diamond`
+        - MONGO_INITDB_ROOT_PASSWORD=ShineBrightLike4Diamond
+```
 - Make sure that the exposed port in `Dockerfile` matches the ones in `docker-compose.yml`
 
 ## Settings
