@@ -498,7 +498,7 @@ router.get("/search", sanitizeQueryQ, async (req, res) => { // Search a user bas
 router.get("/whoami", validateAuthCookie, async (req, res) => { // If authenticated, returns information about req.username
     const cookieUsername = req.username;
     const mongo = mongoManager.getDB();
-    const queryOptionsUser = {
+    const queryOptions = {
         projection : {
             _id : 0,
             username : 1,
@@ -508,17 +508,8 @@ router.get("/whoami", validateAuthCookie, async (req, res) => { // If authentica
             signUpDate: 1
         }
     }
-    const queryOptionsFollows = {
-        projection : {
-            _id : 0,
-            username : 1,
-            followedUsers : 1
-        }
-    }
     try {
-        let userInfo = await mongo.collection("users").findOne({username : cookieUsername}, queryOptionsUser);
-        let userFollows = await mongo.collection("follows").findOne({username : cookieUsername}, queryOptionsFollows);
-        userInfo.followedUsers = userFollows.followedUsers;
+        let userInfo = await mongo.collection("users").findOne({username : cookieUsername}, queryOptions);
         userInfo.authenticated = true;
         return res.json(userInfo);
     } catch(err) {
