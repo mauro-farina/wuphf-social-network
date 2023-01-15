@@ -7,9 +7,6 @@ require("dotenv").config({ path: './private/settings.env' });
 const mongoManager = require("../mongodb-manager.js");
 const { body, validationResult } = require('express-validator');
 
-// Joi to validate inputs
-// SANITIZER express-validator
-
 /*
 POST    /api/auth/signup    Registrazione di un nuovo utente
 POST    /api/auth/signin    Login di un utente
@@ -42,7 +39,6 @@ const sanitizeInputSignin = [
 router.post("/signup", sanitizeInputSignup, async (req, res) => {
     const sanitizeInputErrors = validationResult(req);
 	if (!sanitizeInputErrors.isEmpty()) {
-        //return res.status(400).json({ inputValidationErrors : sanitizeInputErrors.array() });
         return res.status(400).json({ error : sanitizeInputErrors.array()[0].msg });
         /* "errors": [ {
                         "value": "panda84", "msg": "Password must be at least 8 characters", "param": "password", "location": "body"
@@ -82,8 +78,7 @@ router.post("/signup", sanitizeInputSignup, async (req, res) => {
         await mongo.collection("follows")
                 .insertOne( { 
                     username : req.body.username, 
-                    followers : [], 
-                    followedUsers : []
+                    followers : []
                 } );
     } catch(err) {
         console.error(`Something went wrong: ${err}`);
