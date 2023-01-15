@@ -58,7 +58,7 @@ export const MessageBody = {
                 </button>
             </span>
         </div>
-        <p class="pt-3 px-2 pointerOnHover" v-html="addLinkToTaggedUsers(message.message)" @click="openSingleMessage(message)">
+        <p class="pt-3 px-2 pointerOnHover" v-html="addLinkToTaggedUsers(message.message)" @click.self="openSingleMessage(message)">
         </p>
         <div class="row row-cols-2">
             <span class="col-xs- align-self-start">
