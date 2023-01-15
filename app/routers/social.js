@@ -235,15 +235,20 @@ router.get("/following/:username", sanitizeParamUsername, async (req, res) => { 
         projection : {
             _id : 0,
             username : 1,
-            followedUsers : 1
+            //followedUsers : 1
         }
     }
     try {
-        let followedUsers = await mongo.collection("follows").findOne({username : usernameRegex}, queryOptions);
+        //let followedUsers = await mongo.collection("follows").findOne({username : usernameRegex}, queryOptions);
+        let followedUsers = await mongo.collection("follows").find({followers : usernameRegex}, queryOptions).toArray();
         if(followedUsers){
-            res.json(followedUsers);
+            res.json({
+                username : req.params.username,
+                followedUsers : followedUsers
+            });
         } else {
-            res.json({});
+            console.error(`Something went wrong: ${err}`);
+            return res.status(500).json({error : "Server error"});
         }
     } catch(err) {
         console.error(`Something went wrong: ${err}`);
@@ -303,9 +308,6 @@ router.post("/followers/:username", validateAuthCookie, sanitizeParamUsername, a
         
         // `:username` has a new follower: cookieUsername
         await mongo.collection("follows").updateOne( {username : usernameRegex}, { $push: {followers: cookieUsername} } );
-    
-        // cookieUsername now follows :username
-        await mongo.collection("follows").updateOne( {username : cookieUsername}, { $push: {followedUsers: req.params.username} } );
         
         res.status(200).json({
             username : req.params.username,
@@ -335,8 +337,6 @@ router.delete("/followers/:username", validateAuthCookie, sanitizeParamUsername,
         }
         // `:username` loses a follower: cookieUsername
         await mongo.collection("follows").updateOne( {username : usernameRegex}, { $pull: {followers: cookieUsername} } );
-        // cookieUsername stops following :username
-        await mongo.collection("follows").updateOne( {username : cookieUsername}, { $pull: {followedUsers: req.params.username} } );
         
         res.status(200).json({
             username : req.params.username,

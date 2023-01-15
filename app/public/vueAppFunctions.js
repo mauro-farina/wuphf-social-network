@@ -37,6 +37,7 @@ export async function getUserData() {
         }
     } else {
         userData.feed = [];
+        userData.user.followedUsers = [];
     }
 
     return userData;
