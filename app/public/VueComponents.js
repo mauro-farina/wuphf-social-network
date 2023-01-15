@@ -49,10 +49,10 @@ export const MessageBody = {
             <span class="col-auto align-self-start pointerOnHover" @click="openProfile(message.username)">
                 <img class="message-pfp" :src="'https://api.dicebear.com/5.x/bottts-neutral/svg?radius=50&seed='.concat(message.username)" />
             </span>
-            <span class="col-8 align-self-start text-start pointerOnHover" @click="openProfile(message.username)">
+            <span class="col align-self-start text-start pointerOnHover" @click="openProfile(message.username)">
                 <a class="fw-bold local-primary-text link-no-underline">@{{message.username}}</a>
             </span>
-            <span class="col-2 align-self-end text-end flex-grow-1">
+            <span class="col align-self-end text-end flex-grow-1">
                 <button class="btn" @click="copyMessageUrlToClipboard(message)" title="Copy message URL to clipboard">
                     <i class="bi bi-link"></i>
                 </button>
@@ -218,8 +218,8 @@ export const UserProfileContainer = {
                     </div>
                     <div class="col">
                         <button class="btn" @click.prevent="toggleFollow(userProfile, userFollowers)" type="submit" v-if="user.authenticated && userProfile.username !== user.username">
-                            <span v-if="!userFollowers.includes(user.username)">FOLLOW</span>
-                            <span v-if="userFollowers.includes(user.username)">FOLLOWING</span>
+                            <span v-if="!userFollowers.includes(user.username)"><i class="bi bi-person-plus-fill"></i> FOLLOW</span>
+                            <span v-if="userFollowers.includes(user.username)"><i class="bi bi-person-check-fill"></i> FOLLOWING</span>
                         </button>
                     </div>
                     <div class="col mt-3 mt-1 text-start align-self-start font-l flex-grow-1">
