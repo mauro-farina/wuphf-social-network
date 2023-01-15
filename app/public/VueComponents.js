@@ -112,12 +112,12 @@ export const NewUser = {
         currentPath : String
     },
     template: 
-        `<div v-if="user.authenticated && user.followedUsers.length === 0 && messages.length > 0 && (currentView === '/feed' || currentView === '/feed/' || currentView === '/' || currentView === '')">
+        `<div v-if="user.authenticated && user.followedUsers.length === 0 && (currentView === '/feed' || currentView === '/feed/' || currentView === '/' || currentView === '')"  v-cloak>
             <hr>
-            <article v-cloak>
+            <article>
                 <p>Start following users to personalize your feed!</p>
             </article>
-            <div>
+            <div v-if="messages.length > 0">
                 <p>Here are some random <em>Woofs</em> to get you started: </p>
                 <random-messages :messages="messages"></random-messages>
             </div>
